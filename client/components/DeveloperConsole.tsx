@@ -434,11 +434,20 @@ function WordForm({ word, onSave, onCancel }: {
           {word.id ? 'Edit Word' : 'Add New Word'}
         </h3>
         <div className="flex gap-2">
-          <Button type="submit">
-            <Save className="h-4 w-4 mr-2" />
-            Save
+          <Button type="submit" disabled={isUploading}>
+            {isUploading ? (
+              <>
+                <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+              </>
+            )}
           </Button>
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isUploading}>
             Cancel
           </Button>
         </div>
