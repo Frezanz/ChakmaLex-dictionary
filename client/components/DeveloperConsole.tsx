@@ -198,8 +198,11 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
             <CardTitle className="flex items-center gap-2">
               <Database className="h-5 w-5" />
               ChakmaLex Developer Console
-              <Badge variant="outline">v1.0</Badge>
+              <Badge variant="outline">v2.0</Badge>
             </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Enhanced with audio upload, full character editing, and AI word generation
+            </p>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
