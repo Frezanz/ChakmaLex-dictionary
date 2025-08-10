@@ -64,6 +64,32 @@ export default function Layout({ children }: LayoutProps) {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [location.pathname]);
 
+  // PWA install prompt handling
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      setDeferredPrompt(e);
+      // Show install button
+      setShowInstallPrompt(true);
+    };
+
+    const handleAppInstalled = () => {
+      console.log('PWA was installed');
+      setShowInstallPrompt(false);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
   // Handle logo tap for developer console access
   const handleLogoTap = () => {
     const newTapCount = tapCount + 1;
