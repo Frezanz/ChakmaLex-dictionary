@@ -372,7 +372,7 @@ function WordForm({ word, onSave, onCancel }: {
           <Input
             value={formData.chakma_word_script}
             onChange={(e) => setFormData({...formData, chakma_word_script: e.target.value})}
-            placeholder="𑄌𑄇𑄴𑄟"
+            placeholder="Chakma text"
             className="font-chakma"
             required
           />
