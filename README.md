@@ -56,7 +56,7 @@ A comprehensive digital dictionary and language learning platform dedicated to p
 │   │   └── About.tsx      # Information and contacts
 │   ├── lib/               # Utilities and helpers
 │   │   ├── storage.ts     # Local storage management
-│   │   └── utils.ts       # General utilities
+│   │   └─�� utils.ts       # General utilities
 │   ├── App.tsx            # App entry point with routing
 │   └── global.css         # Tailwind CSS and theming
 ├── server/                # Express API backend
@@ -235,5 +235,5 @@ Special thanks to:
 
 ---
 
-**ChakmaLex v1.0** - Preserving language, empowering learners  
-Built with ❤️ for the Chakma community
+**ChakmaLex v1.0** - Preserving language, empowering learners
+Built with ❤️ for the Chakma community | Powered by **Fxanx**
