@@ -4,22 +4,24 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Search, 
-  BookOpen, 
-  Type, 
-  Brain, 
-  Heart, 
-  Settings, 
+import {
+  Search,
+  BookOpen,
+  Type,
+  Brain,
+  Heart,
+  Settings,
   Info,
   Menu,
   X,
   Volume2,
-  VolumeX
+  VolumeX,
+  ArrowLeft,
+  Home
 } from 'lucide-react';
 import { DeveloperConsoleManager, AudioManager } from '@/lib/storage';
 import DeveloperConsole from './DeveloperConsole';
