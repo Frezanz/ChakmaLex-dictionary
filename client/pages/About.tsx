@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 
 import { CONTACT_INFO } from '@shared/types';
+import { FxanxInlineBrand, FxanxFooterBrand } from '@/components/FxanxWatermark';
 
 export default function About() {
   return (
@@ -302,9 +303,12 @@ export default function About() {
               and promoting the Chakma language and culture.
             </p>
             <Separator className="my-4" />
-            <p className="text-xs text-muted-foreground">
-              © 2024 ChakmaLex. Made with dedication for language preservation.
-            </p>
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                © 2024 ChakmaLex. Made with dedication for language preservation.
+              </p>
+              <FxanxFooterBrand />
+            </div>
           </div>
         </CardContent>
       </Card>
