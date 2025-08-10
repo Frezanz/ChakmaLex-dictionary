@@ -127,6 +127,22 @@ export default function Layout({ children }: LayoutProps) {
     navigate('/');
   };
 
+  // Handle PWA installation
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+
+    // Show the install prompt
+    deferredPrompt.prompt();
+
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+
+    // Clear the deferredPrompt variable
+    setDeferredPrompt(null);
+    setShowInstallPrompt(false);
+  };
+
   // Toggle audio globally
   const toggleAudio = () => {
     const currentVolume = AudioManager.getVolume();
