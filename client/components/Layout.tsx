@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { DeveloperConsoleManager, AudioManager } from '@/lib/storage';
 import DeveloperConsole from './DeveloperConsole';
+import ChakmaLexLogo from './ChakmaLexLogo';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -123,32 +124,16 @@ export default function Layout({ children }: LayoutProps) {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo and Title */}
-            <div 
+            <div
               ref={logoRef}
-              className="flex items-center space-x-3 cursor-pointer"
+              className="cursor-pointer"
               onClick={handleLogoTap}
             >
-              <div className="relative">
-                <div className="text-2xl font-bold text-chakma-primary font-chakma">
-                  𑄌𑄇𑄴𑄟𑄣𑄮𑄇𑄴𑄌
-                </div>
-                {tapCount > 0 && (
-                  <Badge 
-                    variant="secondary" 
-                    className="absolute -top-2 -right-2 text-xs"
-                  >
-                    {tapCount}
-                  </Badge>
-                )}
-              </div>
-              <div>
-                <h1 className="text-xl font-semibold text-foreground">
-                  ChakmaLex
-                </h1>
-                <p className="text-xs text-muted-foreground">
-                  Digital Dictionary
-                </p>
-              </div>
+              <ChakmaLexLogo
+                size="md"
+                showBadge={tapCount > 0}
+                badgeCount={tapCount}
+              />
             </div>
 
             {/* Desktop Navigation */}
