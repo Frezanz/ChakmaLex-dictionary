@@ -24,6 +24,7 @@ import {
 import { DeveloperConsoleManager, AudioManager } from '@/lib/storage';
 import DeveloperConsole from './DeveloperConsole';
 import ChakmaLexLogo from './ChakmaLexLogo';
+import FxanxWatermark from './FxanxWatermark';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -233,6 +234,9 @@ export default function Layout({ children }: LayoutProps) {
       {showDevConsole && (
         <DeveloperConsole onClose={() => setShowDevConsole(false)} />
       )}
+
+      {/* Fxanx Watermark */}
+      <FxanxWatermark position="bottom-right" size="sm" opacity={0.4} />
     </div>
   );
 }
