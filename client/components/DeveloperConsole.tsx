@@ -1,7 +1,7 @@
 /**
  * Developer Console for ChakmaLex
  * Hidden content management system accessible via logo taps + password
- * Features: CRUD operations, data export/import
+ * Features: CRUD operations, audio upload, AI word generation, data export/import
  */
 
 import React, { useState, useEffect } from 'react';
@@ -13,11 +13,11 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import {
-  X,
-  Plus,
-  Edit,
-  Trash2,
+import { 
+  X, 
+  Plus, 
+  Edit, 
+  Trash2, 
   Save,
   Download,
   Upload,
@@ -53,7 +53,7 @@ const generateRandomEnglishWords = (count: number): string[] => {
     'adventure', 'discovery', 'creativity', 'innovation', 'inspiration', 'dedication', 'perseverance',
     'excellence', 'achievement', 'success', 'progress', 'development', 'growth', 'improvement'
   ];
-
+  
   return commonWords
     .sort(() => 0.5 - Math.random())
     .slice(0, count);
@@ -90,9 +90,9 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [uploadingAudio, setUploadingAudio] = useState(false);
 
   const validPasswords = [
-    'frezanz120913',
-    'frezanz1212312123',
-    'frezanz448538',
+    'frezanz120913', 
+    'frezanz1212312123', 
+    'frezanz448538', 
     'ujc448538',
     'ujc120913',
     'ujc04485380'
@@ -110,7 +110,6 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
       setPassword('');
     }
   };
-
 
   const exportData = () => {
     const data = {
@@ -239,7 +238,7 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
 
             {/* Characters Management */}
             <TabsContent value="characters" className="flex-1 overflow-hidden">
-              <CharactersManagement
+              <CharactersManagement 
                 characters={characters}
                 editingCharacter={editingCharacter}
                 onEdit={setEditingCharacter}
@@ -260,7 +259,7 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
 
             {/* AI Word Generator */}
             <TabsContent value="ai" className="flex-1 overflow-hidden">
-              <AIWordGenerator
+              <AIWordGenerator 
                 words={aiGeneratedWords}
                 isGenerating={isGeneratingAI}
                 onGenerate={async () => {
@@ -290,7 +289,6 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 }}
               />
             </TabsContent>
-
 
             {/* Data Management */}
             <TabsContent value="data" className="flex-1 overflow-hidden">
@@ -394,9 +392,9 @@ function WordForm({ word, onSave, onCancel }: {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     let audioUrl = formData.audio_pronunciation_url;
-
+    
     // Handle audio upload if file is selected
     if (audioFile) {
       setIsUploading(true);
@@ -410,7 +408,7 @@ function WordForm({ word, onSave, onCancel }: {
       }
       setIsUploading(false);
     }
-
+    
     onSave({
       ...formData,
       audio_pronunciation_url: audioUrl,
@@ -525,7 +523,7 @@ function WordForm({ word, onSave, onCancel }: {
               </Button>
             </div>
           )}
-
+          
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <input
@@ -550,7 +548,7 @@ function WordForm({ word, onSave, onCancel }: {
               </Button>
             )}
           </div>
-
+          
           <p className="text-xs text-muted-foreground">
             Supported formats: MP3, WAV, OGG. Max size: 5MB
           </p>
@@ -561,13 +559,13 @@ function WordForm({ word, onSave, onCancel }: {
 }
 
 // Characters Management Component
-function CharactersManagement({
-  characters,
-  editingCharacter,
-  onEdit,
-  onSave,
-  onDelete,
-  onCancel
+function CharactersManagement({ 
+  characters, 
+  editingCharacter, 
+  onEdit, 
+  onSave, 
+  onDelete, 
+  onCancel 
 }: {
   characters: Character[];
   editingCharacter: Character | null;
@@ -596,7 +594,7 @@ function CharactersManagement({
           Add Character
         </Button>
       </div>
-
+      
       <div className="flex-1 overflow-auto space-y-2">
         {characters.map((character) => (
           <Card key={character.id} className="p-3">
@@ -617,8 +615,8 @@ function CharactersManagement({
               </div>
               <div className="flex gap-2">
                 {character.audio_pronunciation_url && (
-                  <Button
-                    variant="ghost"
+                  <Button 
+                    variant="ghost" 
                     size="sm"
                     onClick={() => {
                       const audio = new Audio(character.audio_pronunciation_url!);
@@ -631,9 +629,9 @@ function CharactersManagement({
                 <Button variant="ghost" size="sm" onClick={() => onEdit(character)}>
                   <Edit className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
                   onClick={() => onDelete(character.id)}
                   className="text-destructive"
                 >
@@ -662,9 +660,9 @@ function CharacterForm({ character, onSave, onCancel }: {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     let audioUrl = formData.audio_pronunciation_url;
-
+    
     if (audioFile) {
       setIsUploading(true);
       try {
@@ -677,11 +675,10 @@ function CharacterForm({ character, onSave, onCancel }: {
       }
       setIsUploading(false);
     }
-
+    
     onSave({
       ...formData,
-      audio_pronunciation_url: audioUrl,
-      updated_at: new Date().toISOString()
+      audio_pronunciation_url: audioUrl
     });
   };
 
@@ -788,7 +785,7 @@ function CharacterForm({ character, onSave, onCancel }: {
               </Button>
             </div>
           )}
-
+          
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <input
@@ -813,7 +810,7 @@ function CharacterForm({ character, onSave, onCancel }: {
               </Button>
             )}
           </div>
-
+          
           <p className="text-xs text-muted-foreground">
             Supported formats: MP3, WAV, OGG. Max size: 5MB
           </p>
@@ -823,13 +820,12 @@ function CharacterForm({ character, onSave, onCancel }: {
   );
 }
 
-
 // AI Word Generator Component
-function AIWordGenerator({
-  words,
-  isGenerating,
-  onGenerate,
-  onCreateWord
+function AIWordGenerator({ 
+  words, 
+  isGenerating, 
+  onGenerate, 
+  onCreateWord 
 }: {
   words: string[];
   isGenerating: boolean;
@@ -880,7 +876,7 @@ function AIWordGenerator({
                   </Button>
                 ))}
               </div>
-
+              
               <p className="text-xs text-muted-foreground text-center">
                 Click any word above to create a new dictionary entry with that English translation.
                 You can then add the Chakma script and other details.
