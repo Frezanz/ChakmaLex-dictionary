@@ -266,21 +266,8 @@ export default function Layout({ children }: LayoutProps) {
               })}
             </nav>
 
-            {/* Audio Toggle and Mobile Menu */}
+            {/* Mobile Menu */}
             <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleAudio}
-                className="h-8 w-8 p-0"
-              >
-                {audioEnabled ? (
-                  <Volume2 className="h-4 w-4" />
-                ) : (
-                  <VolumeX className="h-4 w-4" />
-                )}
-              </Button>
-              
               <Button
                 variant="ghost"
                 size="sm"
