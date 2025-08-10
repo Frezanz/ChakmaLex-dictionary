@@ -10,6 +10,7 @@ import { useEffect } from "react";
 
 // Layout and pages
 import Layout from "./components/Layout";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Dictionary from "./pages/Dictionary";
 import Characters from "./pages/Characters";
 import Quiz from "./pages/Quiz";
@@ -32,26 +33,28 @@ function AppInitializer() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AppInitializer />
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Dictionary />} />
-            <Route path="/characters" element={<Characters />} />
-            <Route path="/quiz" element={<Quiz />} />
-            <Route path="/favorites" element={<Favorites />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AppInitializer />
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Dictionary />} />
+              <Route path="/characters" element={<Characters />} />
+              <Route path="/quiz" element={<Quiz />} />
+              <Route path="/favorites" element={<Favorites />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/about" element={<About />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 createRoot(document.getElementById("root")!).render(<App />);
