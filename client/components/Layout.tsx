@@ -201,7 +201,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Back Button and Logo */}
-            <div className="flex items-center space-x-2">
+            <div className="flex justify-start flex-row overflow-auto items-center space-x-2">
               {/* Back Button */}
               {canGoBack && location.pathname !== '/' && (
                 <Button
