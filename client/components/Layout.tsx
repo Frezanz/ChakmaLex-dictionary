@@ -37,7 +37,9 @@ export default function Layout({ children }: LayoutProps) {
   const [tapCount, setTapCount] = useState(0);
   const [showDevConsole, setShowDevConsole] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [canGoBack, setCanGoBack] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
   const tapTimeoutRef = useRef<NodeJS.Timeout>();
 
