@@ -1,7 +1,7 @@
 /**
  * Developer Console for ChakmaLex
  * Hidden content management system accessible via logo taps + password
- * Features: CRUD operations, AI translations, data export/import
+ * Features: CRUD operations, data export/import
  */
 
 import React, { useState, useEffect } from 'react';
@@ -33,7 +33,7 @@ import {
 import { cn } from '@/lib/utils';
 
 import { Word, Character, WordFormData, CharacterFormData, CharacterType } from '@shared/types';
-import { sampleWords, sampleCharacters, mockAITranslations } from '@shared/sampleData';
+import { sampleWords, sampleCharacters } from '@shared/sampleData';
 import { DeveloperConsoleManager } from '@/lib/storage';
 
 interface DeveloperConsoleProps {
@@ -51,8 +51,6 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [characters, setCharacters] = useState<Character[]>(sampleCharacters);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
-  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
-  const [suggestionIndex, setSuggestionIndex] = useState(0);
 
   const validPasswords = ['chakmalex2024', 'developer', 'admin123', 'contentmanager'];
 
@@ -69,10 +67,6 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
     }
   };
 
-  const generateAISuggestions = () => {
-    setAiSuggestions([...mockAITranslations].sort(() => 0.5 - Math.random()).slice(0, 10));
-    setSuggestionIndex(0);
-  };
 
   const exportData = () => {
     const data = {
@@ -171,10 +165,9 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
         
         <CardContent className="flex-1 overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="words">Words Management</TabsTrigger>
               <TabsTrigger value="characters">Characters</TabsTrigger>
-              <TabsTrigger value="ai">AI Tools</TabsTrigger>
               <TabsTrigger value="data">Data Export/Import</TabsTrigger>
             </TabsList>
 
@@ -220,28 +213,6 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
               />
             </TabsContent>
 
-            {/* AI Tools */}
-            <TabsContent value="ai" className="flex-1 overflow-hidden">
-              <AITools 
-                suggestions={aiSuggestions}
-                suggestionIndex={suggestionIndex}
-                onGenerate={generateAISuggestions}
-                onNext={() => setSuggestionIndex(Math.min(suggestionIndex + 1, aiSuggestions.length - 1))}
-                onPrev={() => setSuggestionIndex(Math.max(suggestionIndex - 1, 0))}
-                onCreateWord={(englishWord) => {
-                  setEditingWord({
-                    id: '',
-                    chakma_word_script: '',
-                    romanized_pronunciation: '',
-                    english_translation: englishWord,
-                    example_sentence: '',
-                    etymology: '',
-                    created_at: new Date().toISOString()
-                  });
-                  setActiveTab('words');
-                }}
-              />
-            </TabsContent>
 
             {/* Data Management */}
             <TabsContent value="data" className="flex-1 overflow-hidden">
@@ -435,61 +406,6 @@ function CharactersManagement({ characters, editingCharacter, onEdit, onSave, on
   );
 }
 
-// AI Tools Component
-function AITools({ suggestions, suggestionIndex, onGenerate, onNext, onPrev, onCreateWord }: any) {
-  return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <Brain className="h-12 w-12 text-chakma-primary mx-auto mb-4" />
-        <h3 className="text-lg font-semibold mb-2">AI Translation Assistant</h3>
-        <p className="text-muted-foreground">
-          Generate English words for translation into Chakma (10 per day limit)
-        </p>
-      </div>
-
-      <Card className="p-6">
-        <div className="space-y-4">
-          <Button onClick={onGenerate} className="w-full">
-            <Sparkles className="h-4 w-4 mr-2" />
-            Generate 10 English Words
-          </Button>
-
-          {suggestions.length > 0 && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <h4 className="text-2xl font-semibold mb-2">
-                  {suggestions[suggestionIndex]}
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Word {suggestionIndex + 1} of {suggestions.length}
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={onPrev} disabled={suggestionIndex === 0}>
-                  Previous
-                </Button>
-                <Button 
-                  className="flex-1"
-                  onClick={() => onCreateWord(suggestions[suggestionIndex])}
-                >
-                  Create Word Entry
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={onNext} 
-                  disabled={suggestionIndex === suggestions.length - 1}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      </Card>
-    </div>
-  );
-}
 
 // Data Management Component
 function DataManagement({ wordsCount, charactersCount, onExport, onImport }: any) {
