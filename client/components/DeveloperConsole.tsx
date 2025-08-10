@@ -25,7 +25,6 @@ import {
   Database,
   Settings,
   FileText,
-  Brain,
   CheckCircle,
   XCircle,
   RotateCcw
