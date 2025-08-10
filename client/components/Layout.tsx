@@ -85,6 +85,20 @@ export default function Layout({ children }: LayoutProps) {
   };
 
 
+  // Handle back navigation
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
+
+  // Handle home navigation
+  const handleGoHome = () => {
+    navigate('/');
+  };
+
   // Toggle audio globally
   const toggleAudio = () => {
     const currentVolume = AudioManager.getVolume();
