@@ -32,12 +32,8 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [tapCount, setTapCount] = useState(0);
-  const [showDevConsole, setShowDevConsole] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const location = useLocation();
-  const logoRef = useRef<HTMLDivElement>(null);
-  const tapTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Initialize audio state
   useEffect(() => {
@@ -45,27 +41,6 @@ export default function Layout({ children }: LayoutProps) {
     setAudioEnabled(volume > 0);
   }, []);
 
-  // Handle logo tap for developer console access
-  const handleLogoTap = () => {
-    const newTapCount = tapCount + 1;
-    setTapCount(newTapCount);
-
-    // Clear previous timeout
-    if (tapTimeoutRef.current) {
-      clearTimeout(tapTimeoutRef.current);
-    }
-
-    // Reset tap count after 5 seconds of no taps
-    tapTimeoutRef.current = setTimeout(() => {
-      setTapCount(0);
-    }, 5000);
-
-    // Check if we've reached the required taps
-    if (newTapCount >= 10) {
-      setTapCount(0);
-      setShowDevConsole(true);
-    }
-  };
 
   // Toggle audio globally
   const toggleAudio = () => {
@@ -125,15 +100,11 @@ export default function Layout({ children }: LayoutProps) {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo and Title */}
-            <div
-              ref={logoRef}
-              className="cursor-pointer"
-              onClick={handleLogoTap}
-            >
+            <div className="">
               <ChakmaLexLogo
                 size="md"
-                showBadge={tapCount > 0}
-                badgeCount={tapCount}
+                showBadge={false}
+                badgeCount={0}
               />
             </div>
 
@@ -229,11 +200,6 @@ export default function Layout({ children }: LayoutProps) {
       <main className="container mx-auto px-4 py-6">
         {children}
       </main>
-
-      {/* Developer Console Modal */}
-      {showDevConsole && (
-        <DeveloperConsole onClose={() => setShowDevConsole(false)} />
-      )}
 
       {/* Fxanx Watermark */}
       <FxanxWatermark position="bottom-right" size="sm" opacity={0.4} />
