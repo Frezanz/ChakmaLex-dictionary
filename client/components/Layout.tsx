@@ -22,6 +22,7 @@ import {
   VolumeX
 } from 'lucide-react';
 import { DeveloperConsoleManager, AudioManager } from '@/lib/storage';
+import DeveloperConsole from './DeveloperConsole';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -247,87 +248,6 @@ export default function Layout({ children }: LayoutProps) {
       {showDevConsole && (
         <DeveloperConsole onClose={() => setShowDevConsole(false)} />
       )}
-    </div>
-  );
-}
-
-// Developer Console Component (placeholder for now)
-function DeveloperConsole({ onClose }: { onClose: () => void }) {
-  const [password, setPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [error, setError] = useState('');
-
-  const validPasswords = ['chakmalex2024', 'developer', 'admin123', 'contentmanager'];
-
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (validPasswords.includes(password)) {
-      setIsAuthenticated(true);
-      setError('');
-      DeveloperConsoleManager.setAuthenticated(true);
-    } else {
-      setError('Invalid password');
-      setPassword('');
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-        <div className="bg-background border border-border rounded-lg p-6 w-full max-w-md">
-          <h2 className="text-lg font-semibold mb-4">Developer Console Access</h2>
-          <form onSubmit={handlePasswordSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Enter Password:
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-input rounded-lg bg-background"
-                placeholder="Password"
-                autoFocus
-              />
-              {error && (
-                <p className="text-destructive text-sm mt-1">{error}</p>
-              )}
-            </div>
-            <div className="flex space-x-2">
-              <Button type="submit" className="flex-1">
-                Access Console
-              </Button>
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-background border border-border rounded-lg p-6 w-full max-w-4xl h-[80vh] flex flex-col">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Developer Console</h2>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        <div className="flex-1 bg-muted rounded-lg p-4 font-mono text-sm">
-          <p className="text-green-500">ChakmaLex Developer Console v1.0</p>
-          <p className="text-muted-foreground mt-2">
-            Access granted. Content management features will be implemented here.
-          </p>
-          <p className="text-muted-foreground">
-            Features: Add/Edit/Delete words, AI translation suggestions, data export/import
-          </p>
-        </div>
-      </div>
     </div>
   );
 }
