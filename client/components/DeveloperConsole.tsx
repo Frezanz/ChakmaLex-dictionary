@@ -43,6 +43,37 @@ interface DeveloperConsoleProps {
   onClose: () => void;
 }
 
+// Helper function to generate random English words
+const generateRandomEnglishWords = (count: number): string[] => {
+  const commonWords = [
+    'happiness', 'mountain', 'river', 'beautiful', 'friendship', 'journey', 'wisdom', 'courage',
+    'peaceful', 'traditional', 'family', 'education', 'culture', 'celebration', 'community',
+    'nature', 'freedom', 'respect', 'harmony', 'strength', 'knowledge', 'compassion', 'unity',
+    'heritage', 'dignity', 'prosperity', 'abundance', 'serenity', 'gratitude', 'enlightenment',
+    'adventure', 'discovery', 'creativity', 'innovation', 'inspiration', 'dedication', 'perseverance',
+    'excellence', 'achievement', 'success', 'progress', 'development', 'growth', 'improvement'
+  ];
+
+  return commonWords
+    .sort(() => 0.5 - Math.random())
+    .slice(0, count);
+};
+
+// Helper function to handle audio file upload
+const handleAudioUpload = async (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      // In a real app, this would upload to a server/CDN
+      // For demo purposes, we'll create a blob URL
+      const audioUrl = URL.createObjectURL(file);
+      resolve(audioUrl);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
@@ -358,13 +389,42 @@ function WordForm({ word, onSave, onCancel }: {
   onCancel: () => void;
 }) {
   const [formData, setFormData] = useState(word);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    let audioUrl = formData.audio_pronunciation_url;
+
+    // Handle audio upload if file is selected
+    if (audioFile) {
+      setIsUploading(true);
+      try {
+        audioUrl = await handleAudioUpload(audioFile);
+      } catch (error) {
+        console.error('Audio upload failed:', error);
+        alert('Audio upload failed. Please try again.');
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
     onSave({
       ...formData,
+      audio_pronunciation_url: audioUrl,
       updated_at: new Date().toISOString()
     });
+  };
+
+  const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('audio/')) {
+      setAudioFile(file);
+    } else {
+      alert('Please select a valid audio file (MP3, WAV, OGG)');
+    }
   };
 
   return (
@@ -434,6 +494,58 @@ function WordForm({ word, onSave, onCancel }: {
           placeholder="Origin and historical development of the word"
           required
         />
+      </div>
+
+      <div>
+        <Label>Audio Pronunciation</Label>
+        <div className="space-y-3">
+          {formData.audio_pronunciation_url && (
+            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+              <Volume2 className="h-4 w-4 text-chakma-primary" />
+              <span className="text-sm text-muted-foreground">Current audio available</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const audio = new Audio(formData.audio_pronunciation_url!);
+                  audio.play().catch(console.error);
+                }}
+              >
+                <Volume2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                type="file"
+                accept="audio/*"
+                onChange={handleAudioFileChange}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+              <Button type="button" variant="outline" className="w-full">
+                <Music className="h-4 w-4 mr-2" />
+                {audioFile ? audioFile.name : 'Upload Audio File'}
+              </Button>
+            </div>
+            {audioFile && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setAudioFile(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            Supported formats: MP3, WAV, OGG. Max size: 5MB
+          </p>
+        </div>
       </div>
     </form>
   );
