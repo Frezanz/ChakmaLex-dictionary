@@ -128,9 +128,8 @@ export default function Layout({ children }: LayoutProps) {
             {/* Logo and Title */}
             <div
               ref={logoRef}
-              className="cursor-pointer select-none"
+              className="dev-console-trigger unselectable"
               onClick={handleLogoTap}
-              style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
             >
               <ChakmaLexLogo
                 size="md"
