@@ -13,11 +13,11 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { 
-  X, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  X,
+  Plus,
+  Edit,
+  Trash2,
   Save,
   Download,
   Upload,
@@ -27,7 +27,11 @@ import {
   FileText,
   CheckCircle,
   XCircle,
-  RotateCcw
+  RotateCcw,
+  Brain,
+  Volume2,
+  Music,
+  RefreshCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -50,6 +54,9 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [characters, setCharacters] = useState<Character[]>(sampleCharacters);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
+  const [aiGeneratedWords, setAiGeneratedWords] = useState<string[]>([]);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [uploadingAudio, setUploadingAudio] = useState(false);
 
   const validPasswords = [
     'frezanz120913',
@@ -171,9 +178,10 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
         
         <CardContent className="flex-1 overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="words">Words Management</TabsTrigger>
               <TabsTrigger value="characters">Characters</TabsTrigger>
+              <TabsTrigger value="ai">AI Word Generator</TabsTrigger>
               <TabsTrigger value="data">Data Export/Import</TabsTrigger>
             </TabsList>
 
@@ -200,7 +208,7 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
 
             {/* Characters Management */}
             <TabsContent value="characters" className="flex-1 overflow-hidden">
-              <CharactersManagement 
+              <CharactersManagement
                 characters={characters}
                 editingCharacter={editingCharacter}
                 onEdit={setEditingCharacter}
@@ -216,6 +224,39 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                   setCharacters(characters.filter(c => c.id !== id));
                 }}
                 onCancel={() => setEditingCharacter(null)}
+              />
+            </TabsContent>
+
+            {/* AI Word Generator */}
+            <TabsContent value="ai" className="flex-1 overflow-hidden">
+              <AIWordGenerator
+                words={aiGeneratedWords}
+                isGenerating={isGeneratingAI}
+                onGenerate={async () => {
+                  setIsGeneratingAI(true);
+                  try {
+                    // Simulate AI API call
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    const newWords = generateRandomEnglishWords(10);
+                    setAiGeneratedWords(newWords);
+                  } catch (error) {
+                    console.error('AI generation failed:', error);
+                  } finally {
+                    setIsGeneratingAI(false);
+                  }
+                }}
+                onCreateWord={(englishWord) => {
+                  setEditingWord({
+                    id: '',
+                    chakma_word_script: '',
+                    romanized_pronunciation: '',
+                    english_translation: englishWord,
+                    example_sentence: '',
+                    etymology: '',
+                    created_at: new Date().toISOString()
+                  });
+                  setActiveTab('words');
+                }}
               />
             </TabsContent>
 
