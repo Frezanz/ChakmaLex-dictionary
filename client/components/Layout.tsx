@@ -49,6 +49,19 @@ export default function Layout({ children }: LayoutProps) {
     setAudioEnabled(volume > 0);
   }, []);
 
+  // Track navigation history to show/hide back button
+  useEffect(() => {
+    const handlePopState = () => {
+      setCanGoBack(window.history.length > 1);
+    };
+
+    // Check if we can go back
+    setCanGoBack(window.history.length > 1 && location.pathname !== '/');
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [location.pathname]);
+
   // Handle logo tap for developer console access
   const handleLogoTap = () => {
     const newTapCount = tapCount + 1;
