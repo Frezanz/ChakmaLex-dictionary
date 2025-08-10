@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface ChakmaLexLogoProps {
@@ -41,7 +42,10 @@ export default function ChakmaLexLogo({
   };
 
   return (
-    <div className={cn("flex items-center space-x-3", className)}>
+    <div
+      className={cn("flex items-center space-x-3 select-none", className)}
+      style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
+    >
       {/* Logo Icon */}
       <div className={cn("relative", sizes[size].container)}>
         {/* Main logo circle with gradient */}
@@ -63,19 +67,29 @@ export default function ChakmaLexLogo({
         {/* Decorative elements */}
         <div className="absolute -top-1 -right-1 h-3 w-3 bg-chakma-secondary rounded-full opacity-80 animate-pulse" />
         <div className="absolute -bottom-1 -left-1 h-2 w-2 bg-chakma-accent rounded-full opacity-60" />
+
+        {/* Tap counter badge */}
+        {showBadge && badgeCount > 0 && (
+          <Badge
+            variant="secondary"
+            className="absolute -top-2 -right-2 text-xs h-5 w-5 p-0 flex items-center justify-center"
+          >
+            {badgeCount}
+          </Badge>
+        )}
         
       </div>
       
-      {/* Logo text */}
-      <div className="flex flex-col">
+      {/* Logo text - unselectable */}
+      <div className="flex flex-col select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}>
         <div className={cn(
-          "font-bold bg-gradient-to-r from-chakma-primary to-chakma-accent bg-clip-text text-transparent",
+          "font-bold bg-gradient-to-r from-chakma-primary to-chakma-accent bg-clip-text text-transparent select-none",
           sizes[size].titleText
         )}>
           ChakmaLex
         </div>
         <div className={cn(
-          "text-muted-foreground font-medium",
+          "text-muted-foreground font-medium select-none",
           sizes[size].subtitleText
         )}>
           Digital Dictionary
