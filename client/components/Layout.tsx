@@ -156,17 +156,46 @@ export default function Layout({ children }: LayoutProps) {
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
-            {/* Logo and Title */}
-            <div
-              ref={logoRef}
-              className="dev-console-trigger unselectable"
-              onClick={handleLogoTap}
-            >
-              <ChakmaLexLogo
-                size="md"
-                showBadge={false}
-                badgeCount={0}
-              />
+            {/* Back Button and Logo */}
+            <div className="flex items-center space-x-2">
+              {/* Back Button */}
+              {canGoBack && location.pathname !== '/' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleGoBack}
+                  className="h-8 w-8 p-0"
+                  title="Go back"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* Home Button (only show when not on home page) */}
+              {location.pathname !== '/' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleGoHome}
+                  className="h-8 w-8 p-0"
+                  title="Go to home"
+                >
+                  <Home className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* Logo and Title */}
+              <div
+                ref={logoRef}
+                className="dev-console-trigger unselectable"
+                onClick={handleLogoTap}
+              >
+                <ChakmaLexLogo
+                  size="md"
+                  showBadge={false}
+                  badgeCount={0}
+                />
+              </div>
             </div>
 
             {/* Desktop Navigation */}
