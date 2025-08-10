@@ -42,10 +42,7 @@ export default function ChakmaLexLogo({
   };
 
   return (
-    <div
-      className={cn("flex items-center space-x-3 select-none", className)}
-      style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
-    >
+    <div className={cn("flex items-center space-x-3 unselectable", className)}>
       {/* Logo Icon */}
       <div className={cn("relative", sizes[size].container)}>
         {/* Main logo circle with gradient */}
@@ -81,15 +78,15 @@ export default function ChakmaLexLogo({
       </div>
       
       {/* Logo text - unselectable */}
-      <div className="flex flex-col select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}>
+      <div className="flex flex-col unselectable">
         <div className={cn(
-          "font-bold bg-gradient-to-r from-chakma-primary to-chakma-accent bg-clip-text text-transparent select-none",
+          "font-bold bg-gradient-to-r from-chakma-primary to-chakma-accent bg-clip-text text-transparent unselectable",
           sizes[size].titleText
         )}>
           ChakmaLex
         </div>
         <div className={cn(
-          "text-muted-foreground font-medium select-none",
+          "text-muted-foreground font-medium unselectable",
           sizes[size].subtitleText
         )}>
           Digital Dictionary
