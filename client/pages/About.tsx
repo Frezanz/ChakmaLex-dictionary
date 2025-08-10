@@ -33,9 +33,6 @@ export default function About() {
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
       <div className="text-center space-y-4">
-        <div className="text-4xl font-chakma text-chakma-primary mb-2">
-          𑄌𑄇𑄴𑄟𑄣𑄮𑄇𑄴𑄌
-        </div>
         <h1 className="text-3xl font-bold text-foreground">ChakmaLex</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           A comprehensive digital dictionary and language learning platform 
