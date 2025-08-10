@@ -38,6 +38,8 @@ export default function Layout({ children }: LayoutProps) {
   const [showDevConsole, setShowDevConsole] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [canGoBack, setCanGoBack] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
