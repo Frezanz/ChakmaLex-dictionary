@@ -7,6 +7,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RotateCcw, Home } from 'lucide-react';
+import { CompactLogo } from './ChakmaLexLogo';
 
 interface Props {
   children: ReactNode;
@@ -47,7 +48,9 @@ class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
           <Card className="w-full max-w-lg">
             <CardHeader className="text-center">
-              <div className="text-4xl font-chakma text-destructive mb-4">𑄃𑄟𑄧</div>
+              <div className="flex justify-center mb-4">
+                <CompactLogo className="h-12 w-12 opacity-50" />
+              </div>
               <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
               <CardTitle className="text-xl">Something went wrong</CardTitle>
             </CardHeader>
