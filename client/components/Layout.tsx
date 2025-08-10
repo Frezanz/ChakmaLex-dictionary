@@ -3,10 +3,11 @@
  * Provides navigation, header, and consistent layout structure
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
   BookOpen, 
@@ -20,7 +21,8 @@ import {
   Volume2,
   VolumeX
 } from 'lucide-react';
-import { AudioManager } from '@/lib/storage';
+import { DeveloperConsoleManager, AudioManager } from '@/lib/storage';
+import DeveloperConsole from './DeveloperConsole';
 import ChakmaLexLogo from './ChakmaLexLogo';
 import FxanxWatermark from './FxanxWatermark';
 
@@ -30,14 +32,40 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
+  const [showDevConsole, setShowDevConsole] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const location = useLocation();
+  const logoRef = useRef<HTMLDivElement>(null);
+  const tapTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Initialize audio state
   useEffect(() => {
     const volume = AudioManager.getVolume();
     setAudioEnabled(volume > 0);
   }, []);
+
+  // Handle logo tap for developer console access
+  const handleLogoTap = () => {
+    const newTapCount = tapCount + 1;
+    setTapCount(newTapCount);
+
+    // Clear previous timeout
+    if (tapTimeoutRef.current) {
+      clearTimeout(tapTimeoutRef.current);
+    }
+
+    // Reset tap count after 5 seconds of no taps
+    tapTimeoutRef.current = setTimeout(() => {
+      setTapCount(0);
+    }, 5000);
+
+    // Check if we've reached the required taps
+    if (newTapCount >= 10) {
+      setTapCount(0);
+      setShowDevConsole(true);
+    }
+  };
 
 
   // Toggle audio globally
@@ -98,11 +126,16 @@ export default function Layout({ children }: LayoutProps) {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo and Title */}
-            <div className="">
+            <div
+              ref={logoRef}
+              className="cursor-pointer select-none"
+              onClick={handleLogoTap}
+              style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
+            >
               <ChakmaLexLogo
                 size="md"
-                showBadge={false}
-                badgeCount={0}
+                showBadge={tapCount > 0}
+                badgeCount={tapCount}
               />
             </div>
 
@@ -198,6 +231,11 @@ export default function Layout({ children }: LayoutProps) {
       <main className="container mx-auto px-4 py-6">
         {children}
       </main>
+
+      {/* Developer Console Modal */}
+      {showDevConsole && (
+        <DeveloperConsole onClose={() => setShowDevConsole(false)} />
+      )}
 
       {/* Fxanx Watermark */}
       <FxanxWatermark position="bottom-right" size="sm" opacity={0.4} />
