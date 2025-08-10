@@ -111,6 +111,8 @@ export interface QuizSession {
   completed: boolean;
   started_at: string;
   completed_at?: string;
+  time_remaining?: number;
+  total_time?: number;
 }
 
 export interface QuizResult {
