@@ -121,7 +121,7 @@ export default function About() {
               <ol className="space-y-2 text-sm text-muted-foreground" start={5}>
                 <li className="flex gap-2">
                   <Badge variant="outline" className="min-w-6 h-6 flex items-center justify-center text-xs">5</Badge>
-                  Take AI-generated quizzes to test your knowledge
+                  Take timed quizzes to test your knowledge
                 </li>
                 <li className="flex gap-2">
                   <Badge variant="outline" className="min-w-6 h-6 flex items-center justify-center text-xs">6</Badge>
@@ -155,7 +155,7 @@ export default function About() {
               { title: 'Advanced Search', description: 'Search across multiple fields with intelligent matching' },
               { title: 'Audio Pronunciation', description: 'Native speaker recordings for correct pronunciation' },
               { title: 'Etymology & Examples', description: 'Word origins and practical usage examples' },
-              { title: 'AI-Generated Quizzes', description: 'Dynamic learning assessments powered by AI' },
+              { title: 'Timed Quizzes', description: 'Multiple choice questions with 60-second time limit' },
               { title: 'Personalization', description: 'Multiple themes, font sizes, and customization options' },
               { title: 'Offline Favorites', description: 'Save and manage your favorite words locally' }
             ].map((feature, index) => (
