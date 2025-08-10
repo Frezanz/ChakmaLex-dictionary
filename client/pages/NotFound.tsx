@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Search, ArrowLeft } from 'lucide-react';
+import { Home, Search, ArrowLeft, FileX } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { CompactLogo } from '@/components/ChakmaLexLogo';
 import { useEffect } from 'react';
 
 const NotFound = () => {
@@ -18,8 +19,11 @@ const NotFound = () => {
     <div className="min-h-[60vh] flex items-center justify-center">
       <Card className="w-full max-w-md text-center">
         <CardContent className="pt-6 space-y-6">
-          <div className="space-y-2">
-            <div className="text-6xl font-chakma text-chakma-primary">𑄃𑄦𑄴</div>
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <CompactLogo className="h-16 w-16" />
+            </div>
+            <FileX className="h-12 w-12 text-muted-foreground mx-auto" />
             <h1 className="text-4xl font-bold text-foreground">404</h1>
             <h2 className="text-xl font-semibold text-muted-foreground">
               Page Not Found
