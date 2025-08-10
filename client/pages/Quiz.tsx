@@ -1,23 +1,23 @@
 /**
  * Quiz Page - Interactive language learning quizzes
- * Features: AI-generated questions, bidirectional translation, progress tracking
+ * Features: Timed quizzes, multiple choice questions, progress tracking
  */
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
-  Brain, 
   Play, 
   RotateCcw, 
   CheckCircle, 
   XCircle, 
   Trophy,
   Target,
-  Zap
+  Zap,
+  Clock,
+  Timer
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -30,13 +30,29 @@ interface QuizSession {
   answers: QuizResult[];
   isComplete: boolean;
   score: number;
+  timeRemaining: number;
+  options: string[];
 }
 
 export default function Quiz() {
   const [session, setSession] = useState<QuizSession | null>(null);
-  const [currentAnswer, setCurrentAnswer] = useState('');
+  const [selectedAnswer, setSelectedAnswer] = useState('');
   const [showResult, setShowResult] = useState(false);
   const [selectedQuizType, setSelectedQuizType] = useState<QuizType>('english_to_chakma');
+
+  // Timer effect
+  useEffect(() => {
+    if (session && session.timeRemaining > 0 && !session.isComplete && !showResult) {
+      const timer = setTimeout(() => {
+        setSession(prev => prev ? { ...prev, timeRemaining: prev.timeRemaining - 1 } : null);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    } else if (session && session.timeRemaining === 0 && !session.isComplete) {
+      // Time's up - submit current answer or mark as incorrect
+      submitAnswer();
+    }
+  }, [session?.timeRemaining, session?.isComplete, showResult]);
 
   const quizTypes = [
     {
@@ -49,78 +65,136 @@ export default function Quiz() {
       id: 'chakma_to_english' as QuizType,
       label: 'Chakma to English',
       description: 'Translate Chakma words to English',
-      icon: Brain
+      icon: Zap
     },
     {
       id: 'character_recognition' as QuizType,
       label: 'Character Recognition',
       description: 'Identify Chakma characters',
-      icon: Zap
+      icon: Timer
     }
   ];
 
-  const generateQuiz = (type: QuizType, count: number = 10): QuizQuestion[] => {
+  const generateOptions = (correctAnswer: string, type: QuizType): string[] => {
+    const options = [correctAnswer];
+    
+    if (type === 'character_recognition') {
+      // For character recognition, use other character romanized names
+      const otherChars = sampleCharacters
+        .filter(char => char.romanized_name !== correctAnswer)
+        .map(char => char.romanized_name);
+      
+      while (options.length < 4 && otherChars.length > 0) {
+        const randomIndex = Math.floor(Math.random() * otherChars.length);
+        const option = otherChars.splice(randomIndex, 1)[0];
+        if (!options.includes(option)) {
+          options.push(option);
+        }
+      }
+    } else {
+      // For translation questions, use other words
+      const otherWords = sampleWords
+        .filter(word => 
+          type === 'english_to_chakma' 
+            ? word.chakma_word_script !== correctAnswer
+            : word.english_translation !== correctAnswer
+        )
+        .map(word => 
+          type === 'english_to_chakma' 
+            ? word.chakma_word_script
+            : word.english_translation
+        );
+      
+      while (options.length < 4 && otherWords.length > 0) {
+        const randomIndex = Math.floor(Math.random() * otherWords.length);
+        const option = otherWords.splice(randomIndex, 1)[0];
+        if (!options.includes(option)) {
+          options.push(option);
+        }
+      }
+    }
+    
+    // Fill remaining slots with generic options if needed
+    while (options.length < 4) {
+      options.push(`Option ${options.length + 1}`);
+    }
+    
+    // Shuffle options
+    return options.sort(() => Math.random() - 0.5);
+  };
+
+  const generateQuiz = (type: QuizType, count: number = 10): { questions: QuizQuestion[], allOptions: string[][] } => {
     const questions: QuizQuestion[] = [];
+    const allOptions: string[][] = [];
     
     if (type === 'character_recognition') {
       const characters = getRandomCharacters(count);
       characters.forEach((char, index) => {
-        questions.push({
+        const question: QuizQuestion = {
           id: `q-${index}`,
           type,
           question: `What is the romanized name of this character: ${char.character_script}`,
           correct_answer: char.romanized_name,
           source_character_id: char.id
-        });
+        };
+        questions.push(question);
+        allOptions.push(generateOptions(char.romanized_name, type));
       });
     } else {
       const words = getRandomWords(count);
       words.forEach((word, index) => {
         if (type === 'english_to_chakma') {
-          questions.push({
+          const question: QuizQuestion = {
             id: `q-${index}`,
             type,
             question: `Translate "${word.english_translation}" to Chakma:`,
             correct_answer: word.chakma_word_script,
             source_word_id: word.id
-          });
+          };
+          questions.push(question);
+          allOptions.push(generateOptions(word.chakma_word_script, type));
         } else {
-          questions.push({
+          const question: QuizQuestion = {
             id: `q-${index}`,
             type,
             question: `What does "${word.chakma_word_script}" mean in English?`,
             correct_answer: word.english_translation,
             source_word_id: word.id
-          });
+          };
+          questions.push(question);
+          allOptions.push(generateOptions(word.english_translation, type));
         }
       });
     }
     
-    return questions;
+    return { questions, allOptions };
   };
 
   const startQuiz = (type: QuizType) => {
-    const questions = generateQuiz(type);
+    const { questions, allOptions } = generateQuiz(type);
     setSession({
       questions,
       currentIndex: 0,
       answers: [],
       isComplete: false,
-      score: 0
+      score: 0,
+      timeRemaining: 60, // 60 seconds total
+      options: allOptions[0] || []
     });
-    setCurrentAnswer('');
+    setSelectedAnswer('');
     setShowResult(false);
+    setSelectedQuizType(type);
   };
 
   const submitAnswer = () => {
-    if (!session || !currentAnswer.trim()) return;
+    if (!session) return;
 
     const currentQuestion = session.questions[session.currentIndex];
-    const isCorrect = currentAnswer.trim().toLowerCase() === currentQuestion.correct_answer.toLowerCase();
+    const isCorrect = selectedAnswer === currentQuestion.correct_answer;
     
     const result: QuizResult = {
       question_id: currentQuestion.id,
-      user_answer: currentAnswer.trim(),
+      user_answer: selectedAnswer || 'No answer',
       correct_answer: currentQuestion.correct_answer,
       is_correct: isCorrect
     };
@@ -132,15 +206,19 @@ export default function Quiz() {
     
     setTimeout(() => {
       if (session.currentIndex < session.questions.length - 1) {
+        // Move to next question
+        const { allOptions } = generateQuiz(selectedQuizType);
         setSession({
           ...session,
           currentIndex: session.currentIndex + 1,
           answers: updatedAnswers,
-          score: newScore
+          score: newScore,
+          options: allOptions[session.currentIndex + 1] || []
         });
-        setCurrentAnswer('');
+        setSelectedAnswer('');
         setShowResult(false);
       } else {
+        // Quiz complete
         setSession({
           ...session,
           answers: updatedAnswers,
@@ -153,8 +231,14 @@ export default function Quiz() {
 
   const resetQuiz = () => {
     setSession(null);
-    setCurrentAnswer('');
+    setSelectedAnswer('');
     setShowResult(false);
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (!session) {
@@ -164,8 +248,8 @@ export default function Quiz() {
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold text-foreground">Interactive Quiz</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Test your knowledge of the Chakma language with AI-generated questions. 
-            Choose a quiz type to get started.
+            Test your knowledge of the Chakma language with timed multiple-choice questions. 
+            You have 60 seconds to complete 10 questions.
           </p>
         </div>
 
@@ -197,17 +281,27 @@ export default function Quiz() {
           })}
         </div>
 
-        {/* AI Feature Highlight */}
-        <Card className="bg-gradient-to-r from-chakma-primary/10 to-chakma-secondary/10 border-chakma-primary/20">
+        {/* Quiz Info */}
+        <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-4">
-              <Brain className="h-6 w-6 text-chakma-primary" />
-              <h3 className="text-lg font-semibold">AI-Powered Questions</h3>
+              <Clock className="h-6 w-6 text-chakma-primary" />
+              <h3 className="text-lg font-semibold">Quiz Format</h3>
             </div>
-            <p className="text-muted-foreground">
-              Our quizzes feature AI-generated questions that adapt to help you learn more effectively. 
-              Questions are sourced from verified dictionary content to ensure accuracy.
-            </p>
+            <div className="grid md:grid-cols-3 gap-4 text-center">
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="text-2xl font-bold text-chakma-primary mb-2">10</div>
+                <p className="text-sm text-muted-foreground">Questions</p>
+              </div>
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="text-2xl font-bold text-chakma-secondary mb-2">60</div>
+                <p className="text-sm text-muted-foreground">Seconds</p>
+              </div>
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="text-2xl font-bold text-chakma-accent mb-2">4</div>
+                <p className="text-sm text-muted-foreground">Options</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -281,13 +375,28 @@ export default function Quiz() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      {/* Progress */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>Question {session.currentIndex + 1} of {session.questions.length}</span>
-          <span>Score: {session.score}/{session.currentIndex}</span>
+      {/* Progress and Timer */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <div className="text-sm text-muted-foreground">
+            Question {session.currentIndex + 1} of {session.questions.length}
+          </div>
+          <div className="flex items-center gap-2">
+            <Timer className="h-4 w-4 text-chakma-primary" />
+            <span className={cn(
+              "font-mono text-lg font-bold",
+              session.timeRemaining <= 10 ? "text-red-500" : "text-foreground"
+            )}>
+              {formatTime(session.timeRemaining)}
+            </span>
+          </div>
         </div>
         <Progress value={progress} className="w-full" />
+        <div className="text-center">
+          <Badge variant="outline">
+            Score: {session.score}/{session.currentIndex}
+          </Badge>
+        </div>
       </div>
 
       {/* Question */}
@@ -300,21 +409,34 @@ export default function Quiz() {
         <CardContent className="space-y-6">
           {!showResult ? (
             <div className="space-y-4">
-              <Input
-                value={currentAnswer}
-                onChange={(e) => setCurrentAnswer(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    submitAnswer();
-                  }
-                }}
-                placeholder="Type your answer..."
-                className="text-lg text-center"
-                autoFocus
-              />
+              {/* Multiple Choice Options */}
+              <div className="grid gap-3">
+                {session.options.map((option, index) => (
+                  <Button
+                    key={index}
+                    variant={selectedAnswer === option ? "default" : "outline"}
+                    className={cn(
+                      "w-full p-4 h-auto text-left justify-start",
+                      selectedAnswer === option && "ring-2 ring-chakma-primary"
+                    )}
+                    onClick={() => setSelectedAnswer(option)}
+                  >
+                    <span className="font-mono mr-3 text-muted-foreground">
+                      {String.fromCharCode(65 + index)}.
+                    </span>
+                    <span className={cn(
+                      selectedQuizType === 'english_to_chakma' && index === session.options.findIndex(opt => opt === option) 
+                        ? "font-chakma" : ""
+                    )}>
+                      {option}
+                    </span>
+                  </Button>
+                ))}
+              </div>
+              
               <Button 
                 onClick={submitAnswer}
-                disabled={!currentAnswer.trim()}
+                disabled={!selectedAnswer}
                 className="w-full"
               >
                 Submit Answer
