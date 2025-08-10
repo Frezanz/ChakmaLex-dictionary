@@ -286,11 +286,11 @@ export default function Layout({ children }: LayoutProps) {
           {/* Mobile Navigation */}
           {isMobileMenuOpen && (
             <div className="md:hidden py-4 border-t border-border">
-              <nav className="grid grid-cols-2 gap-2">
+              <nav className="grid grid-cols-2 gap-2 mb-4">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.to;
-                  
+
                   return (
                     <Link
                       key={item.to}
@@ -312,6 +312,29 @@ export default function Layout({ children }: LayoutProps) {
                   );
                 })}
               </nav>
+
+              {/* Mobile Audio Toggle */}
+              <div className="border-t border-border pt-4">
+                <Button
+                  variant="ghost"
+                  onClick={toggleAudio}
+                  className="w-full justify-start px-3 py-3 h-auto"
+                >
+                  {audioEnabled ? (
+                    <Volume2 className="h-5 w-5 mr-3" />
+                  ) : (
+                    <VolumeX className="h-5 w-5 mr-3" />
+                  )}
+                  <div className="text-left">
+                    <div className="font-medium text-sm">
+                      {audioEnabled ? 'Disable Audio' : 'Enable Audio'}
+                    </div>
+                    <div className="text-xs opacity-75">
+                      {audioEnabled ? 'Turn off pronunciations' : 'Turn on pronunciations'}
+                    </div>
+                  </div>
+                </Button>
+              </div>
             </div>
           )}
         </div>
