@@ -191,7 +191,7 @@ export default function Quiz() {
 
     const currentQuestion = session.questions[session.currentIndex];
     const isCorrect = selectedAnswer === currentQuestion.correct_answer;
-    
+
     const result: QuizResult = {
       question_id: currentQuestion.id,
       user_answer: selectedAnswer || 'No answer',
@@ -201,30 +201,33 @@ export default function Quiz() {
 
     const updatedAnswers = [...session.answers, result];
     const newScore = updatedAnswers.filter(a => a.is_correct).length;
-    
+
+    // Update session immediately with the new answer for correct feedback display
+    setSession({
+      ...session,
+      answers: updatedAnswers,
+      score: newScore
+    });
+
     setShowResult(true);
-    
+
     setTimeout(() => {
       if (session.currentIndex < session.questions.length - 1) {
         // Move to next question
         const { allOptions } = generateQuiz(selectedQuizType);
-        setSession({
-          ...session,
-          currentIndex: session.currentIndex + 1,
-          answers: updatedAnswers,
-          score: newScore,
-          options: allOptions[session.currentIndex + 1] || []
-        });
+        setSession(prevSession => ({
+          ...prevSession!,
+          currentIndex: prevSession!.currentIndex + 1,
+          options: allOptions[prevSession!.currentIndex + 1] || []
+        }));
         setSelectedAnswer('');
         setShowResult(false);
       } else {
         // Quiz complete
-        setSession({
-          ...session,
-          answers: updatedAnswers,
-          score: newScore,
+        setSession(prevSession => ({
+          ...prevSession!,
           isComplete: true
-        });
+        }));
       }
     }, 2000);
   };
