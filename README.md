@@ -12,7 +12,7 @@ A comprehensive digital dictionary and language learning platform dedicated to p
 
 ### Learning Tools
 - **Character Learning**: Complete Chakma script reference with audio for each character
-- **Interactive Quizzes**: AI-generated questions for bidirectional translation practice
+- **Interactive Quizzes**: Timed multiple choice questions for bidirectional translation practice
 - **Progress Tracking**: Monitor your learning journey with favorites and history
 
 ### Personalization
@@ -22,9 +22,9 @@ A comprehensive digital dictionary and language learning platform dedicated to p
 - **Data Management**: Export/import your favorites and settings
 
 ### Developer Tools
-- **Hidden Console**: Advanced content management system (tap logo 10 times + password)
-- **AI Integration**: Daily AI-generated translation suggestions
-- **Content CRUD**: Add, edit, and delete dictionary entries
+- **Hidden Console**: Advanced content management system
+- **Content Management**: Add, edit, and delete dictionary entries
+- **Data Operations**: Export/import application content
 - **Data Export/Import**: Backup and restore application content
 
 ## 🚀 Tech Stack
@@ -56,7 +56,7 @@ A comprehensive digital dictionary and language learning platform dedicated to p
 │   │   └── About.tsx      # Information and contacts
 │   ├── lib/               # Utilities and helpers
 │   │   ├── storage.ts     # Local storage management
-│   │   └─�� utils.ts       # General utilities
+│   │   └── utils.ts       # General utilities
 │   ├── App.tsx            # App entry point with routing
 │   └── global.css         # Tailwind CSS and theming
 ├── server/                # Express API backend
@@ -82,7 +82,7 @@ A comprehensive digital dictionary and language learning platform dedicated to p
 - **Interactive Grid**: Easy navigation through character types
 
 ### Quiz System
-- **AI-Generated Questions**: Dynamic content from verified dictionary entries
+- **Timed Questions**: 60-second timer with multiple choice options
 - **Multiple Formats**: English-to-Chakma, Chakma-to-English, character recognition
 - **Progress Tracking**: Score tracking and performance analytics
 
