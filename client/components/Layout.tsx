@@ -3,11 +3,10 @@
  * Provides navigation, header, and consistent layout structure
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
   BookOpen, 
@@ -21,8 +20,7 @@ import {
   Volume2,
   VolumeX
 } from 'lucide-react';
-import { DeveloperConsoleManager, AudioManager } from '@/lib/storage';
-import DeveloperConsole from './DeveloperConsole';
+import { AudioManager } from '@/lib/storage';
 import ChakmaLexLogo from './ChakmaLexLogo';
 import FxanxWatermark from './FxanxWatermark';
 
