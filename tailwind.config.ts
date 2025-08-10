@@ -47,21 +47,26 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+        // ChakmaLex specific colors
+        chakma: {
+          primary: "hsl(var(--chakma-primary))",
+          secondary: "hsl(var(--chakma-secondary))",
+          accent: "hsl(var(--chakma-accent))",
+        },
+        search: {
+          bg: "hsl(var(--search-bg))",
+        },
+        audio: {
+          button: "hsl(var(--audio-button))",
         },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        chakma: ['Noto Sans Chakma', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {
@@ -80,10 +85,47 @@ export default {
             height: "0",
           },
         },
+        "fade-in": {
+          from: {
+            opacity: "0",
+            transform: "translateY(10px)",
+          },
+          to: {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+        "slide-in": {
+          from: {
+            transform: "translateX(-100%)",
+          },
+          to: {
+            transform: "translateX(0)",
+          },
+        },
+        "pulse-ring": {
+          "0%": {
+            transform: "scale(0.33)",
+          },
+          "40%, 50%": {
+            opacity: "1",
+          },
+          "100%": {
+            opacity: "0",
+            transform: "scale(1)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
+        "slide-in": "slide-in 0.3s ease-out",
+        "pulse-ring": "pulse-ring 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite",
+      },
+      spacing: {
+        "18": "4.5rem",
+        "88": "22rem",
       },
     },
   },
