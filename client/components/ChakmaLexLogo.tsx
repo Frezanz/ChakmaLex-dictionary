@@ -65,15 +65,6 @@ export default function ChakmaLexLogo({
         <div className="absolute -top-1 -right-1 h-3 w-3 bg-chakma-secondary rounded-full opacity-80 animate-pulse" />
         <div className="absolute -bottom-1 -left-1 h-2 w-2 bg-chakma-accent rounded-full opacity-60" />
         
-        {/* Tap counter badge */}
-        {showBadge && badgeCount > 0 && (
-          <Badge 
-            variant="secondary" 
-            className="absolute -top-2 -right-2 text-xs h-5 w-5 p-0 flex items-center justify-center"
-          >
-            {badgeCount}
-          </Badge>
-        )}
       </div>
       
       {/* Logo text */}
