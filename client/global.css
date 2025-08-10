@@ -1,9 +1,9 @@
+/* Custom font for Chakma script - replace with actual Chakma font */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Chakma&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Custom font for Chakma script - replace with actual Chakma font */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Chakma&display=swap');
 
 @layer base {
   /**
