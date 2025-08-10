@@ -51,7 +51,14 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
 
-  const validPasswords = ['chakmalex2024', 'developer', 'admin123', 'contentmanager'];
+  const validPasswords = [
+    'frezanz120913',
+    'frezanz1212312123',
+    'frezanz448538',
+    'ujc448538',
+    'ujc120913',
+    'ujc04485380'
+  ];
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
