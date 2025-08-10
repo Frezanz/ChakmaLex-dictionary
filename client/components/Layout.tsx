@@ -133,8 +133,8 @@ export default function Layout({ children }: LayoutProps) {
             >
               <ChakmaLexLogo
                 size="md"
-                showBadge={tapCount > 0}
-                badgeCount={tapCount}
+                showBadge={false}
+                badgeCount={0}
               />
             </div>
 
