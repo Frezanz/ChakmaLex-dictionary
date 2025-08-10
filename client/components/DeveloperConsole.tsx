@@ -560,20 +560,338 @@ function WordForm({ word, onSave, onCancel }: {
   );
 }
 
-// Characters Management Component (simplified)
-function CharactersManagement({ characters, editingCharacter, onEdit, onSave, onDelete, onCancel }: any) {
+// Characters Management Component
+function CharactersManagement({
+  characters,
+  editingCharacter,
+  onEdit,
+  onSave,
+  onDelete,
+  onCancel
+}: {
+  characters: Character[];
+  editingCharacter: Character | null;
+  onEdit: (character: Character | null) => void;
+  onSave: (character: Character) => void;
+  onDelete: (id: string) => void;
+  onCancel: () => void;
+}) {
+  if (editingCharacter) {
+    return <CharacterForm character={editingCharacter} onSave={onSave} onCancel={onCancel} />;
+  }
+
   return (
-    <div className="text-center py-8">
-      <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-      <h3 className="text-lg font-medium mb-2">Characters Management</h3>
-      <p className="text-muted-foreground">
-        Character management interface will be implemented here.
-        Current characters: {characters.length}
-      </p>
+    <div className="h-full flex flex-col space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Characters ({characters.length})</h3>
+        <Button onClick={() => onEdit({
+          id: '',
+          character_script: '',
+          character_type: 'alphabet' as CharacterType,
+          romanized_name: '',
+          description: '',
+          created_at: new Date().toISOString()
+        })}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Character
+        </Button>
+      </div>
+
+      <div className="flex-1 overflow-auto space-y-2">
+        {characters.map((character) => (
+          <Card key={character.id} className="p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 flex items-center gap-4">
+                <div className="text-3xl font-chakma text-chakma-primary">
+                  {character.character_script}
+                </div>
+                <div className="space-y-1">
+                  <div className="font-medium">{character.romanized_name}</div>
+                  <Badge variant="secondary" className="text-xs">
+                    {character.character_type}
+                  </Badge>
+                  {character.description && (
+                    <p className="text-sm text-muted-foreground">{character.description}</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                {character.audio_pronunciation_url && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const audio = new Audio(character.audio_pronunciation_url!);
+                      audio.play().catch(console.error);
+                    }}
+                  >
+                    <Volume2 className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" onClick={() => onEdit(character)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDelete(character.id)}
+                  className="text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
 
+// Character Form Component
+function CharacterForm({ character, onSave, onCancel }: {
+  character: Character;
+  onSave: (character: Character) => void;
+  onCancel: () => void;
+}) {
+  const [formData, setFormData] = useState(character);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const characterTypes: CharacterType[] = ['alphabet', 'vowel', 'conjunct', 'diacritic', 'ordinal', 'symbol'];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    let audioUrl = formData.audio_pronunciation_url;
+
+    if (audioFile) {
+      setIsUploading(true);
+      try {
+        audioUrl = await handleAudioUpload(audioFile);
+      } catch (error) {
+        console.error('Audio upload failed:', error);
+        alert('Audio upload failed. Please try again.');
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
+    onSave({
+      ...formData,
+      audio_pronunciation_url: audioUrl,
+      updated_at: new Date().toISOString()
+    });
+  };
+
+  const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('audio/')) {
+      setAudioFile(file);
+    } else {
+      alert('Please select a valid audio file (MP3, WAV, OGG)');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">
+          {character.id ? 'Edit Character' : 'Add New Character'}
+        </h3>
+        <div className="flex gap-2">
+          <Button type="submit" disabled={isUploading}>
+            {isUploading ? (
+              <>
+                <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+              </>
+            )}
+          </Button>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isUploading}>
+            Cancel
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Character Script *</Label>
+          <Input
+            value={formData.character_script}
+            onChange={(e) => setFormData({...formData, character_script: e.target.value})}
+            placeholder="𑄌"
+            className="font-chakma text-2xl"
+            required
+          />
+        </div>
+        <div>
+          <Label>Romanized Name *</Label>
+          <Input
+            value={formData.romanized_name}
+            onChange={(e) => setFormData({...formData, romanized_name: e.target.value})}
+            placeholder="cha"
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label>Character Type *</Label>
+        <select
+          value={formData.character_type}
+          onChange={(e) => setFormData({...formData, character_type: e.target.value as CharacterType})}
+          className="w-full px-3 py-2 border border-input rounded-lg bg-background"
+          required
+        >
+          {characterTypes.map(type => (
+            <option key={type} value={type}>
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <Label>Description</Label>
+        <Textarea
+          value={formData.description || ''}
+          onChange={(e) => setFormData({...formData, description: e.target.value})}
+          placeholder="Description of the character and its usage"
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <Label>Audio Pronunciation</Label>
+        <div className="space-y-3">
+          {formData.audio_pronunciation_url && (
+            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+              <Volume2 className="h-4 w-4 text-chakma-primary" />
+              <span className="text-sm text-muted-foreground">Current audio available</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const audio = new Audio(formData.audio_pronunciation_url!);
+                  audio.play().catch(console.error);
+                }}
+              >
+                <Volume2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                type="file"
+                accept="audio/*"
+                onChange={handleAudioFileChange}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+              <Button type="button" variant="outline" className="w-full">
+                <Music className="h-4 w-4 mr-2" />
+                {audioFile ? audioFile.name : 'Upload Audio File'}
+              </Button>
+            </div>
+            {audioFile && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setAudioFile(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            Supported formats: MP3, WAV, OGG. Max size: 5MB
+          </p>
+        </div>
+      </div>
+    </form>
+  );
+}
+
+
+// AI Word Generator Component
+function AIWordGenerator({
+  words,
+  isGenerating,
+  onGenerate,
+  onCreateWord
+}: {
+  words: string[];
+  isGenerating: boolean;
+  onGenerate: () => void;
+  onCreateWord: (word: string) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="text-center">
+        <Brain className="h-12 w-12 text-chakma-primary mx-auto mb-4" />
+        <h3 className="text-lg font-semibold mb-2">AI English Word Generator</h3>
+        <p className="text-muted-foreground">
+          Generate English words for translation into Chakma. Click on any word to create a dictionary entry.
+        </p>
+      </div>
+
+      <Card className="p-6">
+        <div className="space-y-4">
+          <Button onClick={onGenerate} disabled={isGenerating} className="w-full">
+            {isGenerating ? (
+              <>
+                <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                Generating Words...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Generate 10 English Words
+              </>
+            )}
+          </Button>
+
+          {words.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="font-medium">Generated Words:</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {words.map((word, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    className="justify-start h-auto p-3"
+                    onClick={() => onCreateWord(word)}
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">{word}</div>
+                      <div className="text-xs text-muted-foreground">Click to create entry</div>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+
+              <p className="text-xs text-muted-foreground text-center">
+                Click any word above to create a new dictionary entry with that English translation.
+                You can then add the Chakma script and other details.
+              </p>
+            </div>
+          )}
+        </div>
+      </Card>
+    </div>
+  );
+}
 
 // Data Management Component
 function DataManagement({ wordsCount, charactersCount, onExport, onImport }: any) {
