@@ -243,10 +243,12 @@ export const DEVELOPER_CONSOLE_CONFIG = {
   required_taps: 10,
   tap_timeout: 5000, // 5 seconds
   valid_passwords: [
-    'chakmalex2024',
-    'developer',
-    'admin123',
-    'contentmanager'
+    'frezanz120913',
+    'frezanz1212312123',
+    'frezanz448538',
+    'ujc448538',
+    'ujc120913',
+    'ujc04485380'
   ],
 } as const;
 
