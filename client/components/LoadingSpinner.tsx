@@ -69,11 +69,11 @@ export function ChakmaLoader({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center justify-center", className)}>
       <div className="relative">
-        <div className="text-4xl font-chakma text-chakma-primary animate-pulse">
-          𑄌𑄇𑄴𑄟
+        <div className="text-4xl font-bold text-chakma-primary animate-pulse">
+          CL
         </div>
-        <div className="absolute inset-0 text-4xl font-chakma text-chakma-secondary animate-ping opacity-30">
-          𑄌𑄇𑄴𑄟
+        <div className="absolute inset-0 text-4xl font-bold text-chakma-secondary animate-ping opacity-30">
+          CL
         </div>
       </div>
     </div>
