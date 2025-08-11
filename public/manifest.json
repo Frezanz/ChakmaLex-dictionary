@@ -1,123 +1,116 @@
 {
-  "name": "ChakmaLex Digital Dictionary - Chakma to English Translation",
+  "name": "ChakmaLex - Digital Chakma Dictionary",
   "short_name": "ChakmaLex",
-  "description": "ChakmaLex by Fxanx - The most comprehensive Chakma dictionary for Chakma to English translation. Learn Chakma words, script and language.",
-  "version": "1.0.0",
+  "description": "A comprehensive digital dictionary and language learning platform for the Chakma language",
   "start_url": "/",
   "display": "standalone",
+  "theme_color": "#2563eb",
   "background_color": "#ffffff",
-  "theme_color": "#7c3aed",
   "orientation": "portrait-primary",
   "scope": "/",
-  "lang": "en-US",
-  "categories": ["education", "reference", "productivity"],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "ChakmaLex Dictionary on Desktop"
-    },
-    {
-      "src": "/screenshots/mobile.png",
-      "sizes": "360x640",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "ChakmaLex Dictionary on Mobile"
-    }
-  ],
+  "lang": "en",
+  "categories": ["education", "books", "reference"],
   "icons": [
     {
-      "src": "/icons/icon-72x72.png",
+      "src": "/icons/icon-72.png",
       "sizes": "72x72",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "maskable"
     },
     {
-      "src": "/icons/icon-96x96.png",
-      "sizes": "96x96",
+      "src": "/icons/icon-96.png",
+      "sizes": "96x96", 
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "maskable"
     },
     {
-      "src": "/icons/icon-128x128.png",
+      "src": "/icons/icon-128.png",
       "sizes": "128x128",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "maskable"
     },
     {
-      "src": "/icons/icon-144x144.png",
+      "src": "/icons/icon-144.png",
       "sizes": "144x144",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "maskable"
     },
     {
-      "src": "/icons/icon-152x152.png",
+      "src": "/icons/icon-152.png",
       "sizes": "152x152",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "maskable"
     },
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-384x384.png",
+      "src": "/icons/icon-384.png",
       "sizes": "384x384",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Search Dictionary",
+      "url": "/",
+      "description": "Search the Chakma dictionary",
+      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Learn Characters",
+      "url": "/characters",
+      "description": "Learn Chakma script characters",
+      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Take Quiz",
+      "url": "/quiz",
+      "description": "Practice with interactive quizzes",
+      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "My Favorites",
+      "url": "/favorites",
+      "description": "View saved words and favorites",
+      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop.webp",
+      "sizes": "1280x720",
+      "type": "image/webp",
+      "form_factor": "wide",
+      "label": "ChakmaLex Dictionary Interface"
+    },
+    {
+      "src": "/screenshots/mobile.webp",
+      "sizes": "360x640",
+      "type": "image/webp",
+      "form_factor": "narrow", 
+      "label": "ChakmaLex Mobile View"
     }
   ],
   "related_applications": [],
   "prefer_related_applications": false,
   "edge_side_panel": {
-    "preferred_width": 480
+    "preferred_width": 400
   },
-  "shortcuts": [
+  "protocol_handlers": [
     {
-      "name": "Search Dictionary",
-      "short_name": "Search",
-      "description": "Search for words in the dictionary",
-      "url": "/",
-      "icons": [
-        {
-          "src": "/icons/search-shortcut.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Learn Characters",
-      "short_name": "Characters",
-      "description": "Learn Chakma script characters",
-      "url": "/characters",
-      "icons": [
-        {
-          "src": "/icons/characters-shortcut.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Take Quiz",
-      "short_name": "Quiz",
-      "description": "Test your knowledge with interactive quizzes",
-      "url": "/quiz",
-      "icons": [
-        {
-          "src": "/icons/quiz-shortcut.png",
-          "sizes": "96x96"
-        }
-      ]
+      "protocol": "web+chakmalex",
+      "url": "/?query=%s"
     }
   ]
 }

@@ -17,8 +17,16 @@
     "build:server": "vite build --config vite.config.server.ts",
     "start": "node dist/server/node-build.mjs",
     "test": "vitest --run",
+    "test:watch": "vitest",
     "format.fix": "prettier --write .",
-    "typecheck": "tsc"
+    "format.check": "prettier --check .",
+    "typecheck": "tsc",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist node_modules/.vite",
+    "preview": "npm run build && npm start",
+    "deploy:netlify": "netlify deploy --prod --dir=dist/spa --functions=netlify/functions",
+    "audit:security": "npm audit",
+    "audit:fix": "npm audit fix"
   },
   "dependencies": {
     "dotenv": "^17.2.0",
