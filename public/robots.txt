@@ -1,8 +1,10 @@
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +14,22 @@ Allow: /
 
 User-agent: *
 Allow: /
+Allow: /characters
+Allow: /quiz
+Allow: /favorites
+Allow: /settings
+Allow: /about
+Crawl-delay: 2
+
+# Sitemap location
+Sitemap: https://chakmalex-dictionary.netlify.app/sitemap.xml
+
+# Block AI training bots
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
