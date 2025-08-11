@@ -1,7 +1,7 @@
 {
-  "name": "ChakmaLex Digital Dictionary",
+  "name": "ChakmaLex Digital Dictionary - Chakma to English Translation",
   "short_name": "ChakmaLex",
-  "description": "A comprehensive digital dictionary and learning platform for the Chakma language",
+  "description": "ChakmaLex by Fxanx - The most comprehensive Chakma dictionary for Chakma to English translation. Learn Chakma words, script and language.",
   "version": "1.0.0",
   "start_url": "/",
   "display": "standalone",
