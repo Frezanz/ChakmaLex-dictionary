@@ -3,11 +3,11 @@
  * Provides navigation, header, and consistent layout structure
  */
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Search,
   BookOpen,
@@ -21,12 +21,12 @@ import {
   Volume2,
   VolumeX,
   ArrowLeft,
-  Home
-} from 'lucide-react';
-import { DeveloperConsoleManager, AudioManager } from '@/lib/storage';
-import DeveloperConsole from './DeveloperConsole';
-import ChakmaLexLogo from './ChakmaLexLogo';
-import FxanxWatermark from './FxanxWatermark';
+  Home,
+} from "lucide-react";
+import { DeveloperConsoleManager, AudioManager } from "@/lib/storage";
+import DeveloperConsole from "./DeveloperConsole";
+import ChakmaLexLogo from "./ChakmaLexLogo";
+import FxanxWatermark from "./FxanxWatermark";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -58,10 +58,10 @@ export default function Layout({ children }: LayoutProps) {
     };
 
     // Check if we can go back
-    setCanGoBack(window.history.length > 1 && location.pathname !== '/');
+    setCanGoBack(window.history.length > 1 && location.pathname !== "/");
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, [location.pathname]);
 
   // PWA install prompt handling
@@ -76,17 +76,20 @@ export default function Layout({ children }: LayoutProps) {
     };
 
     const handleAppInstalled = () => {
-      console.log('PWA was installed');
+      console.log("PWA was installed");
       setShowInstallPrompt(false);
       setDeferredPrompt(null);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
@@ -112,19 +115,18 @@ export default function Layout({ children }: LayoutProps) {
     }
   };
 
-
   // Handle back navigation
   const handleGoBack = () => {
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      navigate('/');
+      navigate("/");
     }
   };
 
   // Handle home navigation
   const handleGoHome = () => {
-    navigate('/');
+    navigate("/");
   };
 
   // Handle PWA installation
@@ -157,41 +159,41 @@ export default function Layout({ children }: LayoutProps) {
 
   const navigationItems = [
     {
-      to: '/',
+      to: "/",
       icon: Search,
-      label: 'Dictionary',
-      description: 'Search words'
+      label: "Dictionary",
+      description: "Search words",
     },
     {
-      to: '/characters',
+      to: "/characters",
       icon: Type,
-      label: 'Characters',
-      description: 'Learn script'
+      label: "Characters",
+      description: "Learn script",
     },
     {
-      to: '/quiz',
+      to: "/quiz",
       icon: Brain,
-      label: 'Quiz',
-      description: 'Test knowledge'
+      label: "Quiz",
+      description: "Test knowledge",
     },
     {
-      to: '/favorites',
+      to: "/favorites",
       icon: Heart,
-      label: 'Favorites',
-      description: 'Saved words'
+      label: "Favorites",
+      description: "Saved words",
     },
     {
-      to: '/settings',
+      to: "/settings",
       icon: Settings,
-      label: 'Settings',
-      description: 'Preferences'
+      label: "Settings",
+      description: "Preferences",
     },
     {
-      to: '/about',
+      to: "/about",
       icon: Info,
-      label: 'About',
-      description: 'Information'
-    }
+      label: "About",
+      description: "Information",
+    },
   ];
 
   return (
@@ -203,7 +205,7 @@ export default function Layout({ children }: LayoutProps) {
             {/* Back Button and Logo */}
             <div className="flex justify-start flex-row overflow-auto items-center space-x-2">
               {/* Back Button */}
-              {canGoBack && location.pathname !== '/' && (
+              {canGoBack && location.pathname !== "/" && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -216,7 +218,7 @@ export default function Layout({ children }: LayoutProps) {
               )}
 
               {/* Home Button (only show when not on home page) */}
-              {location.pathname !== '/' && (
+              {location.pathname !== "/" && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -234,11 +236,7 @@ export default function Layout({ children }: LayoutProps) {
                 className="dev-console-trigger unselectable"
                 onClick={handleLogoTap}
               >
-                <ChakmaLexLogo
-                  size="md"
-                  showBadge={false}
-                  badgeCount={0}
-                />
+                <ChakmaLexLogo size="md" showBadge={false} badgeCount={0} />
               </div>
             </div>
 
@@ -247,7 +245,7 @@ export default function Layout({ children }: LayoutProps) {
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.to;
-                
+
                 return (
                   <Link
                     key={item.to}
@@ -256,7 +254,7 @@ export default function Layout({ children }: LayoutProps) {
                       "flex flex-col items-center px-3 py-2 rounded-lg text-xs transition-colors",
                       isActive
                         ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted",
                     )}
                   >
                     <Icon className="h-4 w-4 mb-1" />
@@ -299,14 +297,16 @@ export default function Layout({ children }: LayoutProps) {
                         "flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors",
                         isActive
                           ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted",
                       )}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Icon className="h-5 w-5" />
                       <div>
                         <div className="font-medium text-sm">{item.label}</div>
-                        <div className="text-xs opacity-75">{item.description}</div>
+                        <div className="text-xs opacity-75">
+                          {item.description}
+                        </div>
                       </div>
                     </Link>
                   );
@@ -327,10 +327,12 @@ export default function Layout({ children }: LayoutProps) {
                   )}
                   <div className="text-left">
                     <div className="font-medium text-sm">
-                      {audioEnabled ? 'Disable Audio' : 'Enable Audio'}
+                      {audioEnabled ? "Disable Audio" : "Enable Audio"}
                     </div>
                     <div className="text-xs opacity-75">
-                      {audioEnabled ? 'Turn off pronunciations' : 'Turn on pronunciations'}
+                      {audioEnabled
+                        ? "Turn off pronunciations"
+                        : "Turn on pronunciations"}
                     </div>
                   </div>
                 </Button>
@@ -341,9 +343,7 @@ export default function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        {children}
-      </main>
+      <main className="container mx-auto px-4 py-6">{children}</main>
 
       {/* Developer Console Modal */}
       {showDevConsole && (

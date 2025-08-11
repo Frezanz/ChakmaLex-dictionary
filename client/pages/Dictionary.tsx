@@ -3,37 +3,41 @@
  * Features: Advanced search, word display, pronunciation, favorites
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Search, 
-  Volume2, 
-  Heart, 
-  HeartOff, 
+import React, { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Search,
+  Volume2,
+  Heart,
+  HeartOff,
   ExternalLink,
   History,
   Sparkles,
   BookOpen,
-  ArrowRight
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  ArrowRight,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Data and utilities
-import { Word, SearchHistoryItem } from '@shared/types';
-import { sampleWords, searchWords, sampleSearchHistory } from '@shared/sampleData';
-import { 
-  SearchHistoryManager, 
-  FavoritesManager, 
+import { Word, SearchHistoryItem } from "@shared/types";
+import {
+  sampleWords,
+  searchWords,
+  sampleSearchHistory,
+} from "@shared/sampleData";
+import {
+  SearchHistoryManager,
+  FavoritesManager,
   AudioManager,
-  PreferencesManager 
-} from '@/lib/storage';
+  PreferencesManager,
+} from "@/lib/storage";
 
 export default function Dictionary() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Word[]>([]);
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
@@ -46,7 +50,7 @@ export default function Dictionary() {
   useEffect(() => {
     setSearchHistory(SearchHistoryManager.get());
     setFavorites(FavoritesManager.get());
-    
+
     // Show some featured words initially
     setSearchResults(sampleWords.slice(0, 3));
   }, []);
@@ -61,18 +65,18 @@ export default function Dictionary() {
 
     setIsLoading(true);
     setShowHistory(false);
-    
+
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     const results = searchWords(query);
     setSearchResults(results);
     setSelectedWord(null);
-    
+
     // Add to search history
     SearchHistoryManager.add(query, results.length);
     setSearchHistory(SearchHistoryManager.get());
-    
+
     setIsLoading(false);
   };
 
@@ -91,11 +95,11 @@ export default function Dictionary() {
   // Handle audio play
   const handlePlayAudio = async (url?: string) => {
     if (!url) return;
-    
+
     try {
       await AudioManager.playAudio(url);
     } catch (error) {
-      console.error('Error playing audio:', error);
+      console.error("Error playing audio:", error);
     }
   };
 
@@ -115,8 +119,9 @@ export default function Dictionary() {
           Welcome to ChakmaLex
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Discover the beauty of the Chakma language through our comprehensive digital dictionary. 
-          Search, learn, and explore words with pronunciation, etymology, and cultural context.
+          Discover the beauty of the Chakma language through our comprehensive
+          digital dictionary. Search, learn, and explore words with
+          pronunciation, etymology, and cultural context.
         </p>
       </div>
 
@@ -133,7 +138,7 @@ export default function Dictionary() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       handleSearch(searchQuery);
                     }
                   }}
@@ -146,15 +151,15 @@ export default function Dictionary() {
                     size="sm"
                     className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
                     onClick={() => {
-                      setSearchQuery('');
-                      handleSearch('');
+                      setSearchQuery("");
+                      handleSearch("");
                     }}
                   >
                     ×
                   </Button>
                 )}
               </div>
-              <Button 
+              <Button
                 onClick={() => handleSearch(searchQuery)}
                 disabled={isLoading}
                 className="h-12 px-6"
@@ -173,7 +178,9 @@ export default function Dictionary() {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <History className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium text-muted-foreground">Recent Searches</span>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      Recent Searches
+                    </span>
                   </div>
                   <div className="space-y-1">
                     {searchHistory.slice(0, 5).map((item, index) => (
@@ -202,11 +209,12 @@ export default function Dictionary() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">
-              {searchQuery ? `Results for "${searchQuery}"` : 'Featured Words'}
+              {searchQuery ? `Results for "${searchQuery}"` : "Featured Words"}
             </h2>
             {searchResults.length > 0 && (
               <Badge variant="outline">
-                {searchResults.length} {searchResults.length === 1 ? 'word' : 'words'}
+                {searchResults.length}{" "}
+                {searchResults.length === 1 ? "word" : "words"}
               </Badge>
             )}
           </div>
@@ -231,7 +239,9 @@ export default function Dictionary() {
                   isFavorite={favorites.includes(word.id)}
                   onSelect={() => handleWordSelect(word)}
                   onFavoriteToggle={() => handleFavoriteToggle(word.id)}
-                  onPlayAudio={() => handlePlayAudio(word.audio_pronunciation_url)}
+                  onPlayAudio={() =>
+                    handlePlayAudio(word.audio_pronunciation_url)
+                  }
                 />
               ))}
             </div>
@@ -241,11 +251,13 @@ export default function Dictionary() {
         {/* Word Details */}
         <div className="lg:sticky lg:top-24">
           {selectedWord ? (
-            <WordDetails 
+            <WordDetails
               word={selectedWord}
               isFavorite={favorites.includes(selectedWord.id)}
               onFavoriteToggle={() => handleFavoriteToggle(selectedWord.id)}
-              onPlayAudio={() => handlePlayAudio(selectedWord.audio_pronunciation_url)}
+              onPlayAudio={() =>
+                handlePlayAudio(selectedWord.audio_pronunciation_url)
+              }
             />
           ) : (
             <Card className="text-center py-12">
@@ -253,8 +265,8 @@ export default function Dictionary() {
                 <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2">Select a word</h3>
                 <p className="text-muted-foreground">
-                  Click on any word from the search results to see detailed information, 
-                  pronunciation, and examples.
+                  Click on any word from the search results to see detailed
+                  information, pronunciation, and examples.
                 </p>
               </CardContent>
             </Card>
@@ -275,12 +287,19 @@ interface WordCardProps {
   onPlayAudio: () => void;
 }
 
-function WordCard({ word, isSelected, isFavorite, onSelect, onFavoriteToggle, onPlayAudio }: WordCardProps) {
+function WordCard({
+  word,
+  isSelected,
+  isFavorite,
+  onSelect,
+  onFavoriteToggle,
+  onPlayAudio,
+}: WordCardProps) {
   return (
-    <Card 
+    <Card
       className={cn(
         "cursor-pointer transition-all duration-200 hover:shadow-md",
-        isSelected && "ring-2 ring-primary border-primary"
+        isSelected && "ring-2 ring-primary border-primary",
       )}
       onClick={onSelect}
     >
@@ -311,7 +330,7 @@ function WordCard({ word, isSelected, isFavorite, onSelect, onFavoriteToggle, on
               </div>
             )}
           </div>
-          
+
           <div className="flex flex-col gap-2 ml-4">
             <Button
               variant="ghost"
@@ -354,7 +373,12 @@ interface WordDetailsProps {
   onPlayAudio: () => void;
 }
 
-function WordDetails({ word, isFavorite, onFavoriteToggle, onPlayAudio }: WordDetailsProps) {
+function WordDetails({
+  word,
+  isFavorite,
+  onFavoriteToggle,
+  onPlayAudio,
+}: WordDetailsProps) {
   return (
     <Card>
       <CardHeader>
@@ -366,15 +390,13 @@ function WordDetails({ word, isFavorite, onFavoriteToggle, onPlayAudio }: WordDe
             <div className="text-muted-foreground">
               /{word.romanized_pronunciation}/
             </div>
-            <h2 className="text-2xl font-semibold">{word.english_translation}</h2>
+            <h2 className="text-2xl font-semibold">
+              {word.english_translation}
+            </h2>
           </div>
-          
+
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onPlayAudio}
-            >
+            <Button variant="outline" size="sm" onClick={onPlayAudio}>
               <Volume2 className="h-4 w-4 mr-2" />
               Play
             </Button>
@@ -388,12 +410,12 @@ function WordDetails({ word, isFavorite, onFavoriteToggle, onPlayAudio }: WordDe
               ) : (
                 <HeartOff className="h-4 w-4 mr-2" />
               )}
-              {isFavorite ? 'Favorited' : 'Favorite'}
+              {isFavorite ? "Favorited" : "Favorite"}
             </Button>
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
         {/* Synonyms */}
         {word.synonyms && word.synonyms.length > 0 && (
@@ -401,12 +423,10 @@ function WordDetails({ word, isFavorite, onFavoriteToggle, onPlayAudio }: WordDe
             <h3 className="font-medium mb-2">Synonyms</h3>
             <div className="flex flex-wrap gap-2">
               {word.synonyms.map((syn, index) => (
-                <Badge 
-                  key={index} 
+                <Badge
+                  key={index}
                   variant="secondary"
-                  className={cn(
-                    syn.language === 'chakma' && "font-chakma"
-                  )}
+                  className={cn(syn.language === "chakma" && "font-chakma")}
                 >
                   {syn.term}
                 </Badge>
@@ -421,12 +441,10 @@ function WordDetails({ word, isFavorite, onFavoriteToggle, onPlayAudio }: WordDe
             <h3 className="font-medium mb-2">Antonyms</h3>
             <div className="flex flex-wrap gap-2">
               {word.antonyms.map((ant, index) => (
-                <Badge 
-                  key={index} 
+                <Badge
+                  key={index}
                   variant="outline"
-                  className={cn(
-                    ant.language === 'chakma' && "font-chakma"
-                  )}
+                  className={cn(ant.language === "chakma" && "font-chakma")}
                 >
                   {ant.term}
                 </Badge>
@@ -448,20 +466,18 @@ function WordDetails({ word, isFavorite, onFavoriteToggle, onPlayAudio }: WordDe
         {/* Etymology */}
         <div>
           <h3 className="font-medium mb-2">Etymology</h3>
-          <p className="text-muted-foreground">
-            {word.etymology}
-          </p>
+          <p className="text-muted-foreground">{word.etymology}</p>
         </div>
 
         {/* Visual Explanation */}
         {word.explanation_media && (
           <div>
             <h3 className="font-medium mb-2">Visual Reference</h3>
-            {word.explanation_media.type === 'url' ? (
+            {word.explanation_media.type === "url" ? (
               <Button variant="outline" size="sm" asChild>
-                <a 
-                  href={word.explanation_media.value} 
-                  target="_blank" 
+                <a
+                  href={word.explanation_media.value}
+                  target="_blank"
                   rel="noopener noreferrer"
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
@@ -469,8 +485,8 @@ function WordDetails({ word, isFavorite, onFavoriteToggle, onPlayAudio }: WordDe
                 </a>
               </Button>
             ) : (
-              <img 
-                src={word.explanation_media.value} 
+              <img
+                src={word.explanation_media.value}
                 alt={`Visual explanation for ${word.english_translation}`}
                 className="rounded-lg max-w-full h-auto"
               />

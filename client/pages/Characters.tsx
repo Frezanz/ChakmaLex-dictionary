@@ -3,21 +3,23 @@
  * Features: Alphabets, vowels, diacritics, numbers, symbols with audio
  */
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Volume2, BookOpen, Type } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Volume2, BookOpen, Type } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-import { Character, CharacterType } from '@shared/types';
-import { sampleCharacters, charactersByType } from '@shared/sampleData';
-import { AudioManager } from '@/lib/storage';
+import { Character, CharacterType } from "@shared/types";
+import { sampleCharacters, charactersByType } from "@shared/sampleData";
+import { AudioManager } from "@/lib/storage";
 
 export default function Characters() {
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
-  const [activeTab, setActiveTab] = useState<CharacterType>('alphabet');
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
+    null,
+  );
+  const [activeTab, setActiveTab] = useState<CharacterType>("alphabet");
 
   const handleCharacterSelect = (character: Character) => {
     setSelectedCharacter(character);
@@ -25,42 +27,52 @@ export default function Characters() {
 
   const handlePlayAudio = async (url?: string) => {
     if (!url) return;
-    
+
     try {
       await AudioManager.playAudio(url);
     } catch (error) {
-      console.error('Error playing audio:', error);
+      console.error("Error playing audio:", error);
     }
   };
 
   const characterTypes = [
-    { id: 'alphabet' as CharacterType, label: 'Alphabets', icon: Type },
-    { id: 'vowel' as CharacterType, label: 'Vowels', icon: BookOpen },
-    { id: 'diacritic' as CharacterType, label: 'Diacritics', icon: Type },
-    { id: 'ordinal' as CharacterType, label: 'Numbers', icon: BookOpen },
-    { id: 'symbol' as CharacterType, label: 'Symbols', icon: Type }
+    { id: "alphabet" as CharacterType, label: "Alphabets", icon: Type },
+    { id: "vowel" as CharacterType, label: "Vowels", icon: BookOpen },
+    { id: "diacritic" as CharacterType, label: "Diacritics", icon: Type },
+    { id: "ordinal" as CharacterType, label: "Numbers", icon: BookOpen },
+    { id: "symbol" as CharacterType, label: "Symbols", icon: Type },
   ];
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold text-foreground">Learn Chakma Script</h1>
+        <h1 className="text-3xl font-bold text-foreground">
+          Learn Chakma Script
+        </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Master the Chakma writing system by learning individual characters, their sounds, and usage. 
-          Click on any character to hear its pronunciation.
+          Master the Chakma writing system by learning individual characters,
+          their sounds, and usage. Click on any character to hear its
+          pronunciation.
         </p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Character Categories */}
         <div className="lg:col-span-2">
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as CharacterType)}>
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as CharacterType)}
+          >
             <TabsList className="grid w-full grid-cols-5">
               {characterTypes.map((type) => {
                 const Icon = type.icon;
                 return (
-                  <TabsTrigger key={type.id} value={type.id} className="text-xs">
+                  <TabsTrigger
+                    key={type.id}
+                    value={type.id}
+                    className="text-xs"
+                  >
                     <Icon className="h-4 w-4 mr-1" />
                     {type.label}
                   </TabsTrigger>
@@ -88,12 +100,15 @@ export default function Characters() {
                           character={character}
                           isSelected={selectedCharacter?.id === character.id}
                           onSelect={() => handleCharacterSelect(character)}
-                          onPlayAudio={() => handlePlayAudio(character.audio_pronunciation_url)}
+                          onPlayAudio={() =>
+                            handlePlayAudio(character.audio_pronunciation_url)
+                          }
                         />
                       ))}
                     </div>
-                    
-                    {(!charactersByType[type.id] || charactersByType[type.id].length === 0) && (
+
+                    {(!charactersByType[type.id] ||
+                      charactersByType[type.id].length === 0) && (
                       <div className="text-center py-8 text-muted-foreground">
                         <Type className="h-12 w-12 mx-auto mb-4 opacity-50" />
                         <p>No {type.label.toLowerCase()} available yet.</p>
@@ -109,9 +124,11 @@ export default function Characters() {
         {/* Character Details */}
         <div className="lg:sticky lg:top-24">
           {selectedCharacter ? (
-            <CharacterDetails 
+            <CharacterDetails
               character={selectedCharacter}
-              onPlayAudio={() => handlePlayAudio(selectedCharacter.audio_pronunciation_url)}
+              onPlayAudio={() =>
+                handlePlayAudio(selectedCharacter.audio_pronunciation_url)
+              }
             />
           ) : (
             <Card className="text-center py-12">
@@ -119,7 +136,8 @@ export default function Characters() {
                 <Type className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2">Select a character</h3>
                 <p className="text-muted-foreground">
-                  Click on any character to see detailed information and hear its pronunciation.
+                  Click on any character to see detailed information and hear
+                  its pronunciation.
                 </p>
               </CardContent>
             </Card>
@@ -138,12 +156,17 @@ interface CharacterCardProps {
   onPlayAudio: () => void;
 }
 
-function CharacterCard({ character, isSelected, onSelect, onPlayAudio }: CharacterCardProps) {
+function CharacterCard({
+  character,
+  isSelected,
+  onSelect,
+  onPlayAudio,
+}: CharacterCardProps) {
   return (
-    <Card 
+    <Card
       className={cn(
         "cursor-pointer transition-all duration-200 hover:shadow-md text-center relative group",
-        isSelected && "ring-2 ring-primary border-primary"
+        isSelected && "ring-2 ring-primary border-primary",
       )}
       onClick={onSelect}
     >
@@ -157,7 +180,7 @@ function CharacterCard({ character, isSelected, onSelect, onPlayAudio }: Charact
         <Badge variant="secondary" className="text-xs">
           {character.character_type}
         </Badge>
-        
+
         {/* Audio button overlay */}
         <Button
           variant="ghost"
@@ -190,7 +213,9 @@ function CharacterDetails({ character, onPlayAudio }: CharacterDetailsProps) {
             {character.character_script}
           </div>
           <div>
-            <CardTitle className="text-xl">{character.romanized_name}</CardTitle>
+            <CardTitle className="text-xl">
+              {character.romanized_name}
+            </CardTitle>
             <Badge variant="outline" className="mt-2">
               {character.character_type}
             </Badge>
@@ -201,13 +226,11 @@ function CharacterDetails({ character, onPlayAudio }: CharacterDetailsProps) {
           </Button>
         </div>
       </CardHeader>
-      
+
       {character.description && (
         <CardContent>
           <h3 className="font-medium mb-2">Description</h3>
-          <p className="text-muted-foreground">
-            {character.description}
-          </p>
+          <p className="text-muted-foreground">{character.description}</p>
         </CardContent>
       )}
     </Card>

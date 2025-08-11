@@ -4,20 +4,20 @@
  * Features: CRUD operations, audio upload, AI word generation, data export/import
  */
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { 
-  X, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import {
+  X,
+  Plus,
+  Edit,
+  Trash2,
   Save,
   Download,
   Upload,
@@ -31,13 +31,19 @@ import {
   Brain,
   Volume2,
   Music,
-  RefreshCw
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  RefreshCw,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-import { Word, Character, WordFormData, CharacterFormData, CharacterType } from '@shared/types';
-import { sampleWords, sampleCharacters } from '@shared/sampleData';
-import { DeveloperConsoleManager } from '@/lib/storage';
+import {
+  Word,
+  Character,
+  WordFormData,
+  CharacterFormData,
+  CharacterType,
+} from "@shared/types";
+import { sampleWords, sampleCharacters } from "@shared/sampleData";
+import { DeveloperConsoleManager } from "@/lib/storage";
 
 interface DeveloperConsoleProps {
   onClose: () => void;
@@ -46,17 +52,53 @@ interface DeveloperConsoleProps {
 // Helper function to generate random English words
 const generateRandomEnglishWords = (count: number): string[] => {
   const commonWords = [
-    'happiness', 'mountain', 'river', 'beautiful', 'friendship', 'journey', 'wisdom', 'courage',
-    'peaceful', 'traditional', 'family', 'education', 'culture', 'celebration', 'community',
-    'nature', 'freedom', 'respect', 'harmony', 'strength', 'knowledge', 'compassion', 'unity',
-    'heritage', 'dignity', 'prosperity', 'abundance', 'serenity', 'gratitude', 'enlightenment',
-    'adventure', 'discovery', 'creativity', 'innovation', 'inspiration', 'dedication', 'perseverance',
-    'excellence', 'achievement', 'success', 'progress', 'development', 'growth', 'improvement'
+    "happiness",
+    "mountain",
+    "river",
+    "beautiful",
+    "friendship",
+    "journey",
+    "wisdom",
+    "courage",
+    "peaceful",
+    "traditional",
+    "family",
+    "education",
+    "culture",
+    "celebration",
+    "community",
+    "nature",
+    "freedom",
+    "respect",
+    "harmony",
+    "strength",
+    "knowledge",
+    "compassion",
+    "unity",
+    "heritage",
+    "dignity",
+    "prosperity",
+    "abundance",
+    "serenity",
+    "gratitude",
+    "enlightenment",
+    "adventure",
+    "discovery",
+    "creativity",
+    "innovation",
+    "inspiration",
+    "dedication",
+    "perseverance",
+    "excellence",
+    "achievement",
+    "success",
+    "progress",
+    "development",
+    "growth",
+    "improvement",
   ];
-  
-  return commonWords
-    .sort(() => 0.5 - Math.random())
-    .slice(0, count);
+
+  return commonWords.sort(() => 0.5 - Math.random()).slice(0, count);
 };
 
 // Helper function to handle audio file upload
@@ -76,38 +118,40 @@ const handleAudioUpload = async (file: File): Promise<string> => {
 
 export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('words');
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("words");
 
   // Content management state
   const [words, setWords] = useState<Word[]>(sampleWords);
   const [characters, setCharacters] = useState<Character[]>(sampleCharacters);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
-  const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
+  const [editingCharacter, setEditingCharacter] = useState<Character | null>(
+    null,
+  );
   const [aiGeneratedWords, setAiGeneratedWords] = useState<string[]>([]);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
 
   const validPasswords = [
-    'frezanz120913', 
-    'frezanz1212312123', 
-    'frezanz448538', 
-    'ujc448538',
-    'ujc120913',
-    'ujc04485380'
+    "frezanz120913",
+    "frezanz1212312123",
+    "frezanz448538",
+    "ujc448538",
+    "ujc120913",
+    "ujc04485380",
   ];
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (validPasswords.includes(password)) {
       setIsAuthenticated(true);
-      setError('');
+      setError("");
       DeveloperConsoleManager.setAuthenticated(true);
     } else {
-      setError('Invalid password');
-      setPassword('');
+      setError("Invalid password");
+      setPassword("");
     }
   };
 
@@ -116,14 +160,16 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
       words,
       characters,
       exportedAt: new Date().toISOString(),
-      version: '1.0.0'
+      version: "1.0.0",
     };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'chakmalex-content.json';
+    a.download = "chakmalex-content.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -140,9 +186,9 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
         const data = JSON.parse(e.target?.result as string);
         if (data.words) setWords(data.words);
         if (data.characters) setCharacters(data.characters);
-        alert('Data imported successfully!');
+        alert("Data imported successfully!");
       } catch (error) {
-        alert('Import failed: Invalid file format');
+        alert("Import failed: Invalid file format");
       }
     };
     reader.readAsText(file);
@@ -201,16 +247,21 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
               <Badge variant="outline">v2.0</Badge>
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Enhanced with audio upload, full character editing, and AI word generation
+              Enhanced with audio upload, full character editing, and AI word
+              generation
             </p>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
           </div>
         </CardHeader>
-        
+
         <CardContent className="flex-1 overflow-hidden">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="h-full flex flex-col"
+          >
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="words">Words Management</TabsTrigger>
               <TabsTrigger value="characters">Characters</TabsTrigger>
@@ -220,20 +271,23 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
 
             {/* Words Management */}
             <TabsContent value="words" className="flex-1 overflow-hidden">
-              <WordsManagement 
+              <WordsManagement
                 words={words}
                 editingWord={editingWord}
                 onEdit={setEditingWord}
                 onSave={(word) => {
                   if (editingWord) {
-                    setWords(words.map(w => w.id === word.id ? word : w));
+                    setWords(words.map((w) => (w.id === word.id ? word : w)));
                   } else {
-                    setWords([...words, { ...word, id: Date.now().toString() }]);
+                    setWords([
+                      ...words,
+                      { ...word, id: Date.now().toString() },
+                    ]);
                   }
                   setEditingWord(null);
                 }}
                 onDelete={(id) => {
-                  setWords(words.filter(w => w.id !== id));
+                  setWords(words.filter((w) => w.id !== id));
                 }}
                 onCancel={() => setEditingWord(null)}
               />
@@ -241,20 +295,27 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
 
             {/* Characters Management */}
             <TabsContent value="characters" className="flex-1 overflow-hidden">
-              <CharactersManagement 
+              <CharactersManagement
                 characters={characters}
                 editingCharacter={editingCharacter}
                 onEdit={setEditingCharacter}
                 onSave={(character) => {
                   if (editingCharacter) {
-                    setCharacters(characters.map(c => c.id === character.id ? character : c));
+                    setCharacters(
+                      characters.map((c) =>
+                        c.id === character.id ? character : c,
+                      ),
+                    );
                   } else {
-                    setCharacters([...characters, { ...character, id: Date.now().toString() }]);
+                    setCharacters([
+                      ...characters,
+                      { ...character, id: Date.now().toString() },
+                    ]);
                   }
                   setEditingCharacter(null);
                 }}
                 onDelete={(id) => {
-                  setCharacters(characters.filter(c => c.id !== id));
+                  setCharacters(characters.filter((c) => c.id !== id));
                 }}
                 onCancel={() => setEditingCharacter(null)}
               />
@@ -262,40 +323,40 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
 
             {/* AI Word Generator */}
             <TabsContent value="ai" className="flex-1 overflow-hidden">
-              <AIWordGenerator 
+              <AIWordGenerator
                 words={aiGeneratedWords}
                 isGenerating={isGeneratingAI}
                 onGenerate={async () => {
                   setIsGeneratingAI(true);
                   try {
                     // Simulate AI API call
-                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    await new Promise((resolve) => setTimeout(resolve, 2000));
                     const newWords = generateRandomEnglishWords(10);
                     setAiGeneratedWords(newWords);
                   } catch (error) {
-                    console.error('AI generation failed:', error);
+                    console.error("AI generation failed:", error);
                   } finally {
                     setIsGeneratingAI(false);
                   }
                 }}
                 onCreateWord={(englishWord) => {
                   setEditingWord({
-                    id: '',
-                    chakma_word_script: '',
-                    romanized_pronunciation: '',
+                    id: "",
+                    chakma_word_script: "",
+                    romanized_pronunciation: "",
                     english_translation: englishWord,
-                    example_sentence: '',
-                    etymology: '',
-                    created_at: new Date().toISOString()
+                    example_sentence: "",
+                    etymology: "",
+                    created_at: new Date().toISOString(),
                   });
-                  setActiveTab('words');
+                  setActiveTab("words");
                 }}
               />
             </TabsContent>
 
             {/* Data Management */}
             <TabsContent value="data" className="flex-1 overflow-hidden">
-              <DataManagement 
+              <DataManagement
                 wordsCount={words.length}
                 charactersCount={characters.length}
                 onExport={exportData}
@@ -310,13 +371,13 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
 }
 
 // Words Management Component
-function WordsManagement({ 
-  words, 
-  editingWord, 
-  onEdit, 
-  onSave, 
-  onDelete, 
-  onCancel 
+function WordsManagement({
+  words,
+  editingWord,
+  onEdit,
+  onSave,
+  onDelete,
+  onCancel,
 }: {
   words: Word[];
   editingWord: Word | null;
@@ -333,20 +394,24 @@ function WordsManagement({
     <div className="h-full flex flex-col space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Words ({words.length})</h3>
-        <Button onClick={() => onEdit({
-          id: '',
-          chakma_word_script: '',
-          romanized_pronunciation: '',
-          english_translation: '',
-          example_sentence: '',
-          etymology: '',
-          created_at: new Date().toISOString()
-        })}>
+        <Button
+          onClick={() =>
+            onEdit({
+              id: "",
+              chakma_word_script: "",
+              romanized_pronunciation: "",
+              english_translation: "",
+              example_sentence: "",
+              etymology: "",
+              created_at: new Date().toISOString(),
+            })
+          }
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add Word
         </Button>
       </div>
-      
+
       <div className="flex-1 overflow-auto space-y-2">
         {words.map((word) => (
           <Card key={word.id} className="p-3">
@@ -366,9 +431,9 @@ function WordsManagement({
                 <Button variant="ghost" size="sm" onClick={() => onEdit(word)}>
                   <Edit className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => onDelete(word.id)}
                   className="text-destructive"
                 >
@@ -384,7 +449,11 @@ function WordsManagement({
 }
 
 // Word Form Component
-function WordForm({ word, onSave, onCancel }: {
+function WordForm({
+  word,
+  onSave,
+  onCancel,
+}: {
   word: Word;
   onSave: (word: Word) => void;
   onCancel: () => void;
@@ -395,36 +464,36 @@ function WordForm({ word, onSave, onCancel }: {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     let audioUrl = formData.audio_pronunciation_url;
-    
+
     // Handle audio upload if file is selected
     if (audioFile) {
       setIsUploading(true);
       try {
         audioUrl = await handleAudioUpload(audioFile);
       } catch (error) {
-        console.error('Audio upload failed:', error);
-        alert('Audio upload failed. Please try again.');
+        console.error("Audio upload failed:", error);
+        alert("Audio upload failed. Please try again.");
         setIsUploading(false);
         return;
       }
       setIsUploading(false);
     }
-    
+
     onSave({
       ...formData,
       audio_pronunciation_url: audioUrl,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     });
   };
 
   const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith('audio/')) {
+    if (file && file.type.startsWith("audio/")) {
       setAudioFile(file);
     } else {
-      alert('Please select a valid audio file (MP3, WAV, OGG)');
+      alert("Please select a valid audio file (MP3, WAV, OGG)");
     }
   };
 
@@ -432,7 +501,7 @@ function WordForm({ word, onSave, onCancel }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">
-          {word.id ? 'Edit Word' : 'Add New Word'}
+          {word.id ? "Edit Word" : "Add New Word"}
         </h3>
         <div className="flex gap-2">
           <Button type="submit" disabled={isUploading}>
@@ -448,7 +517,12 @@ function WordForm({ word, onSave, onCancel }: {
               </>
             )}
           </Button>
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isUploading}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isUploading}
+          >
             Cancel
           </Button>
         </div>
@@ -459,7 +533,9 @@ function WordForm({ word, onSave, onCancel }: {
           <Label>Chakma Script *</Label>
           <Input
             value={formData.chakma_word_script}
-            onChange={(e) => setFormData({...formData, chakma_word_script: e.target.value})}
+            onChange={(e) =>
+              setFormData({ ...formData, chakma_word_script: e.target.value })
+            }
             placeholder="Chakma text"
             className="font-chakma"
             required
@@ -469,7 +545,12 @@ function WordForm({ word, onSave, onCancel }: {
           <Label>Romanized Pronunciation *</Label>
           <Input
             value={formData.romanized_pronunciation}
-            onChange={(e) => setFormData({...formData, romanized_pronunciation: e.target.value})}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                romanized_pronunciation: e.target.value,
+              })
+            }
             placeholder="chakma"
             required
           />
@@ -480,7 +561,9 @@ function WordForm({ word, onSave, onCancel }: {
         <Label>English Translation *</Label>
         <Input
           value={formData.english_translation}
-          onChange={(e) => setFormData({...formData, english_translation: e.target.value})}
+          onChange={(e) =>
+            setFormData({ ...formData, english_translation: e.target.value })
+          }
           placeholder="Chakma people"
           required
         />
@@ -490,7 +573,9 @@ function WordForm({ word, onSave, onCancel }: {
         <Label>Example Sentence *</Label>
         <Textarea
           value={formData.example_sentence}
-          onChange={(e) => setFormData({...formData, example_sentence: e.target.value})}
+          onChange={(e) =>
+            setFormData({ ...formData, example_sentence: e.target.value })
+          }
           placeholder="Example usage in Chakma with English translation"
           required
         />
@@ -500,7 +585,9 @@ function WordForm({ word, onSave, onCancel }: {
         <Label>Etymology *</Label>
         <Textarea
           value={formData.etymology}
-          onChange={(e) => setFormData({...formData, etymology: e.target.value})}
+          onChange={(e) =>
+            setFormData({ ...formData, etymology: e.target.value })
+          }
           placeholder="Origin and historical development of the word"
           required
         />
@@ -512,7 +599,9 @@ function WordForm({ word, onSave, onCancel }: {
           {formData.audio_pronunciation_url && (
             <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
               <Volume2 className="h-4 w-4 text-chakma-primary" />
-              <span className="text-sm text-muted-foreground">Current audio available</span>
+              <span className="text-sm text-muted-foreground">
+                Current audio available
+              </span>
               <Button
                 type="button"
                 variant="ghost"
@@ -526,7 +615,7 @@ function WordForm({ word, onSave, onCancel }: {
               </Button>
             </div>
           )}
-          
+
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <input
@@ -537,7 +626,7 @@ function WordForm({ word, onSave, onCancel }: {
               />
               <Button type="button" variant="outline" className="w-full">
                 <Music className="h-4 w-4 mr-2" />
-                {audioFile ? audioFile.name : 'Upload Audio File'}
+                {audioFile ? audioFile.name : "Upload Audio File"}
               </Button>
             </div>
             {audioFile && (
@@ -551,7 +640,7 @@ function WordForm({ word, onSave, onCancel }: {
               </Button>
             )}
           </div>
-          
+
           <p className="text-xs text-muted-foreground">
             Supported formats: MP3, WAV, OGG. Max size: 5MB
           </p>
@@ -562,13 +651,13 @@ function WordForm({ word, onSave, onCancel }: {
 }
 
 // Characters Management Component
-function CharactersManagement({ 
-  characters, 
-  editingCharacter, 
-  onEdit, 
-  onSave, 
-  onDelete, 
-  onCancel 
+function CharactersManagement({
+  characters,
+  editingCharacter,
+  onEdit,
+  onSave,
+  onDelete,
+  onCancel,
 }: {
   characters: Character[];
   editingCharacter: Character | null;
@@ -578,26 +667,38 @@ function CharactersManagement({
   onCancel: () => void;
 }) {
   if (editingCharacter) {
-    return <CharacterForm character={editingCharacter} onSave={onSave} onCancel={onCancel} />;
+    return (
+      <CharacterForm
+        character={editingCharacter}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
   }
 
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Characters ({characters.length})</h3>
-        <Button onClick={() => onEdit({
-          id: '',
-          character_script: '',
-          character_type: 'alphabet' as CharacterType,
-          romanized_name: '',
-          description: '',
-          created_at: new Date().toISOString()
-        })}>
+        <h3 className="text-lg font-semibold">
+          Characters ({characters.length})
+        </h3>
+        <Button
+          onClick={() =>
+            onEdit({
+              id: "",
+              character_script: "",
+              character_type: "alphabet" as CharacterType,
+              romanized_name: "",
+              description: "",
+              created_at: new Date().toISOString(),
+            })
+          }
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add Character
         </Button>
       </div>
-      
+
       <div className="flex-1 overflow-auto space-y-2">
         {characters.map((character) => (
           <Card key={character.id} className="p-3">
@@ -612,29 +713,37 @@ function CharactersManagement({
                     {character.character_type}
                   </Badge>
                   {character.description && (
-                    <p className="text-sm text-muted-foreground">{character.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {character.description}
+                    </p>
                   )}
                 </div>
               </div>
               <div className="flex gap-2">
                 {character.audio_pronunciation_url && (
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="sm"
                     onClick={() => {
-                      const audio = new Audio(character.audio_pronunciation_url!);
+                      const audio = new Audio(
+                        character.audio_pronunciation_url!,
+                      );
                       audio.play().catch(console.error);
                     }}
                   >
                     <Volume2 className="h-4 w-4" />
                   </Button>
                 )}
-                <Button variant="ghost" size="sm" onClick={() => onEdit(character)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onEdit(character)}
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => onDelete(character.id)}
                   className="text-destructive"
                 >
@@ -650,7 +759,11 @@ function CharactersManagement({
 }
 
 // Character Form Component
-function CharacterForm({ character, onSave, onCancel }: {
+function CharacterForm({
+  character,
+  onSave,
+  onCancel,
+}: {
   character: Character;
   onSave: (character: Character) => void;
   onCancel: () => void;
@@ -659,38 +772,45 @@ function CharacterForm({ character, onSave, onCancel }: {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const characterTypes: CharacterType[] = ['alphabet', 'vowel', 'conjunct', 'diacritic', 'ordinal', 'symbol'];
+  const characterTypes: CharacterType[] = [
+    "alphabet",
+    "vowel",
+    "conjunct",
+    "diacritic",
+    "ordinal",
+    "symbol",
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     let audioUrl = formData.audio_pronunciation_url;
-    
+
     if (audioFile) {
       setIsUploading(true);
       try {
         audioUrl = await handleAudioUpload(audioFile);
       } catch (error) {
-        console.error('Audio upload failed:', error);
-        alert('Audio upload failed. Please try again.');
+        console.error("Audio upload failed:", error);
+        alert("Audio upload failed. Please try again.");
         setIsUploading(false);
         return;
       }
       setIsUploading(false);
     }
-    
+
     onSave({
       ...formData,
-      audio_pronunciation_url: audioUrl
+      audio_pronunciation_url: audioUrl,
     });
   };
 
   const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith('audio/')) {
+    if (file && file.type.startsWith("audio/")) {
       setAudioFile(file);
     } else {
-      alert('Please select a valid audio file (MP3, WAV, OGG)');
+      alert("Please select a valid audio file (MP3, WAV, OGG)");
     }
   };
 
@@ -698,7 +818,7 @@ function CharacterForm({ character, onSave, onCancel }: {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">
-          {character.id ? 'Edit Character' : 'Add New Character'}
+          {character.id ? "Edit Character" : "Add New Character"}
         </h3>
         <div className="flex gap-2">
           <Button type="submit" disabled={isUploading}>
@@ -714,7 +834,12 @@ function CharacterForm({ character, onSave, onCancel }: {
               </>
             )}
           </Button>
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isUploading}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isUploading}
+          >
             Cancel
           </Button>
         </div>
@@ -725,7 +850,9 @@ function CharacterForm({ character, onSave, onCancel }: {
           <Label>Character Script *</Label>
           <Input
             value={formData.character_script}
-            onChange={(e) => setFormData({...formData, character_script: e.target.value})}
+            onChange={(e) =>
+              setFormData({ ...formData, character_script: e.target.value })
+            }
             placeholder="𑄌"
             className="font-chakma text-2xl"
             required
@@ -735,7 +862,9 @@ function CharacterForm({ character, onSave, onCancel }: {
           <Label>Romanized Name *</Label>
           <Input
             value={formData.romanized_name}
-            onChange={(e) => setFormData({...formData, romanized_name: e.target.value})}
+            onChange={(e) =>
+              setFormData({ ...formData, romanized_name: e.target.value })
+            }
             placeholder="cha"
             required
           />
@@ -746,11 +875,16 @@ function CharacterForm({ character, onSave, onCancel }: {
         <Label>Character Type *</Label>
         <select
           value={formData.character_type}
-          onChange={(e) => setFormData({...formData, character_type: e.target.value as CharacterType})}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              character_type: e.target.value as CharacterType,
+            })
+          }
           className="w-full px-3 py-2 border border-input rounded-lg bg-background"
           required
         >
-          {characterTypes.map(type => (
+          {characterTypes.map((type) => (
             <option key={type} value={type}>
               {type.charAt(0).toUpperCase() + type.slice(1)}
             </option>
@@ -761,8 +895,10 @@ function CharacterForm({ character, onSave, onCancel }: {
       <div>
         <Label>Description</Label>
         <Textarea
-          value={formData.description || ''}
-          onChange={(e) => setFormData({...formData, description: e.target.value})}
+          value={formData.description || ""}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
           placeholder="Description of the character and its usage"
           rows={3}
         />
@@ -774,7 +910,9 @@ function CharacterForm({ character, onSave, onCancel }: {
           {formData.audio_pronunciation_url && (
             <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
               <Volume2 className="h-4 w-4 text-chakma-primary" />
-              <span className="text-sm text-muted-foreground">Current audio available</span>
+              <span className="text-sm text-muted-foreground">
+                Current audio available
+              </span>
               <Button
                 type="button"
                 variant="ghost"
@@ -788,7 +926,7 @@ function CharacterForm({ character, onSave, onCancel }: {
               </Button>
             </div>
           )}
-          
+
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <input
@@ -799,7 +937,7 @@ function CharacterForm({ character, onSave, onCancel }: {
               />
               <Button type="button" variant="outline" className="w-full">
                 <Music className="h-4 w-4 mr-2" />
-                {audioFile ? audioFile.name : 'Upload Audio File'}
+                {audioFile ? audioFile.name : "Upload Audio File"}
               </Button>
             </div>
             {audioFile && (
@@ -813,7 +951,7 @@ function CharacterForm({ character, onSave, onCancel }: {
               </Button>
             )}
           </div>
-          
+
           <p className="text-xs text-muted-foreground">
             Supported formats: MP3, WAV, OGG. Max size: 5MB
           </p>
@@ -824,11 +962,11 @@ function CharacterForm({ character, onSave, onCancel }: {
 }
 
 // AI Word Generator Component
-function AIWordGenerator({ 
-  words, 
-  isGenerating, 
-  onGenerate, 
-  onCreateWord 
+function AIWordGenerator({
+  words,
+  isGenerating,
+  onGenerate,
+  onCreateWord,
 }: {
   words: string[];
   isGenerating: boolean;
@@ -839,15 +977,22 @@ function AIWordGenerator({
     <div className="space-y-6">
       <div className="text-center">
         <Brain className="h-12 w-12 text-chakma-primary mx-auto mb-4" />
-        <h3 className="text-lg font-semibold mb-2">AI English Word Generator</h3>
+        <h3 className="text-lg font-semibold mb-2">
+          AI English Word Generator
+        </h3>
         <p className="text-muted-foreground">
-          Generate English words for translation into Chakma. Click on any word to create a dictionary entry.
+          Generate English words for translation into Chakma. Click on any word
+          to create a dictionary entry.
         </p>
       </div>
 
       <Card className="p-6">
         <div className="space-y-4">
-          <Button onClick={onGenerate} disabled={isGenerating} className="w-full">
+          <Button
+            onClick={onGenerate}
+            disabled={isGenerating}
+            className="w-full"
+          >
             {isGenerating ? (
               <>
                 <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
@@ -874,15 +1019,18 @@ function AIWordGenerator({
                   >
                     <div className="text-left">
                       <div className="font-medium">{word}</div>
-                      <div className="text-xs text-muted-foreground">Click to create entry</div>
+                      <div className="text-xs text-muted-foreground">
+                        Click to create entry
+                      </div>
                     </div>
                   </Button>
                 ))}
               </div>
-              
+
               <p className="text-xs text-muted-foreground text-center">
-                Click any word above to create a new dictionary entry with that English translation.
-                You can then add the Chakma script and other details.
+                Click any word above to create a new dictionary entry with that
+                English translation. You can then add the Chakma script and
+                other details.
               </p>
             </div>
           )}
@@ -893,7 +1041,12 @@ function AIWordGenerator({
 }
 
 // Data Management Component
-function DataManagement({ wordsCount, charactersCount, onExport, onImport }: any) {
+function DataManagement({
+  wordsCount,
+  charactersCount,
+  onExport,
+  onImport,
+}: any) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
