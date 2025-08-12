@@ -343,14 +343,14 @@ function WordCard({
         <div className="flex items-start justify-between">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-3">
-              <h3 className="text-2xl font-chakma text-chakma-primary">
+              <h3 className="text-2xl font-chakma chakma-text">
                 {word.chakma_word_script}
               </h3>
               <div className="text-sm text-muted-foreground">
                 /{word.romanized_pronunciation}/
               </div>
             </div>
-            <p className="text-lg font-medium">{word.english_translation}</p>
+            <p className="text-lg font-medium english-translation">{word.english_translation}</p>
             {word.synonyms && word.synonyms.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {word.synonyms.slice(0, 3).map((syn, index) => (
