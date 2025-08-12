@@ -253,27 +253,52 @@
     @apply outline-none ring-2 ring-ring ring-offset-2;
   }
 
-  /* Dynamic font size classes */
+  /* Dynamic font size classes - Mobile responsive */
   .font-size-xs {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
   }
   .font-size-sm {
-    font-size: 0.875rem;
+    font-size: 0.7rem;
   }
   .font-size-base {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
   .font-size-lg {
-    font-size: 1.125rem;
+    font-size: 0.9rem;
   }
   .font-size-xl {
-    font-size: 1.25rem;
+    font-size: 1rem;
   }
   .font-size-2xl {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
   }
   .font-size-3xl {
-    font-size: 1.875rem;
+    font-size: 1.2rem;
+  }
+
+  /* Desktop overrides for better readability */
+  @media (min-width: 768px) {
+    .font-size-xs {
+      font-size: 0.75rem;
+    }
+    .font-size-sm {
+      font-size: 0.875rem;
+    }
+    .font-size-base {
+      font-size: 1rem;
+    }
+    .font-size-lg {
+      font-size: 1.125rem;
+    }
+    .font-size-xl {
+      font-size: 1.25rem;
+    }
+    .font-size-2xl {
+      font-size: 1.5rem;
+    }
+    .font-size-3xl {
+      font-size: 1.875rem;
+    }
   }
 
   /* Audio button pulse animation */
