@@ -211,11 +211,11 @@ function FavoriteWordCard({ word, onRemove, onPlayAudio }: FavoriteWordCardProps
 
   const handleRemoveClick = () => {
     setIsAnimating(true);
-    // Add a small delay to show the animation before removing
+    // Add a small delay to show the animation before removing - faster
     setTimeout(() => {
       onRemove();
       setIsAnimating(false);
-    }, 300);
+    }, 200);
   };
   return (
     <Card className="transition-all duration-200 hover:shadow-md">
