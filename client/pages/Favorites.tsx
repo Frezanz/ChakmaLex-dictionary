@@ -207,6 +207,16 @@ interface FavoriteWordCardProps {
 }
 
 function FavoriteWordCard({ word, onRemove, onPlayAudio }: FavoriteWordCardProps) {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleRemoveClick = () => {
+    setIsAnimating(true);
+    // Add a small delay to show the animation before removing
+    setTimeout(() => {
+      onRemove();
+      setIsAnimating(false);
+    }, 300);
+  };
   return (
     <Card className="transition-all duration-200 hover:shadow-md">
       <CardContent className="p-6">
