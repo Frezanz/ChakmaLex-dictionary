@@ -1091,7 +1091,7 @@ function CharacterForm({
   );
 }
 
-// AI Word Generator Component
+// AI Word Generator Component with Chakma Input Collection
 function AIWordGenerator({
   words,
   isGenerating,
@@ -1103,69 +1103,258 @@ function AIWordGenerator({
   onGenerate: () => void;
   onCreateWord: (word: string) => void;
 }) {
+  const [selectedEnglishWord, setSelectedEnglishWord] = useState<string | null>(null);
+  const [chakmaInput, setChakmaInput] = useState("");
+  const [romanizedInput, setRomanizedInput] = useState("");
+  const [generatedEtymologies, setGeneratedEtymologies] = useState<string[]>([]);
+  const [selectedEtymology, setSelectedEtymology] = useState("");
+  const [customEtymology, setCustomEtymology] = useState("");
+  const [isGeneratingEtymology, setIsGeneratingEtymology] = useState(false);
+  const [showEtymologyForm, setShowEtymologyForm] = useState(false);
+
+  // Generate etymology suggestions
+  const generateEtymologies = async (englishWord: string) => {
+    setIsGeneratingEtymology(true);
+    // Simulate AI etymology generation
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const etymologies = [
+      `Derived from Sanskrit root related to "${englishWord}", adapted through Middle Indo-Aryan languages`,
+      `From Proto-Sino-Tibetan origin, cognate with Bengali and Assamese forms of "${englishWord}"`,
+      `Indigenous Chakma term with possible Tibeto-Burman etymology, meaning "${englishWord}"`,
+      `Borrowed from Bengali "${englishWord.toLowerCase()}", adapted to Chakma phonological system`,
+      `Ancient Chakma word with uncertain etymology, possibly related to Arakanese forms`
+    ];
+
+    setGeneratedEtymologies(etymologies);
+    setSelectedEtymology(etymologies[0]);
+    setIsGeneratingEtymology(false);
+    setShowEtymologyForm(true);
+  };
+
+  const handleWordSelection = (englishWord: string) => {
+    setSelectedEnglishWord(englishWord);
+    setChakmaInput("");
+    setRomanizedInput("");
+    setGeneratedEtymologies([]);
+    setSelectedEtymology("");
+    setCustomEtymology("");
+    setShowEtymologyForm(false);
+  };
+
+  const handleChakmaSubmit = () => {
+    if (chakmaInput && romanizedInput && selectedEnglishWord) {
+      generateEtymologies(selectedEnglishWord);
+    }
+  };
+
+  const handleFinalSubmit = () => {
+    if (selectedEnglishWord && chakmaInput && romanizedInput) {
+      const finalEtymology = customEtymology || selectedEtymology;
+      // Here you would create the final word entry
+      const wordData = {
+        chakma_word_script: chakmaInput,
+        romanized_pronunciation: romanizedInput,
+        english_translation: selectedEnglishWord,
+        etymology: finalEtymology,
+        example_sentence: `Example sentence with ${chakmaInput} - Example with ${selectedEnglishWord}`,
+      };
+
+      // For now, let's create a downloadable JSON
+      const blob = new Blob([JSON.stringify(wordData, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `chakmalex-word-${romanizedInput}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Reset form
+      setSelectedEnglishWord(null);
+      setChakmaInput("");
+      setRomanizedInput("");
+      setGeneratedEtymologies([]);
+      setSelectedEtymology("");
+      setCustomEtymology("");
+      setShowEtymologyForm(false);
+
+      alert(`Word entry for "${selectedEnglishWord}" has been exported as JSON!`);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="text-center">
         <Brain className="h-12 w-12 text-chakma-primary mx-auto mb-4" />
         <h3 className="text-lg font-semibold mb-2">
-          AI English Word Generator
+          AI English Word Generator & Chakma Entry Creator
         </h3>
         <p className="text-muted-foreground">
-          Generate English words for translation into Chakma. Click on any word
-          to create a dictionary entry.
+          Generate English words, then provide their Chakma translations with auto-generated etymologies.
         </p>
       </div>
 
-      <Card className="p-6">
-        <div className="space-y-4">
-          <Button
-            onClick={onGenerate}
-            disabled={isGenerating}
-            className="w-full"
-          >
-            {isGenerating ? (
-              <>
-                <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
-                Generating Words...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Generate 10 English Words
-              </>
-            )}
-          </Button>
+      {!selectedEnglishWord ? (
+        <Card className="p-6">
+          <div className="space-y-4">
+            <Button
+              onClick={onGenerate}
+              disabled={isGenerating}
+              className="w-full"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                  Generating Words...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Generate 10 English Words
+                </>
+              )}
+            </Button>
 
-          {words.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="font-medium">Generated Words:</h4>
-              <div className="grid grid-cols-2 gap-2">
-                {words.map((word, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    className="justify-start h-auto p-3"
-                    onClick={() => onCreateWord(word)}
-                  >
-                    <div className="text-left">
-                      <div className="font-medium">{word}</div>
-                      <div className="text-xs text-muted-foreground">
-                        Click to create entry
+            {words.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="font-medium">Generated Words:</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {words.map((word, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      className="justify-start h-auto p-3"
+                      onClick={() => handleWordSelection(word)}
+                    >
+                      <div className="text-left">
+                        <div className="font-medium">{word}</div>
+                        <div className="text-xs text-muted-foreground">
+                          Click to provide Chakma translation
+                        </div>
                       </div>
-                    </div>
-                  </Button>
-                ))}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {/* Chakma Input Form */}
+          <Card className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Provide Chakma Translation for: "{selectedEnglishWord}"</h4>
+                <Button variant="ghost" size="sm" onClick={() => setSelectedEnglishWord(null)}>
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
 
-              <p className="text-xs text-muted-foreground text-center">
-                Click any word above to create a new dictionary entry with that
-                English translation. You can then add the Chakma script and
-                other details.
-              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Chakma Script *</Label>
+                  <Input
+                    value={chakmaInput}
+                    onChange={(e) => setChakmaInput(e.target.value)}
+                    placeholder="Enter Chakma script"
+                    className="font-chakma text-xl h-12"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label>Romanized Form *</Label>
+                  <Input
+                    value={romanizedInput}
+                    onChange={(e) => setRomanizedInput(e.target.value)}
+                    placeholder="Enter romanized pronunciation"
+                    className="h-12"
+                    required
+                  />
+                </div>
+              </div>
+
+              <Button
+                onClick={handleChakmaSubmit}
+                disabled={!chakmaInput || !romanizedInput || isGeneratingEtymology}
+                className="w-full"
+              >
+                {isGeneratingEtymology ? (
+                  <>
+                    <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                    Generating Etymology...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate Etymology Options
+                  </>
+                )}
+              </Button>
             </div>
+          </Card>
+
+          {/* Etymology Selection Form */}
+          {showEtymologyForm && (
+            <Card className="p-6">
+              <div className="space-y-4">
+                <h4 className="font-medium">Select or Edit Etymology</h4>
+
+                <div className="space-y-3">
+                  {generatedEtymologies.map((etymology, index) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <input
+                        type="radio"
+                        id={`etymology-${index}`}
+                        name="etymology"
+                        value={etymology}
+                        checked={selectedEtymology === etymology && !customEtymology}
+                        onChange={() => {
+                          setSelectedEtymology(etymology);
+                          setCustomEtymology("");
+                        }}
+                        className="mt-1"
+                      />
+                      <label htmlFor={`etymology-${index}`} className="text-sm cursor-pointer">
+                        {etymology}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+
+                <Separator />
+
+                <div>
+                  <Label>Custom Etymology (Optional)</Label>
+                  <Textarea
+                    value={customEtymology}
+                    onChange={(e) => {
+                      setCustomEtymology(e.target.value);
+                      if (e.target.value) setSelectedEtymology("");
+                    }}
+                    placeholder="Write your own etymology or edit the selected one above"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button onClick={handleFinalSubmit} className="flex-1">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Word Entry as JSON
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowEtymologyForm(false)}>
+                    Back
+                  </Button>
+                </div>
+              </div>
+            </Card>
           )}
         </div>
-      </Card>
+      )}
     </div>
   );
 }
