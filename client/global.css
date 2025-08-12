@@ -1,5 +1,5 @@
 /* Custom font for Chakma script - replace with actual Chakma font */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Chakma&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Chakma&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -214,12 +214,15 @@
 
   body {
     @apply bg-background text-foreground transition-colors duration-300;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
   }
 
   /* Chakma script font family */
   .chakma-text {
-    font-family: 'Noto Sans Chakma', sans-serif;
+    font-family: "Noto Sans Chakma", sans-serif;
     font-weight: 400;
   }
 
@@ -251,18 +254,37 @@
   }
 
   /* Dynamic font size classes */
-  .font-size-xs { font-size: 0.75rem; }
-  .font-size-sm { font-size: 0.875rem; }
-  .font-size-base { font-size: 1rem; }
-  .font-size-lg { font-size: 1.125rem; }
-  .font-size-xl { font-size: 1.25rem; }
-  .font-size-2xl { font-size: 1.5rem; }
-  .font-size-3xl { font-size: 1.875rem; }
+  .font-size-xs {
+    font-size: 0.75rem;
+  }
+  .font-size-sm {
+    font-size: 0.875rem;
+  }
+  .font-size-base {
+    font-size: 1rem;
+  }
+  .font-size-lg {
+    font-size: 1.125rem;
+  }
+  .font-size-xl {
+    font-size: 1.25rem;
+  }
+  .font-size-2xl {
+    font-size: 1.5rem;
+  }
+  .font-size-3xl {
+    font-size: 1.875rem;
+  }
 
   /* Audio button pulse animation */
   @keyframes audio-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
   }
 
   .audio-playing {
