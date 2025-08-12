@@ -801,7 +801,7 @@ function WordForm({
   );
 }
 
-// Characters Management Component
+// Characters Management Component - View Only
 function CharactersManagement({
   characters,
   editingCharacter,
@@ -817,93 +817,72 @@ function CharactersManagement({
   onDelete: (id: string) => void;
   onCancel: () => void;
 }) {
-  if (editingCharacter) {
-    return (
-      <CharacterForm
-        character={editingCharacter}
-        onSave={onSave}
-        onCancel={onCancel}
-      />
-    );
-  }
+  // Group characters by type for better organization
+  const charactersByType = characters.reduce((acc, char) => {
+    const type = char.character_type;
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(char);
+    return acc;
+  }, {} as Record<CharacterType, Character[]>);
+
+  const typeOrder: CharacterType[] = ['alphabet', 'vowel', 'diacritic', 'conjunct', 'ordinal', 'symbol'];
 
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">
-          Characters ({characters.length})
+          Chakma Characters ({characters.length})
         </h3>
-        <Button
-          onClick={() =>
-            onEdit({
-              id: "",
-              character_script: "",
-              character_type: "alphabet" as CharacterType,
-              romanized_name: "",
-              description: "",
-              created_at: new Date().toISOString(),
-            })
-          }
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Character
-        </Button>
+        <Badge variant="outline" className="text-sm">
+          View Only - Grouped by Type
+        </Badge>
       </div>
 
-      <div className="flex-1 overflow-auto space-y-2">
-        {characters.map((character) => (
-          <Card key={character.id} className="p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 flex items-center gap-4">
-                <div className="text-3xl font-chakma text-chakma-primary">
-                  {character.character_script}
-                </div>
-                <div className="space-y-1">
-                  <div className="font-medium">{character.romanized_name}</div>
-                  <Badge variant="secondary" className="text-xs">
-                    {character.character_type}
-                  </Badge>
-                  {character.description && (
-                    <p className="text-sm text-muted-foreground">
-                      {character.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                {character.audio_pronunciation_url && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const audio = new Audio(
-                        character.audio_pronunciation_url!,
-                      );
-                      audio.play().catch(console.error);
-                    }}
-                  >
-                    <Volume2 className="h-4 w-4" />
-                  </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit(character)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDelete(character.id)}
-                  className="text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+      <div className="flex-1 overflow-auto space-y-6">
+        {typeOrder.map((type) => {
+          const typeCharacters = charactersByType[type] || [];
+          if (typeCharacters.length === 0) return null;
+
+          return (
+            <div key={type}>
+              <h4 className="text-md font-medium mb-3 capitalize text-chakma-primary">
+                {type} ({typeCharacters.length})
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {typeCharacters.map((character) => (
+                  <Card key={character.id} className="p-4 text-center hover:shadow-md transition-shadow">
+                    <div className="space-y-2">
+                      <div className="text-4xl font-chakma text-chakma-primary">
+                        {character.character_script}
+                      </div>
+                      <div className="font-medium text-sm">{character.romanized_name}</div>
+                      {character.description && (
+                        <p className="text-xs text-muted-foreground">
+                          {character.description}
+                        </p>
+                      )}
+                      {character.audio_pronunciation_url && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const audio = new Audio(
+                              character.audio_pronunciation_url!,
+                            );
+                            audio.play().catch(console.error);
+                          }}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Volume2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                ))}
               </div>
             </div>
-          </Card>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
