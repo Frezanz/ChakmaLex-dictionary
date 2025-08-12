@@ -65,13 +65,13 @@ export default function ChakmaLexLogo({
             </svg>
           </div>
           
-          {/* Central Chakma character */}
+          {/* Central logo text */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className={cn(
-              "font-bold text-white drop-shadow-lg font-chakma select-none",
+              "font-bold text-white drop-shadow-lg select-none tracking-tight",
               sizes[size].text
             )}>
-              𑄌𑄣
+              CkLex
             </div>
           </div>
           
@@ -135,7 +135,7 @@ export function AnimatedChakmaLexLogo({ className }: { className?: string }) {
         
         {/* Logo center */}
         <div className="absolute inset-3 bg-gradient-to-br from-emerald-500 via-blue-600 to-purple-700 rounded-full flex items-center justify-center shadow-2xl">
-          <span className="text-xl font-bold text-white font-chakma drop-shadow-lg">𑄌𑄣</span>
+          <span className="text-xl font-bold text-white drop-shadow-lg tracking-tight">CkLex</span>
         </div>
         
         {/* Orbiting elements */}
@@ -170,7 +170,7 @@ export function CompactLogo({ className }: { className?: string }) {
         <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent" />
         
         <div className="h-full w-full flex items-center justify-center">
-          <span className="text-sm font-bold text-white font-chakma drop-shadow">𑄌𑄣</span>
+          <span className="text-sm font-bold text-white drop-shadow tracking-tight">CkLex</span>
         </div>
       </div>
     </div>
@@ -199,13 +199,13 @@ export function DarkModeLogo({ size = 'md', className }: { size?: 'sm' | 'md' | 
           <div className="absolute top-0 bottom-0 right-0 w-px bg-gradient-to-b from-transparent via-pink-400 to-transparent" />
         </div>
         
-        {/* Central character with neon effect */}
+        {/* Central text with neon effect */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className={cn(
-            "font-bold text-transparent bg-gradient-to-br from-cyan-300 via-indigo-400 to-purple-500 bg-clip-text drop-shadow-2xl font-chakma select-none",
+            "font-bold text-transparent bg-gradient-to-br from-cyan-300 via-indigo-400 to-purple-500 bg-clip-text drop-shadow-2xl select-none tracking-tight",
             sizes[size].text
           )} style={{ filter: 'drop-shadow(0 0 10px rgba(139, 92, 246, 0.5))' }}>
-            𑄌𑄣
+            CkLex
           </div>
         </div>
         
