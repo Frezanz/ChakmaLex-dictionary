@@ -20,7 +20,7 @@ import {
 import { cn } from '@/lib/utils';
 
 import { Word } from '@shared/types';
-import { sampleWords, findWordById } from '@shared/sampleData';
+import { subscribeContent, getWords } from '@/lib/content';
 import { FavoritesManager, AudioManager } from '@/lib/storage';
 
 export default function Favorites() {
@@ -32,10 +32,17 @@ export default function Favorites() {
   useEffect(() => {
     const favoriteIds = FavoritesManager.get();
     setFavorites(favoriteIds);
-    
-    const words = favoriteIds.map(id => findWordById(id)).filter(Boolean) as Word[];
-    setFavoriteWords(words);
-    setFilteredWords(words);
+    const compute = () => {
+      const words = getWords();
+      const fav = favoriteIds
+        .map((id) => words.find((w) => w.id === id))
+        .filter(Boolean) as Word[];
+      setFavoriteWords(fav);
+      setFilteredWords(fav);
+    };
+    const unsub = subscribeContent(compute);
+    compute();
+    return unsub;
   }, []);
 
   useEffect(() => {
@@ -55,8 +62,8 @@ export default function Favorites() {
     FavoritesManager.remove(wordId);
     const updatedFavorites = favorites.filter(id => id !== wordId);
     setFavorites(updatedFavorites);
-    
-    const updatedWords = updatedFavorites.map(id => findWordById(id)).filter(Boolean) as Word[];
+    const words = getWords();
+    const updatedWords = updatedFavorites.map(id => words.find(w => w.id === id)).filter(Boolean) as Word[];
     setFavoriteWords(updatedWords);
   };
 

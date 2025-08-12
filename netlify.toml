@@ -4,7 +4,7 @@
   publish = "dist/spa"
 
 [functions]
-  external_node_modules = ["express"]
+  external_node_modules = ["express", "@netlify/blobs"]
   node_bundler = "esbuild"
 
 # API redirects

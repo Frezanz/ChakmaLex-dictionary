@@ -25,8 +25,8 @@ import { cn } from "@/lib/utils";
 // Data and utilities
 import { Word, SearchHistoryItem } from "@shared/types";
 import {
-  sampleWords,
-  searchWords,
+  // sampleWords,
+  // searchWords,
   sampleSearchHistory,
 } from "@shared/sampleData";
 import {
@@ -35,6 +35,7 @@ import {
   AudioManager,
   PreferencesManager,
 } from "@/lib/storage";
+import { searchWordsLocal, subscribeContent, getWords, loadContent as loadClientContent } from "@/lib/content";
 
 export default function Dictionary() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,14 +52,23 @@ export default function Dictionary() {
     setSearchHistory(SearchHistoryManager.get());
     setFavorites(FavoritesManager.get());
 
-    // Show some featured words initially
-    setSearchResults(sampleWords.slice(0, 3));
+    const unsubscribe = subscribeContent(() => {
+      // Show some featured words initially
+      const all = getWords();
+      setSearchResults(all.slice(0, 3));
+    });
+
+    // Ensure initial load
+    loadClientContent().catch(() => {});
+
+    return unsubscribe;
   }, []);
 
   // Handle search
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
-      setSearchResults(sampleWords.slice(0, 3));
+      const all = getWords();
+      setSearchResults(all.slice(0, 3));
       setSelectedWord(null);
       return;
     }
@@ -67,9 +77,9 @@ export default function Dictionary() {
     setShowHistory(false);
 
     // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 150));
 
-    const results = searchWords(query);
+    const results = searchWordsLocal(query);
     setSearchResults(results);
     setSelectedWord(null);
 

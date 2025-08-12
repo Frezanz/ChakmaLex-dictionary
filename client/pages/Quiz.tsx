@@ -21,8 +21,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-import { QuizQuestion, QuizType, QuizResult } from '@shared/types';
-import { sampleWords, sampleCharacters, getRandomWords, getRandomCharacters } from '@shared/sampleData';
+import { QuizQuestion, QuizType, QuizResult, Word } from '@shared/types';
+import { sampleWords, sampleCharacters } from '@shared/sampleData';
+import { getWords } from '@/lib/content';
+import { subscribeContent } from '@/lib/content';
 
 interface QuizSession {
   questions: QuizQuestion[];
@@ -39,6 +41,7 @@ export default function Quiz() {
   const [selectedAnswer, setSelectedAnswer] = useState('');
   const [showResult, setShowResult] = useState(false);
   const [selectedQuizType, setSelectedQuizType] = useState<QuizType>('english_to_chakma');
+  const [quizWords, setQuizWords] = useState<Word[]>([]);
 
   // Timer effect
   useEffect(() => {
@@ -53,6 +56,17 @@ export default function Quiz() {
       submitAnswer();
     }
   }, [session?.timeRemaining, session?.isComplete, showResult]);
+
+  useEffect(() => {
+    const compute = () => {
+      const all = getWords();
+      // simple pick first N as placeholder for randomness
+      setQuizWords(all.slice(0, 5));
+    };
+    const unsub = subscribeContent(compute);
+    compute();
+    return unsub;
+  }, []);
 
   const quizTypes = [
     {
@@ -128,7 +142,7 @@ export default function Quiz() {
     const allOptions: string[][] = [];
     
     if (type === 'character_recognition') {
-      const characters = getRandomCharacters(count);
+      const characters = sampleCharacters; // Use sampleCharacters directly
       characters.forEach((char, index) => {
         const question: QuizQuestion = {
           id: `q-${index}`,
@@ -141,7 +155,7 @@ export default function Quiz() {
         allOptions.push(generateOptions(char.romanized_name, type));
       });
     } else {
-      const words = getRandomWords(count);
+      const words = quizWords; // Use quizWords directly
       words.forEach((word, index) => {
         if (type === 'english_to_chakma') {
           const question: QuizQuestion = {

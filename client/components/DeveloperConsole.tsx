@@ -45,6 +45,18 @@ import {
 import { sampleWords, sampleCharacters } from "@shared/sampleData";
 import { DeveloperConsoleManager } from "@/lib/storage";
 
+async function api<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    headers: { "Content-Type": "application/json" },
+    ...init,
+  });
+  const body = await res.json();
+  if (!res.ok || body?.success === false) {
+    throw new Error(body?.error || `Request failed: ${res.status}`);
+  }
+  return body as T;
+}
+
 interface DeveloperConsoleProps {
   onClose: () => void;
 }
@@ -154,6 +166,19 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
       setPassword("");
     }
   };
+
+  useEffect(() => {
+    // Load from backend initially
+    (async () => {
+      try {
+        const resp = await api<{ success: boolean; data: { words: Word[]; characters: Character[] } }>("/api/content");
+        setWords(resp.data.words);
+        setCharacters(resp.data.characters);
+      } catch (e) {
+        console.warn("Falling back to sample data due to API error", e);
+      }
+    })();
+  }, []);
 
   const exportData = () => {
     const data = {
@@ -276,18 +301,31 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 editingWord={editingWord}
                 onEdit={setEditingWord}
                 onSave={(word) => {
-                  if (editingWord) {
-                    setWords(words.map((w) => (w.id === word.id ? word : w)));
-                  } else {
-                    setWords([
-                      ...words,
-                      { ...word, id: Date.now().toString() },
-                    ]);
-                  }
-                  setEditingWord(null);
+                  (async () => {
+                    try {
+                      if (editingWord) {
+                        await api("/api/words/" + word.id, { method: "PUT", body: JSON.stringify(word) });
+                        setWords(words.map((w) => (w.id === word.id ? word : w)));
+                      } else {
+                        const toCreate = { ...word, id: Date.now().toString() } as Word;
+                        await api("/api/words", { method: "POST", body: JSON.stringify(toCreate) });
+                        setWords([...words, toCreate]);
+                      }
+                    } catch (e) {
+                      alert("Failed to save word: " + (e as Error).message);
+                    }
+                    setEditingWord(null);
+                  })();
                 }}
                 onDelete={(id) => {
-                  setWords(words.filter((w) => w.id !== id));
+                  (async () => {
+                    try {
+                      await api("/api/words/" + id, { method: "DELETE" });
+                      setWords(words.filter((w) => w.id !== id));
+                    } catch (e) {
+                      alert("Failed to delete word: " + (e as Error).message);
+                    }
+                  })();
                 }}
                 onCancel={() => setEditingWord(null)}
               />
@@ -300,22 +338,31 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 editingCharacter={editingCharacter}
                 onEdit={setEditingCharacter}
                 onSave={(character) => {
-                  if (editingCharacter) {
-                    setCharacters(
-                      characters.map((c) =>
-                        c.id === character.id ? character : c,
-                      ),
-                    );
-                  } else {
-                    setCharacters([
-                      ...characters,
-                      { ...character, id: Date.now().toString() },
-                    ]);
-                  }
-                  setEditingCharacter(null);
+                  (async () => {
+                    try {
+                      if (editingCharacter) {
+                        await api("/api/characters/" + character.id, { method: "PUT", body: JSON.stringify(character) });
+                        setCharacters(characters.map((c) => (c.id === character.id ? character : c)));
+                      } else {
+                        const toCreate = { ...character, id: Date.now().toString() } as Character;
+                        await api("/api/characters", { method: "POST", body: JSON.stringify(toCreate) });
+                        setCharacters([...characters, toCreate]);
+                      }
+                    } catch (e) {
+                      alert("Failed to save character: " + (e as Error).message);
+                    }
+                    setEditingCharacter(null);
+                  })();
                 }}
                 onDelete={(id) => {
-                  setCharacters(characters.filter((c) => c.id !== id));
+                  (async () => {
+                    try {
+                      await api("/api/characters/" + id, { method: "DELETE" });
+                      setCharacters(characters.filter((c) => c.id !== id));
+                    } catch (e) {
+                      alert("Failed to delete character: " + (e as Error).message);
+                    }
+                  })();
                 }}
                 onCancel={() => setEditingCharacter(null)}
               />

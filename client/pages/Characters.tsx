@@ -12,14 +12,27 @@ import { Volume2, BookOpen, Type } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { Character, CharacterType } from "@shared/types";
-import { sampleCharacters, charactersByType } from "@shared/sampleData";
 import { AudioManager } from "@/lib/storage";
+import { subscribeContent, getCharactersByType } from "@/lib/content";
 
 export default function Characters() {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null,
   );
   const [activeTab, setActiveTab] = useState<CharacterType>("alphabet");
+  const [byType, setByType] = useState(getCharactersByType());
+
+  useEffect(() => {
+    const unsubscribe = subscribeContent(() => {
+      setByType(getCharactersByType());
+      // Keep selection valid
+      if (selectedCharacter) {
+        const stillExists = Object.values(getCharactersByType()).flat().some((c) => c.id === selectedCharacter.id);
+        if (!stillExists) setSelectedCharacter(null);
+      }
+    });
+    return unsubscribe;
+  }, [selectedCharacter]);
 
   const handleCharacterSelect = (character: Character) => {
     setSelectedCharacter(character);
@@ -88,13 +101,13 @@ export default function Characters() {
                       <type.icon className="h-5 w-5" />
                       {type.label}
                       <Badge variant="outline">
-                        {charactersByType[type.id]?.length || 0} characters
+                        {byType[type.id]?.length || 0} characters
                       </Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="character-grid">
-                      {(charactersByType[type.id] || []).map((character) => (
+                      {(byType[type.id] || []).map((character) => (
                         <CharacterCard
                           key={character.id}
                           character={character}
@@ -107,8 +120,7 @@ export default function Characters() {
                       ))}
                     </div>
 
-                    {(!charactersByType[type.id] ||
-                      charactersByType[type.id].length === 0) && (
+                    {(!byType[type.id] || byType[type.id].length === 0) && (
                       <div className="text-center py-8 text-muted-foreground">
                         <Type className="h-12 w-12 mx-auto mb-4 opacity-50" />
                         <p>No {type.label.toLowerCase()} available yet.</p>
