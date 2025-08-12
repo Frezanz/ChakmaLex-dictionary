@@ -81,10 +81,10 @@ export class PreferencesManager {
   }
 
   static applyFontSize(fontSize: FontSize): void {
-    const body = document.body;
+    const root = document.documentElement;
 
     // Remove existing font size classes
-    body.classList.remove(
+    root.classList.remove(
       "font-size-xs",
       "font-size-sm",
       "font-size-base",
@@ -95,7 +95,7 @@ export class PreferencesManager {
     );
 
     // Add the selected font size class
-    body.classList.add(`font-size-${fontSize}`);
+    root.classList.add(`font-size-${fontSize}`);
   }
 
   static applyCustomColors(colors: CustomColors): void {
@@ -417,7 +417,7 @@ export const clearAllData = (): void => {
       localStorage.removeItem(key);
     });
 
-    // Reset to default theme
+    // Reset to default theme and font size
     PreferencesManager.applyTheme("light");
     PreferencesManager.applyFontSize("base");
     PreferencesManager.resetCustomColors();

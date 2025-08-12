@@ -3,37 +3,39 @@
  * Features: View, search, and organize favorite words
  */
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Heart, 
-  Search, 
-  Trash2, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Heart,
+  Search,
+  Trash2,
   Volume2,
   BookOpen,
   Download,
-  HeartOff
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  HeartOff,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-import { Word } from '@shared/types';
-import { sampleWords, findWordById } from '@shared/sampleData';
-import { FavoritesManager, AudioManager } from '@/lib/storage';
+import { Word } from "@shared/types";
+import { sampleWords, findWordById } from "@shared/sampleData";
+import { FavoritesManager, AudioManager } from "@/lib/storage";
 
 export default function Favorites() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [favoriteWords, setFavoriteWords] = useState<Word[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [filteredWords, setFilteredWords] = useState<Word[]>([]);
 
   useEffect(() => {
     const favoriteIds = FavoritesManager.get();
     setFavorites(favoriteIds);
-    
-    const words = favoriteIds.map(id => findWordById(id)).filter(Boolean) as Word[];
+
+    const words = favoriteIds
+      .map((id) => findWordById(id))
+      .filter(Boolean) as Word[];
     setFavoriteWords(words);
     setFilteredWords(words);
   }, []);
@@ -42,10 +44,15 @@ export default function Favorites() {
     if (!searchQuery.trim()) {
       setFilteredWords(favoriteWords);
     } else {
-      const filtered = favoriteWords.filter(word =>
-        word.english_translation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        word.chakma_word_script.includes(searchQuery) ||
-        word.romanized_pronunciation.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = favoriteWords.filter(
+        (word) =>
+          word.english_translation
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          word.chakma_word_script.includes(searchQuery) ||
+          word.romanized_pronunciation
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()),
       );
       setFilteredWords(filtered);
     }
@@ -53,10 +60,12 @@ export default function Favorites() {
 
   const handleRemoveFavorite = (wordId: string) => {
     FavoritesManager.remove(wordId);
-    const updatedFavorites = favorites.filter(id => id !== wordId);
+    const updatedFavorites = favorites.filter((id) => id !== wordId);
     setFavorites(updatedFavorites);
-    
-    const updatedWords = updatedFavorites.map(id => findWordById(id)).filter(Boolean) as Word[];
+
+    const updatedWords = updatedFavorites
+      .map((id) => findWordById(id))
+      .filter(Boolean) as Word[];
     setFavoriteWords(updatedWords);
   };
 
@@ -69,25 +78,27 @@ export default function Favorites() {
 
   const handlePlayAudio = async (url?: string) => {
     if (!url) return;
-    
+
     try {
       await AudioManager.playAudio(url);
     } catch (error) {
-      console.error('Error playing audio:', error);
+      console.error("Error playing audio:", error);
     }
   };
 
   const exportFavorites = () => {
     const data = {
       exported_at: new Date().toISOString(),
-      words: favoriteWords
+      words: favoriteWords,
     };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'chakmalex-favorites.json';
+    a.download = "chakmalex-favorites.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -100,9 +111,7 @@ export default function Favorites() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Favorite Words</h1>
-          <p className="text-muted-foreground">
-            Your saved words collection
-          </p>
+          <p className="text-muted-foreground">Your saved words collection</p>
         </div>
         {favoriteWords.length > 0 && (
           <div className="flex gap-2">
@@ -124,7 +133,8 @@ export default function Favorites() {
             <HeartOff className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No favorites yet</h3>
             <p className="text-muted-foreground mb-6">
-              Start adding words to your favorites by clicking the heart icon when browsing the dictionary.
+              Start adding words to your favorites by clicking the heart icon
+              when browsing the dictionary.
             </p>
             <Button asChild>
               <a href="/">
@@ -189,7 +199,9 @@ export default function Favorites() {
                   key={word.id}
                   word={word}
                   onRemove={() => handleRemoveFavorite(word.id)}
-                  onPlayAudio={() => handlePlayAudio(word.audio_pronunciation_url)}
+                  onPlayAudio={() =>
+                    handlePlayAudio(word.audio_pronunciation_url)
+                  }
                 />
               ))}
             </div>
@@ -206,7 +218,21 @@ interface FavoriteWordCardProps {
   onPlayAudio: () => void;
 }
 
-function FavoriteWordCard({ word, onRemove, onPlayAudio }: FavoriteWordCardProps) {
+function FavoriteWordCard({
+  word,
+  onRemove,
+  onPlayAudio,
+}: FavoriteWordCardProps) {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleRemoveClick = () => {
+    setIsAnimating(true);
+    // Add a small delay to show the animation before removing - faster
+    setTimeout(() => {
+      onRemove();
+      setIsAnimating(false);
+    }, 200);
+  };
   return (
     <Card className="transition-all duration-200 hover:shadow-md">
       <CardContent className="p-6">
@@ -220,9 +246,11 @@ function FavoriteWordCard({ word, onRemove, onPlayAudio }: FavoriteWordCardProps
                 /{word.romanized_pronunciation}/
               </div>
             </div>
-            
+
             <div>
-              <h4 className="text-lg font-medium">{word.english_translation}</h4>
+              <h4 className="text-lg font-medium">
+                {word.english_translation}
+              </h4>
               <p className="text-muted-foreground text-sm mt-1">
                 {word.example_sentence}
               </p>
@@ -230,7 +258,9 @@ function FavoriteWordCard({ word, onRemove, onPlayAudio }: FavoriteWordCardProps
 
             {word.synonyms && word.synonyms.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                <span className="text-xs text-muted-foreground mr-2">Synonyms:</span>
+                <span className="text-xs text-muted-foreground mr-2">
+                  Synonyms:
+                </span>
                 {word.synonyms.slice(0, 3).map((syn, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">
                     {syn.term}
@@ -244,7 +274,7 @@ function FavoriteWordCard({ word, onRemove, onPlayAudio }: FavoriteWordCardProps
               </div>
             )}
           </div>
-          
+
           <div className="flex flex-col gap-2 ml-4">
             <Button
               variant="ghost"
@@ -257,10 +287,15 @@ function FavoriteWordCard({ word, onRemove, onPlayAudio }: FavoriteWordCardProps
             <Button
               variant="ghost"
               size="sm"
-              onClick={onRemove}
-              className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+              onClick={handleRemoveClick}
+              className="h-8 w-8 p-0"
             >
-              <Heart className="h-4 w-4 fill-current" />
+              <Heart
+                className={cn(
+                  "h-4 w-4 heart-icon heart-favorite transition-all duration-300",
+                  isAnimating && "animate-bounce",
+                )}
+              />
             </Button>
           </div>
         </div>
