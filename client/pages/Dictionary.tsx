@@ -447,13 +447,16 @@ function WordDetails({
             <Button
               variant={isFavorite ? "default" : "outline"}
               size="sm"
-              onClick={onFavoriteToggle}
+              onClick={handleFavoriteClick}
+              className="transition-all duration-200 hover:scale-105"
             >
-              {isFavorite ? (
-                <Heart className="h-4 w-4 mr-2 fill-current" />
-              ) : (
-                <HeartOff className="h-4 w-4 mr-2" />
-              )}
+              <Heart
+                className={cn(
+                  "h-4 w-4 mr-2 heart-icon transition-all duration-300",
+                  isFavorite ? "heart-favorite" : "heart-unfavorite",
+                  isAnimating && (isFavorite ? "animate-fill" : "animate-bounce")
+                )}
+              />
               {isFavorite ? "Favorited" : "Favorite"}
             </Button>
           </div>
