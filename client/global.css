@@ -228,6 +228,8 @@
       system-ui,
       -apple-system,
       sans-serif;
+    font-size: var(--base-font-size);
+    line-height: 1.5;
   }
 
   /* Chakma script font family */
