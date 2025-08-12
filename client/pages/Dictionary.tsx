@@ -382,17 +382,16 @@ function WordCard({
             <Button
               variant="ghost"
               size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onFavoriteToggle();
-              }}
+              onClick={handleFavoriteClick}
               className="h-8 w-8 p-0"
             >
-              {isFavorite ? (
-                <Heart className="h-4 w-4 fill-current text-red-500" />
-              ) : (
-                <HeartOff className="h-4 w-4" />
-              )}
+              <Heart
+                className={cn(
+                  "h-4 w-4 heart-icon transition-all duration-300",
+                  isFavorite ? "heart-favorite" : "heart-unfavorite",
+                  isAnimating && (isFavorite ? "animate-fill" : "animate-bounce")
+                )}
+              />
             </Button>
           </div>
         </div>
