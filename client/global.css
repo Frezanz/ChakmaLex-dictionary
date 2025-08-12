@@ -423,6 +423,44 @@
     filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.6));
   }
 
+  /* Selected word card styling */
+  .word-card-selected {
+    background: linear-gradient(135deg,
+      hsl(var(--chakma-primary) / 0.1) 0%,
+      hsl(var(--background)) 50%,
+      hsl(var(--chakma-secondary) / 0.1) 100%);
+    border: 2px solid hsl(var(--chakma-primary));
+    box-shadow:
+      0 0 20px hsl(var(--chakma-primary) / 0.3),
+      0 4px 12px hsl(var(--chakma-primary) / 0.2);
+    transform: scale(1.02);
+  }
+
+  .word-card-selected .chakma-text {
+    color: hsl(var(--chakma-primary));
+    text-shadow: 0 0 8px hsl(var(--chakma-primary) / 0.4);
+  }
+
+  .word-card-selected .english-translation {
+    color: hsl(var(--foreground));
+    font-weight: 600;
+  }
+
+  /* Faster transitions for all interactive elements */
+  .transition-fast {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Word card base styling with faster animations */
+  .word-card {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .word-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
   /* Character grid styling */
   .character-grid {
     display: grid;
