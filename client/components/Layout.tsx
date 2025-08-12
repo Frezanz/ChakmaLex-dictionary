@@ -27,6 +27,7 @@ import { DeveloperConsoleManager, AudioManager } from "@/lib/storage";
 import DeveloperConsole from "./DeveloperConsole";
 import ChakmaLexLogo from "./ChakmaLexLogo";
 import FxanxWatermark from "./FxanxWatermark";
+import { useIsFetching } from "@tanstack/react-query";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -44,6 +45,8 @@ export default function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const logoRef = useRef<HTMLDivElement>(null);
   const tapTimeoutRef = useRef<NodeJS.Timeout>();
+
+  const isFetching = useIsFetching({ queryKey: ["words"] }) + useIsFetching({ queryKey: ["characters"] });
 
   // Initialize audio state
   useEffect(() => {
@@ -341,6 +344,12 @@ export default function Layout({ children }: LayoutProps) {
           )}
         </div>
       </header>
+
+      {isFetching > 0 && (
+        <div className="sticky top-0 z-40 w-full bg-muted text-xs text-muted-foreground text-center py-1">
+          Syncing latest data...
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">{children}</main>

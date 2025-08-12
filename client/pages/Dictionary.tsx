@@ -19,6 +19,7 @@ import {
   Sparkles,
   BookOpen,
   ArrowRight,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +36,9 @@ import {
   AudioManager,
   PreferencesManager,
 } from "@/lib/storage";
+import { useQuery } from "@tanstack/react-query";
+import { WordsApi } from "@/lib/api";
+import { toast } from "sonner";
 
 export default function Dictionary() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,19 +50,29 @@ export default function Dictionary() {
   const [showHistory, setShowHistory] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const wordsQuery = useQuery({
+    queryKey: ["words"],
+    queryFn: WordsApi.list,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    initialData: sampleWords,
+  });
+
   // Initialize data
   useEffect(() => {
     setSearchHistory(SearchHistoryManager.get());
     setFavorites(FavoritesManager.get());
 
-    // Show some featured words initially
-    setSearchResults(sampleWords.slice(0, 3));
-  }, []);
+    // Use latest words from backend (fallback to sample)
+    const items = wordsQuery.data || sampleWords;
+    setSearchResults(items.slice(0, 3));
+  }, [wordsQuery.data]);
 
   // Handle search
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
-      setSearchResults(sampleWords.slice(0, 3));
+      const items = wordsQuery.data || sampleWords;
+      setSearchResults(items.slice(0, 3));
       setSelectedWord(null);
       return;
     }
@@ -66,10 +80,19 @@ export default function Dictionary() {
     setIsLoading(true);
     setShowHistory(false);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    // Simulate API delay for UX parity
+    await new Promise((resolve) => setTimeout(resolve, 150));
 
-    const results = searchWords(query);
+    const items = wordsQuery.data || sampleWords;
+    const lowerQuery = query.toLowerCase();
+    const results = items.filter((word) =>
+      word.english_translation.toLowerCase().includes(lowerQuery) ||
+      word.chakma_word_script.includes(query) ||
+      word.romanized_pronunciation.toLowerCase().includes(lowerQuery) ||
+      word.synonyms?.some((syn) => syn.term.toLowerCase().includes(lowerQuery)) ||
+      word.antonyms?.some((ant) => ant.term.toLowerCase().includes(lowerQuery))
+    );
+
     setSearchResults(results);
     setSelectedWord(null);
 
@@ -78,6 +101,16 @@ export default function Dictionary() {
     setSearchHistory(SearchHistoryManager.get());
 
     setIsLoading(false);
+  };
+
+  // Manual refresh to avoid stale cache
+  const refetchWords = async () => {
+    try {
+      await wordsQuery.refetch();
+      toast.success("Dictionary refreshed");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to refresh");
+    }
   };
 
   // Handle word selection
@@ -111,6 +144,8 @@ export default function Dictionary() {
     searchInputRef.current?.focus();
   };
 
+  const loadingError = wordsQuery.isError ? (wordsQuery.error as any)?.message : null;
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Hero Section */}
@@ -123,6 +158,15 @@ export default function Dictionary() {
           digital dictionary. Search, learn, and explore words with
           pronunciation, etymology, and cultural context.
         </p>
+        <div className="flex items-center justify-center gap-3">
+          <Button variant="outline" size="sm" onClick={refetchWords} disabled={wordsQuery.isFetching}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            {wordsQuery.isFetching ? "Refreshing..." : "Refresh"}
+          </Button>
+          {loadingError && (
+            <span className="text-sm text-destructive">{loadingError}</span>
+          )}
+        </div>
       </div>
 
       {/* Search Section */}
@@ -205,6 +249,10 @@ export default function Dictionary() {
 
       {/* Results Section */}
       <div className="grid lg:grid-cols-2 gap-6">
+        {/* Optional status */}
+        {wordsQuery.isFetching && (
+          <div className="lg:col-span-2 text-xs text-muted-foreground">Fetching latest data...</div>
+        )}
         {/* Search Results */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">

@@ -41,9 +41,13 @@ import {
   WordFormData,
   CharacterFormData,
   CharacterType,
+  RelatedTerm,
 } from "@shared/types";
 import { sampleWords, sampleCharacters } from "@shared/sampleData";
 import { DeveloperConsoleManager } from "@/lib/storage";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { WordsApi, CharactersApi } from "@/lib/api";
+import { toast } from "sonner";
 
 interface DeveloperConsoleProps {
   onClose: () => void;
@@ -194,6 +198,86 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
     reader.readAsText(file);
   };
 
+  const queryClient = useQueryClient();
+
+  const wordsQuery = useQuery({
+    queryKey: ["words"],
+    queryFn: WordsApi.list,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    initialData: sampleWords,
+  });
+
+  const charactersQuery = useQuery({
+    queryKey: ["characters"],
+    queryFn: CharactersApi.list,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    initialData: sampleCharacters,
+  });
+
+  const createWordMutation = useMutation({
+    mutationFn: (payload: Omit<Word, "id" | "created_at" | "updated_at">) =>
+      WordsApi.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["words"] });
+      toast.success("Word created and synced");
+    },
+    onError: (e: any) => toast.error(e?.message || "Failed to create word"),
+  });
+
+  const updateWordMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Word> }) =>
+      WordsApi.update(id, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["words"] });
+      toast.success("Word updated and synced");
+    },
+    onError: (e: any) => toast.error(e?.message || "Failed to update word"),
+  });
+
+  const deleteWordMutation = useMutation({
+    mutationFn: (id: string) => WordsApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["words"] });
+      toast.success("Word deleted and synced");
+    },
+    onError: (e: any) => toast.error(e?.message || "Failed to delete word"),
+  });
+
+  const createCharacterMutation = useMutation({
+    mutationFn: (payload: Omit<Character, "id" | "created_at">) =>
+      CharactersApi.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["characters"] });
+      toast.success("Character created and synced");
+    },
+    onError: (e: any) => toast.error(e?.message || "Failed to create character"),
+  });
+
+  const updateCharacterMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Character> }) =>
+      CharactersApi.update(id, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["characters"] });
+      toast.success("Character updated and synced");
+    },
+    onError: (e: any) => toast.error(e?.message || "Failed to update character"),
+  });
+
+  const deleteCharacterMutation = useMutation({
+    mutationFn: (id: string) => CharactersApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["characters"] });
+      toast.success("Character deleted and synced");
+    },
+    onError: (e: any) => toast.error(e?.message || "Failed to delete character"),
+  });
+
+  // Local UI state falls back to fetched data
+  const words = wordsQuery.data || [];
+  const characters = charactersQuery.data || [];
+
   if (!isAuthenticated) {
     return (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
@@ -246,10 +330,16 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
               ChakmaLex Developer Console
               <Badge variant="outline">v2.0</Badge>
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Enhanced with audio upload, full character editing, and AI word
-              generation
-            </p>
+            <div className="text-sm text-muted-foreground flex items-center gap-3">
+              {wordsQuery.isFetching || charactersQuery.isFetching ? (
+                <span>Syncing...</span>
+              ) : (
+                <span>Idle</span>
+              )}
+              {(wordsQuery.isError || charactersQuery.isError) && (
+                <span className="text-destructive">Sync error</span>
+              )}
+            </div>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
@@ -276,18 +366,16 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 editingWord={editingWord}
                 onEdit={setEditingWord}
                 onSave={(word) => {
-                  if (editingWord) {
-                    setWords(words.map((w) => (w.id === word.id ? word : w)));
+                  if (editingWord && word.id) {
+                    updateWordMutation.mutate({ id: word.id, updates: word });
                   } else {
-                    setWords([
-                      ...words,
-                      { ...word, id: Date.now().toString() },
-                    ]);
+                    const { id, created_at, updated_at, ...payload } = word as any;
+                    createWordMutation.mutate(payload);
                   }
                   setEditingWord(null);
                 }}
                 onDelete={(id) => {
-                  setWords(words.filter((w) => w.id !== id));
+                  deleteWordMutation.mutate(id);
                 }}
                 onCancel={() => setEditingWord(null)}
               />
@@ -300,22 +388,16 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 editingCharacter={editingCharacter}
                 onEdit={setEditingCharacter}
                 onSave={(character) => {
-                  if (editingCharacter) {
-                    setCharacters(
-                      characters.map((c) =>
-                        c.id === character.id ? character : c,
-                      ),
-                    );
+                  if (editingCharacter && character.id) {
+                    updateCharacterMutation.mutate({ id: character.id, updates: character });
                   } else {
-                    setCharacters([
-                      ...characters,
-                      { ...character, id: Date.now().toString() },
-                    ]);
+                    const { id, created_at, ...payload } = character as any;
+                    createCharacterMutation.mutate(payload);
                   }
                   setEditingCharacter(null);
                 }}
                 onDelete={(id) => {
-                  setCharacters(characters.filter((c) => c.id !== id));
+                  deleteCharacterMutation.mutate(id);
                 }}
                 onCancel={() => setEditingCharacter(null)}
               />
@@ -461,13 +543,26 @@ function WordForm({
   const [formData, setFormData] = useState(word);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [newSynonym, setNewSynonym] = useState<{ term: string; language: 'chakma' | 'english' }>({ term: '', language: 'chakma' });
+  const [newAntonym, setNewAntonym] = useState<{ term: string; language: 'chakma' | 'english' }>({ term: '', language: 'chakma' });
+
+  const addRelated = (key: 'synonyms' | 'antonyms', item: RelatedTerm) => {
+    setFormData({
+      ...formData,
+      [key]: [ ...(formData[key] || []), item ],
+    } as Word);
+  };
+  const removeRelated = (key: 'synonyms' | 'antonyms', index: number) => {
+    const next = [...(formData[key] || [])];
+    next.splice(index, 1);
+    setFormData({ ...formData, [key]: next } as Word);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let audioUrl = formData.audio_pronunciation_url;
 
-    // Handle audio upload if file is selected
     if (audioFile) {
       setIsUploading(true);
       try {
@@ -569,6 +664,92 @@ function WordForm({
         />
       </div>
 
+      {/* synonyms editor */}
+      <div>
+        <Label>Synonyms</Label>
+        <div className="flex gap-2 mt-2">
+          <Input
+            placeholder="Add synonym (term)"
+            value={newSynonym.term}
+            onChange={(e) => setNewSynonym({ ...newSynonym, term: e.target.value })}
+          />
+          <select
+            value={newSynonym.language}
+            onChange={(e) => setNewSynonym({ ...newSynonym, language: e.target.value as 'chakma' | 'english' })}
+            className="px-3 py-2 border border-input rounded-lg bg-background"
+          >
+            <option value="chakma">Chakma</option>
+            <option value="english">English</option>
+          </select>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              if (!newSynonym.term.trim()) return;
+              addRelated('synonyms', { term: newSynonym.term.trim(), language: newSynonym.language });
+              setNewSynonym({ term: '', language: 'chakma' });
+            }}
+          >
+            <Plus className="h-4 w-4 mr-1" /> Add
+          </Button>
+        </div>
+        {formData.synonyms && formData.synonyms.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {formData.synonyms.map((syn, idx) => (
+              <Badge key={idx} variant="secondary" className={cn(syn.language === 'chakma' && 'font-chakma')}>
+                {syn.term}
+                <button type="button" className="ml-2" onClick={() => removeRelated('synonyms', idx)}>
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* antonyms editor */}
+      <div>
+        <Label>Antonyms</Label>
+        <div className="flex gap-2 mt-2">
+          <Input
+            placeholder="Add antonym (term)"
+            value={newAntonym.term}
+            onChange={(e) => setNewAntonym({ ...newAntonym, term: e.target.value })}
+          />
+          <select
+            value={newAntonym.language}
+            onChange={(e) => setNewAntonym({ ...newAntonym, language: e.target.value as 'chakma' | 'english' })}
+            className="px-3 py-2 border border-input rounded-lg bg-background"
+          >
+            <option value="chakma">Chakma</option>
+            <option value="english">English</option>
+          </select>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              if (!newAntonym.term.trim()) return;
+              addRelated('antonyms', { term: newAntonym.term.trim(), language: newAntonym.language });
+              setNewAntonym({ term: '', language: 'chakma' });
+            }}
+          >
+            <Plus className="h-4 w-4 mr-1" /> Add
+          </Button>
+        </div>
+        {formData.antonyms && formData.antonyms.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {formData.antonyms.map((ant, idx) => (
+              <Badge key={idx} variant="outline" className={cn(ant.language === 'chakma' && 'font-chakma')}>
+                {ant.term}
+                <button type="button" className="ml-2" onClick={() => removeRelated('antonyms', idx)}>
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div>
         <Label>Example Sentence *</Label>
         <Textarea
@@ -585,9 +766,7 @@ function WordForm({
         <Label>Etymology *</Label>
         <Textarea
           value={formData.etymology}
-          onChange={(e) =>
-            setFormData({ ...formData, etymology: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, etymology: e.target.value })}
           placeholder="Origin and historical development of the word"
           required
         />
@@ -599,9 +778,7 @@ function WordForm({
           {formData.audio_pronunciation_url && (
             <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
               <Volume2 className="h-4 w-4 text-chakma-primary" />
-              <span className="text-sm text-muted-foreground">
-                Current audio available
-              </span>
+              <span className="text-sm text-muted-foreground">Current audio available</span>
               <Button
                 type="button"
                 variant="ghost"
@@ -630,20 +807,13 @@ function WordForm({
               </Button>
             </div>
             {audioFile && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setAudioFile(null)}
-              >
+              <Button type="button" variant="ghost" size="sm" onClick={() => setAudioFile(null)}>
                 <X className="h-4 w-4" />
               </Button>
             )}
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            Supported formats: MP3, WAV, OGG. Max size: 5MB
-          </p>
+          <p className="text-xs text-muted-foreground">Supported formats: MP3, WAV, OGG. Max size: 5MB</p>
         </div>
       </div>
     </form>
