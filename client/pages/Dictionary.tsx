@@ -383,7 +383,7 @@ function WordCard({
               variant="ghost"
               size="sm"
               onClick={handleFavoriteClick}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 transition-fast"
             >
               <Heart
                 className={cn(
