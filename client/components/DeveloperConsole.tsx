@@ -391,7 +391,7 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   );
 }
 
-// Words Management Component
+// Words Management Component - View Only
 function WordsManagement({
   words,
   editingWord,
@@ -407,60 +407,70 @@ function WordsManagement({
   onDelete: (id: string) => void;
   onCancel: () => void;
 }) {
-  if (editingWord) {
-    return <WordForm word={editingWord} onSave={onSave} onCancel={onCancel} />;
-  }
+  // Sort words alphabetically by romanized pronunciation
+  const sortedWords = [...words].sort((a, b) =>
+    a.romanized_pronunciation.localeCompare(b.romanized_pronunciation)
+  );
 
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Words ({words.length})</h3>
-        <Button
-          onClick={() =>
-            onEdit({
-              id: "",
-              chakma_word_script: "",
-              romanized_pronunciation: "",
-              english_translation: "",
-              example_sentence: "",
-              etymology: "",
-              created_at: new Date().toISOString(),
-            })
-          }
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Word
-        </Button>
+        <h3 className="text-lg font-semibold">Dictionary Words ({sortedWords.length})</h3>
+        <Badge variant="outline" className="text-sm">
+          View Only - Alphabetically Sorted
+        </Badge>
       </div>
 
       <div className="flex-1 overflow-auto space-y-2">
-        {words.map((word) => (
-          <Card key={word.id} className="p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-chakma text-chakma-primary">
-                    {word.chakma_word_script}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
+        {sortedWords.map((word) => (
+          <Card key={word.id} className="p-4">
+            <div className="space-y-3">
+              <div className="flex items-center gap-4">
+                <span className="text-2xl font-chakma text-chakma-primary">
+                  {word.chakma_word_script}
+                </span>
+                <div className="flex-1">
+                  <div className="text-sm text-muted-foreground">
                     /{word.romanized_pronunciation}/
-                  </span>
+                  </div>
+                  <div className="font-medium text-lg">{word.english_translation}</div>
                 </div>
-                <div className="font-medium">{word.english_translation}</div>
+                {word.audio_pronunciation_url && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const audio = new Audio(word.audio_pronunciation_url!);
+                      audio.play().catch(console.error);
+                    }}
+                  >
+                    <Volume2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={() => onEdit(word)}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDelete(word.id)}
-                  className="text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+
+              {word.example_sentence && (
+                <div className="text-sm text-muted-foreground italic border-l-2 border-primary/20 pl-3">
+                  {word.example_sentence}
+                </div>
+              )}
+
+              {word.etymology && (
+                <div className="text-xs text-muted-foreground">
+                  <span className="font-medium">Etymology:</span> {word.etymology}
+                </div>
+              )}
+
+              {(word.synonyms && word.synonyms.length > 0) && (
+                <div className="flex flex-wrap gap-1">
+                  <span className="text-xs font-medium text-muted-foreground mr-1">Synonyms:</span>
+                  {word.synonyms.map((syn, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {syn.term}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </Card>
         ))}
