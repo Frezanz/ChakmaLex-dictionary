@@ -122,16 +122,11 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("words");
 
-  // Content management state
+  // Content management state (view-only)
   const [words, setWords] = useState<Word[]>(sampleWords);
   const [characters, setCharacters] = useState<Character[]>(sampleCharacters);
-  const [editingWord, setEditingWord] = useState<Word | null>(null);
-  const [editingCharacter, setEditingCharacter] = useState<Character | null>(
-    null,
-  );
   const [aiGeneratedWords, setAiGeneratedWords] = useState<string[]>([]);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-  const [uploadingAudio, setUploadingAudio] = useState(false);
 
   const validPasswords = [
     "frezanz120913",
