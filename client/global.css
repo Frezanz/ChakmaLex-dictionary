@@ -392,21 +392,35 @@
   .heart-favorite {
     color: #ef4444;
     fill: #ef4444;
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.3));
   }
 
   .heart-favorite:hover {
     color: #dc2626;
     fill: #dc2626;
+    filter: drop-shadow(0 0 8px rgba(220, 38, 38, 0.4));
   }
 
   .heart-unfavorite {
     color: #6b7280;
     fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
   }
 
   .heart-unfavorite:hover {
     color: #ef4444;
     fill: rgba(239, 68, 68, 0.2);
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.2));
+  }
+
+  /* Add a subtle glow effect when animating */
+  .heart-icon.animate-bounce {
+    filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.6));
+  }
+
+  .heart-icon.animate-fill {
+    filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.6));
   }
 
   /* Character grid styling */
