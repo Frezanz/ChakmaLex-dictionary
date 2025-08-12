@@ -76,8 +76,8 @@ export default function Dictionary() {
         if (!searchQuery) setSearchResults(words.slice(0, 3) as any);
       } catch {}
     };
-    window.addEventListener('focus', onFocus);
-    return () => window.removeEventListener('focus', onFocus);
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, []);
 
   // Handle search
@@ -335,7 +335,7 @@ function WordCard({
     <Card
       className={cn(
         "word-card cursor-pointer",
-        isSelected && "word-card-selected"
+        isSelected && "word-card-selected",
       )}
       onClick={onSelect}
     >
@@ -350,7 +350,9 @@ function WordCard({
                 /{word.romanized_pronunciation}/
               </div>
             </div>
-            <p className="text-lg font-medium english-translation">{word.english_translation}</p>
+            <p className="text-lg font-medium english-translation">
+              {word.english_translation}
+            </p>
             {word.synonyms && word.synonyms.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {word.synonyms.slice(0, 3).map((syn, index) => (
@@ -389,7 +391,8 @@ function WordCard({
                 className={cn(
                   "h-4 w-4 heart-icon transition-all duration-300",
                   isFavorite ? "heart-favorite" : "heart-unfavorite",
-                  isAnimating && (isFavorite ? "animate-fill" : "animate-bounce")
+                  isAnimating &&
+                    (isFavorite ? "animate-fill" : "animate-bounce"),
                 )}
               />
             </Button>
@@ -454,7 +457,8 @@ function WordDetails({
                 className={cn(
                   "h-4 w-4 mr-2 heart-icon transition-all duration-300",
                   isFavorite ? "heart-favorite" : "heart-unfavorite",
-                  isAnimating && (isFavorite ? "animate-fill" : "animate-bounce")
+                  isAnimating &&
+                    (isFavorite ? "animate-fill" : "animate-bounce"),
                 )}
               />
               {isFavorite ? "Favorited" : "Favorite"}

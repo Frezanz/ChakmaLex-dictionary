@@ -342,7 +342,8 @@
   }
 
   @keyframes heart-pulse {
-    0%, 100% {
+    0%,
+    100% {
       transform: scale(1);
       filter: brightness(1);
     }
@@ -425,10 +426,12 @@
 
   /* Selected word card styling */
   .word-card-selected {
-    background: linear-gradient(135deg,
+    background: linear-gradient(
+      135deg,
       hsl(var(--chakma-primary) / 0.1) 0%,
       hsl(var(--background)) 50%,
-      hsl(var(--chakma-secondary) / 0.1) 100%);
+      hsl(var(--chakma-secondary) / 0.1) 100%
+    );
     border: 2px solid hsl(var(--chakma-primary));
     box-shadow:
       0 0 20px hsl(var(--chakma-primary) / 0.3),

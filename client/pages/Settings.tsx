@@ -3,19 +3,19 @@
  * Features: Theme selection, font size, sound controls, data management
  */
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Palette, 
-  Volume2, 
-  Type, 
-  Download, 
-  Upload, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import {
+  Palette,
+  Volume2,
+  Type,
+  Download,
+  Upload,
   Trash2,
   RotateCcw,
   Check,
@@ -24,21 +24,23 @@ import {
   Zap,
   Coffee,
   Sparkles,
-  Monitor
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  Monitor,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-import { ThemeMode, FontSize, UserPreferences } from '@shared/types';
-import { 
-  PreferencesManager, 
+import { ThemeMode, FontSize, UserPreferences } from "@shared/types";
+import {
+  PreferencesManager,
   AudioManager,
   exportAllData,
   importAllData,
-  clearAllData
-} from '@/lib/storage';
+  clearAllData,
+} from "@/lib/storage";
 
 export default function Settings() {
-  const [preferences, setPreferences] = useState<UserPreferences>(PreferencesManager.get());
+  const [preferences, setPreferences] = useState<UserPreferences>(
+    PreferencesManager.get(),
+  );
   const [isImporting, setIsImporting] = useState(false);
   const [importSuccess, setImportSuccess] = useState(false);
 
@@ -67,11 +69,11 @@ export default function Settings() {
 
   const handleExportData = () => {
     const data = exportAllData();
-    const blob = new Blob([data], { type: 'application/json' });
+    const blob = new Blob([data], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'chakmalex-data.json';
+    a.download = "chakmalex-data.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -88,14 +90,14 @@ export default function Settings() {
         setIsImporting(true);
         const data = e.target?.result as string;
         const success = importAllData(data);
-        
+
         if (success) {
           setImportSuccess(true);
           setPreferences(PreferencesManager.get());
           setTimeout(() => setImportSuccess(false), 3000);
         }
       } catch (error) {
-        console.error('Import failed:', error);
+        console.error("Import failed:", error);
       } finally {
         setIsImporting(false);
       }
@@ -104,7 +106,11 @@ export default function Settings() {
   };
 
   const handleResetAll = () => {
-    if (confirm('Are you sure you want to reset all settings? This cannot be undone.')) {
+    if (
+      confirm(
+        "Are you sure you want to reset all settings? This cannot be undone.",
+      )
+    ) {
       clearAllData();
       const defaultPrefs = PreferencesManager.get();
       setPreferences(defaultPrefs);
@@ -112,21 +118,51 @@ export default function Settings() {
   };
 
   const themes = [
-    { id: 'light' as ThemeMode, label: 'Light', icon: Sun, description: 'Clean and bright' },
-    { id: 'dark' as ThemeMode, label: 'Dark', icon: Moon, description: 'Easy on the eyes' },
-    { id: 'oled' as ThemeMode, label: 'OLED', icon: Monitor, description: 'Pure black for OLED' },
-    { id: 'sepia' as ThemeMode, label: 'Sepia', icon: Coffee, description: 'Warm and comfortable' },
-    { id: 'warm' as ThemeMode, label: 'Warm', icon: Coffee, description: 'Cozy orange tones' },
-    { id: 'vibrant' as ThemeMode, label: 'Vibrant', icon: Sparkles, description: 'High contrast colors' }
+    {
+      id: "light" as ThemeMode,
+      label: "Light",
+      icon: Sun,
+      description: "Clean and bright",
+    },
+    {
+      id: "dark" as ThemeMode,
+      label: "Dark",
+      icon: Moon,
+      description: "Easy on the eyes",
+    },
+    {
+      id: "oled" as ThemeMode,
+      label: "OLED",
+      icon: Monitor,
+      description: "Pure black for OLED",
+    },
+    {
+      id: "sepia" as ThemeMode,
+      label: "Sepia",
+      icon: Coffee,
+      description: "Warm and comfortable",
+    },
+    {
+      id: "warm" as ThemeMode,
+      label: "Warm",
+      icon: Coffee,
+      description: "Cozy orange tones",
+    },
+    {
+      id: "vibrant" as ThemeMode,
+      label: "Vibrant",
+      icon: Sparkles,
+      description: "High contrast colors",
+    },
   ];
 
   const fontSizes = [
-    { id: 'xs' as FontSize, label: 'Extra Small', size: '12px' },
-    { id: 'sm' as FontSize, label: 'Small', size: '14px' },
-    { id: 'base' as FontSize, label: 'Normal', size: '16px' },
-    { id: 'lg' as FontSize, label: 'Large', size: '18px' },
-    { id: 'xl' as FontSize, label: 'Extra Large', size: '20px' },
-    { id: '2xl' as FontSize, label: 'Huge', size: '24px' }
+    { id: "xs" as FontSize, label: "Extra Small", size: "12px" },
+    { id: "sm" as FontSize, label: "Small", size: "14px" },
+    { id: "base" as FontSize, label: "Normal", size: "16px" },
+    { id: "lg" as FontSize, label: "Large", size: "18px" },
+    { id: "xl" as FontSize, label: "Extra Large", size: "20px" },
+    { id: "2xl" as FontSize, label: "Huge", size: "24px" },
   ];
 
   return (
@@ -164,7 +200,7 @@ export default function Settings() {
                       "p-4 rounded-lg border-2 transition-all duration-200 text-left",
                       preferences.theme === theme.id
                         ? "border-primary bg-primary/10"
-                        : "border-border hover:border-primary/50"
+                        : "border-border hover:border-primary/50",
                     )}
                   >
                     <div className="flex items-center gap-2 mb-2">
@@ -205,7 +241,7 @@ export default function Settings() {
                     "p-3 rounded-lg border text-left transition-all duration-200",
                     preferences.font_size === font.id
                       ? "border-primary bg-primary/10"
-                      : "border-border hover:border-primary/50"
+                      : "border-border hover:border-primary/50",
                   )}
                 >
                   <div className="font-medium">{font.label}</div>
@@ -266,12 +302,16 @@ export default function Settings() {
               <p className="text-sm text-muted-foreground mb-3">
                 Download your settings, favorites, and search history
               </p>
-              <Button onClick={handleExportData} variant="outline" className="w-full">
+              <Button
+                onClick={handleExportData}
+                variant="outline"
+                className="w-full"
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Export Data
               </Button>
             </div>
-            
+
             <div>
               <h3 className="font-medium mb-2">Import Data</h3>
               <p className="text-sm text-muted-foreground mb-3">
@@ -285,7 +325,11 @@ export default function Settings() {
                   className="absolute inset-0 opacity-0 cursor-pointer"
                   disabled={isImporting}
                 />
-                <Button variant="outline" className="w-full" disabled={isImporting}>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  disabled={isImporting}
+                >
                   {isImporting ? (
                     <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
                   ) : importSuccess ? (
@@ -293,7 +337,11 @@ export default function Settings() {
                   ) : (
                     <Upload className="h-4 w-4 mr-2" />
                   )}
-                  {isImporting ? 'Importing...' : importSuccess ? 'Imported!' : 'Import Data'}
+                  {isImporting
+                    ? "Importing..."
+                    : importSuccess
+                      ? "Imported!"
+                      : "Import Data"}
                 </Button>
               </div>
             </div>
@@ -306,9 +354,9 @@ export default function Settings() {
             <p className="text-sm text-muted-foreground">
               These actions cannot be undone. Please be careful.
             </p>
-            <Button 
+            <Button
               onClick={handleResetAll}
-              variant="destructive" 
+              variant="destructive"
               className="w-full md:w-auto"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
