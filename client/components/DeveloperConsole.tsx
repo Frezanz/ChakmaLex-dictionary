@@ -32,6 +32,7 @@ import {
   Volume2,
   Music,
   RefreshCw,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -1071,68 +1072,154 @@ function AIWordGenerator({
   const [selectedEnglishWord, setSelectedEnglishWord] = useState<string | null>(null);
   const [chakmaInput, setChakmaInput] = useState("");
   const [romanizedInput, setRomanizedInput] = useState("");
+  const [audioUrl, setAudioUrl] = useState("");
+  const [exampleSentence, setExampleSentence] = useState("");
+  const [synonyms, setSynonyms] = useState("");
+  const [antonyms, setAntonyms] = useState("");
   const [generatedEtymologies, setGeneratedEtymologies] = useState<string[]>([]);
   const [selectedEtymology, setSelectedEtymology] = useState("");
   const [customEtymology, setCustomEtymology] = useState("");
   const [isGeneratingEtymology, setIsGeneratingEtymology] = useState(false);
   const [showEtymologyForm, setShowEtymologyForm] = useState(false);
+  const [currentStep, setCurrentStep] = useState<'basic' | 'advanced' | 'etymology'>('basic');
+
+  // Smart AI etymology analysis based on romanized Chakma word
+  const analyzeEtymology = (romanized: string, english: string): string[] => {
+    const etymologies = [];
+
+    // Analyze phonetic patterns and linguistic features
+    const hasAspiration = /[kgcjtdpb]h/.test(romanized);
+    const hasTones = /[àáâãäåæçèéêë]/.test(romanized);
+    const endsWithNasal = /[nm]$/.test(romanized);
+    const hasRetroflex = /[ṭḍṇḷ]/.test(romanized);
+    const hasVowelLength = /[āīūē]/.test(romanized);
+
+    // Sanskrit-derived patterns
+    if (hasRetroflex || hasVowelLength) {
+      etymologies.push(
+        `From Sanskrit origin, "${romanized}" shows classical Indo-Aryan features with retroflex/long vowel patterns typical of Sanskrit borrowings into Chakma`
+      );
+    }
+
+    // Bengali cognate patterns
+    if (romanized.includes('bh') || romanized.includes('dh') || hasAspiration) {
+      etymologies.push(
+        `Cognate with Bengali, "${romanized}" retains Middle Indo-Aryan aspirated consonants indicating shared Eastern Indo-Aryan heritage`
+      );
+    }
+
+    // Tibeto-Burman substrate
+    if (endsWithNasal || romanized.includes('ng')) {
+      etymologies.push(
+        `Possible Tibeto-Burman substrate, "${romanized}" shows nasal endings characteristic of indigenous Chakma vocabulary predating Indo-Aryan contact`
+      );
+    }
+
+    // Arakanese/Rakhine connection
+    if (romanized.includes('ky') || romanized.includes('my') || hasTones) {
+      etymologies.push(
+        `Related to Arakanese/Rakhine "${romanized}", showing Tibeto-Burman phonological features common in the Chittagong Hill Tracts linguistic area`
+      );
+    }
+
+    // Modern borrowing patterns
+    if (romanized.length > 4 && !hasRetroflex) {
+      etymologies.push(
+        `Modern adaptation of "${english}" into Chakma as "${romanized}", following contemporary Chakma phonological adaptation patterns`
+      );
+    }
+
+    // Fallback etymologies if no specific patterns detected
+    if (etymologies.length === 0) {
+      etymologies.push(
+        `Indigenous Chakma word "${romanized}" with uncertain etymology, possibly pre-dating historical linguistic contact`,
+        `From Eastern Indo-Aryan, "${romanized}" shows typical sound changes from Middle Indo-Aryan to modern Chakma`,
+        `Borrowed from regional languages, "${romanized}" adapted to Chakma phonological system through historical contact`
+      );
+    }
+
+    return etymologies.slice(0, 5); // Return max 5 options
+  };
 
   // Generate etymology suggestions
-  const generateEtymologies = async (englishWord: string) => {
+  const generateEtymologies = async (englishWord: string, romanized: string) => {
     setIsGeneratingEtymology(true);
-    // Simulate AI etymology generation
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Simulate AI processing time
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    const etymologies = [
-      `Derived from Sanskrit root related to "${englishWord}", adapted through Middle Indo-Aryan languages`,
-      `From Proto-Sino-Tibetan origin, cognate with Bengali and Assamese forms of "${englishWord}"`,
-      `Indigenous Chakma term with possible Tibeto-Burman etymology, meaning "${englishWord}"`,
-      `Borrowed from Bengali "${englishWord.toLowerCase()}", adapted to Chakma phonological system`,
-      `Ancient Chakma word with uncertain etymology, possibly related to Arakanese forms`
-    ];
-
-    setGeneratedEtymologies(etymologies);
-    setSelectedEtymology(etymologies[0]);
+    const smartEtymologies = analyzeEtymology(romanized, englishWord);
+    setGeneratedEtymologies(smartEtymologies);
+    setSelectedEtymology(smartEtymologies[0]);
     setIsGeneratingEtymology(false);
-    setShowEtymologyForm(true);
+    setCurrentStep('etymology');
   };
 
   const handleWordSelection = (englishWord: string) => {
     setSelectedEnglishWord(englishWord);
     setChakmaInput("");
     setRomanizedInput("");
+    setAudioUrl("");
+    setExampleSentence("");
+    setSynonyms("");
+    setAntonyms("");
     setGeneratedEtymologies([]);
     setSelectedEtymology("");
     setCustomEtymology("");
-    setShowEtymologyForm(false);
+    setCurrentStep('basic');
   };
 
-  const handleChakmaSubmit = () => {
+  const handleBasicSubmit = () => {
     if (chakmaInput && romanizedInput && selectedEnglishWord) {
-      generateEtymologies(selectedEnglishWord);
+      setCurrentStep('advanced');
+    }
+  };
+
+  const handleAdvancedSubmit = () => {
+    if (selectedEnglishWord && romanizedInput) {
+      generateEtymologies(selectedEnglishWord, romanizedInput);
     }
   };
 
   const handleFinalSubmit = () => {
     if (selectedEnglishWord && chakmaInput && romanizedInput) {
       const finalEtymology = customEtymology || selectedEtymology;
-      // Here you would create the final word entry
+
+      // Parse synonyms and antonyms
+      const parsedSynonyms = synonyms.split(',').map(s => s.trim()).filter(Boolean).map(term => ({
+        term,
+        language: term.match(/[\u1000-\u109F\u1100-\u11FF\u1200-\u137F\u1380-\u139F\u13A0-\u13FF\u1400-\u167F\u1680-\u169F\u16A0-\u16FF\u1700-\u171F\u1720-\u173F\u1740-\u175F\u1760-\u177F\u1780-\u17FF\u1800-\u18AF\u1900-\u194F\u1950-\u197F\u1980-\u19DF\u19E0-\u19FF\u1A00-\u1A1F\u1A20-\u1AAF\u1AB0-\u1AFF\u1B00-\u1B7F\u1B80-\u1BBF\u1BC0-\u1BFF\u1C00-\u1C4F\u1C50-\u1C7F\u1C80-\u1C8F\u1C90-\u1CBF\u1CC0-\u1CCF\u1CD0-\u1CFF\u1D00-\u1D7F\u1D80-\u1DBF\u1DC0-\u1DFF\u1E00-\u1EFF\u1F00-\u1FFF\u2000-\u206F\u2070-\u209F\u20A0-\u20CF\u20D0-\u20FF\u2100-\u214F\u2150-\u218F\u2190-\u21FF\u2200-\u22FF\u2300-\u23FF\u2400-\u243F\u2440-\u245F\u2460-\u24FF\u2500-\u257F\u2580-\u259F\u25A0-\u25FF\u2600-\u26FF\u2700-\u27BF\u27C0-\u27EF\u27F0-\u27FF\u2800-\u28FF\u2900-\u297F\u2980-\u29FF\u2A00-\u2AFF\u2B00-\u2BFF\u2C00-\u2C5F\u2C60-\u2C7F\u2C80-\u2CFF\u2D00-\u2D2F\u2D30-\u2D7F\u2D80-\u2DDF\u2DE0-\u2DFF\u2E00-\u2E7F\u2E80-\u2EFF\u2F00-\u2FDF\u2FF0-\u2FFF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\u3100-\u312F\u3130-\u318F\u3190-\u319F\u31A0-\u31BF\u31C0-\u31EF\u31F0-\u31FF\u3200-\u32FF\u3300-\u33FF\u3400-\u4DBF\u4DC0-\u4DFF\u4E00-\u9FFF\uA000-\uA48F\uA490-\uA4CF\uA4D0-\uA4FF\uA500-\uA63F\uA640-\uA69F\uA6A0-\uA6FF\uA700-\uA71F\uA720-\uA7FF\uA800-\uA82F\uA830-\uA83F\uA840-\uA87F\uA880-\uA8DF\uA8E0-\uA8FF\uA900-\uA92F\uA930-\uA95F\uA960-\uA97F\uA980-\uA9DF\uA9E0-\uA9FF\uAA00-\uAA5F\uAA60-\uAA7F\uAA80-\uAADF\uAAE0-\uAAFF\uAB00-\uAB2F\uAB30-\uAB6F\uAB70-\uABBF\uABC0-\uABFF\uAC00-\uD7AF\uD7B0-\uD7FF\uD800-\uDB7F\uDB80-\uDBFF\uDC00-\uDFFF\uE000-\uF8FF\uF900-\uFAFF\uFB00-\uFB4F\uFB50-\uFDFF\uFE00-\uFE0F\uFE10-\uFE1F\uFE20-\uFE2F\uFE30-\uFE4F\uFE50-\uFE6F\uFE70-\uFEFF\uFF00-\uFFEF\uFFF0-\uFFFF]|[\u{11100}-\u{1114F}]/u) ? 'chakma' : 'english'
+      }));
+
+      const parsedAntonyms = antonyms.split(',').map(s => s.trim()).filter(Boolean).map(term => ({
+        term,
+        language: term.match(/[\u1000-\u109F\u1100-\u11FF\u1200-\u137F\u1380-\u139F\u13A0-\u13FF\u1400-\u167F\u1680-\u169F\u16A0-\u16FF\u1700-\u171F\u1720-\u173F\u1740-\u175F\u1760-\u177F\u1780-\u17FF\u1800-\u18AF\u1900-\u194F\u1950-\u197F\u1980-\u19DF\u19E0-\u19FF\u1A00-\u1A1F\u1A20-\u1AAF\u1AB0-\u1AFF\u1B00-\u1B7F\u1B80-\u1BBF\u1BC0-\u1BFF\u1C00-\u1C4F\u1C50-\u1C7F\u1C80-\u1C8F\u1C90-\u1CBF\u1CC0-\u1CCF\u1CD0-\u1CFF\u1D00-\u1D7F\u1D80-\u1DBF\u1DC0-\u1DFF\u1E00-\u1EFF\u1F00-\u1FFF\u2000-\u206F\u2070-\u209F\u20A0-\u20CF\u20D0-\u20FF\u2100-\u214F\u2150-\u218F\u2190-\u21FF\u2200-\u22FF\u2300-\u23FF\u2400-\u243F\u2440-\u245F\u2460-\u24FF\u2500-\u257F\u2580-\u259F\u25A0-\u25FF\u2600-\u26FF\u2700-\u27BF\u27C0-\u27EF\u27F0-\u27FF\u2800-\u28FF\u2900-\u297F\u2980-\u29FF\u2A00-\u2AFF\u2B00-\u2BFF\u2C00-\u2C5F\u2C60-\u2C7F\u2C80-\u2CFF\u2D00-\u2D2F\u2D30-\u2D7F\u2D80-\u2DDF\u2DE0-\u2DFF\u2E00-\u2E7F\u2E80-\u2EFF\u2F00-\u2FDF\u2FF0-\u2FFF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\u3100-\u312F\u3130-\u318F\u3190-\u319F\u31A0-\u31BF\u31C0-\u31EF\u31F0-\u31FF\u3200-\u32FF\u3300-\u33FF\u3400-\u4DBF\u4DC0-\u4DFF\u4E00-\u9FFF\uA000-\uA48F\uA490-\uA4CF\uA4D0-\uA4FF\uA500-\uA63F\uA640-\uA69F\uA6A0-\uA6FF\uA700-\uA71F\uA720-\uA7FF\uA800-\uA82F\uA830-\uA83F\uA840-\uA87F\uA880-\uA8DF\uA8E0-\uA8FF\uA900-\uA92F\uA930-\uA95F\uA960-\uA97F\uA980-\uA9DF\uA9E0-\uA9FF\uAA00-\uAA5F\uAA60-\uAA7F\uAA80-\uAADF\uAAE0-\uAAFF\uAB00-\uAB2F\uAB30-\uAB6F\uAB70-\uABBF\uABC0-\uABFF\uAC00-\uD7AF\uD7B0-\uD7FF\uD800-\uDB7F\uDB80-\uDBFF\uDC00-\uDFFF\uE000-\uF8FF\uF900-\uFAFF\uFB00-\uFB4F\uFB50-\uFDFF\uFE00-\uFE0F\uFE10-\uFE1F\uFE20-\uFE2F\uFE30-\uFE4F\uFE50-\uFE6F\uFE70-\uFEFF\uFF00-\uFFEF\uFFF0-\uFFFF]|[\u{11100}-\u{1114F}]/u) ? 'chakma' : 'english'
+      }));
+
+      // Create complete word data in repository format
       const wordData = {
+        id: `word-${Date.now()}`,
         chakma_word_script: chakmaInput,
         romanized_pronunciation: romanizedInput,
         english_translation: selectedEnglishWord,
+        synonyms: parsedSynonyms,
+        antonyms: parsedAntonyms,
+        example_sentence: exampleSentence || `Example usage of ${chakmaInput} meaning ${selectedEnglishWord}`,
         etymology: finalEtymology,
-        example_sentence: `Example sentence with ${chakmaInput} - Example with ${selectedEnglishWord}`,
+        audio_pronunciation_url: audioUrl || undefined,
+        explanation_media: undefined,
+        is_verified: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      // For now, let's create a downloadable JSON
+      // Create finalized JSON export
       const blob = new Blob([JSON.stringify(wordData, null, 2)], {
         type: "application/json",
       });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `chakmalex-word-${romanizedInput}.json`;
+      a.download = `chakmalex-${romanizedInput}-complete.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1142,12 +1229,16 @@ function AIWordGenerator({
       setSelectedEnglishWord(null);
       setChakmaInput("");
       setRomanizedInput("");
+      setAudioUrl("");
+      setExampleSentence("");
+      setSynonyms("");
+      setAntonyms("");
       setGeneratedEtymologies([]);
       setSelectedEtymology("");
       setCustomEtymology("");
-      setShowEtymologyForm(false);
+      setCurrentStep('basic');
 
-      alert(`Word entry for "${selectedEnglishWord}" has been exported as JSON!`);
+      alert(`Complete word entry for "${selectedEnglishWord}" has been exported as JSON with all fields!`);
     }
   };
 
@@ -1169,12 +1260,12 @@ function AIWordGenerator({
             <Button
               onClick={onGenerate}
               disabled={isGenerating}
-              className="w-full"
+              className="w-full h-12"
             >
               {isGenerating ? (
                 <>
                   <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
-                  Generating Words...
+                  Generating English Words...
                 </>
               ) : (
                 <>
@@ -1198,7 +1289,7 @@ function AIWordGenerator({
                       <div className="text-left">
                         <div className="font-medium">{word}</div>
                         <div className="text-xs text-muted-foreground">
-                          Click to provide Chakma translation
+                          Click to create complete entry
                         </div>
                       </div>
                     </Button>
@@ -1210,68 +1301,158 @@ function AIWordGenerator({
         </Card>
       ) : (
         <div className="space-y-4">
-          {/* Chakma Input Form */}
-          <Card className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Provide Chakma Translation for: "{selectedEnglishWord}"</h4>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedEnglishWord(null)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+          {/* Progress Indicator */}
+          <div className="flex items-center justify-center space-x-2 mb-6">
+            <div className={cn("w-3 h-3 rounded-full", currentStep === 'basic' ? 'bg-primary' : 'bg-muted')} />
+            <div className="w-8 h-0.5 bg-muted" />
+            <div className={cn("w-3 h-3 rounded-full", currentStep === 'advanced' ? 'bg-primary' : 'bg-muted')} />
+            <div className="w-8 h-0.5 bg-muted" />
+            <div className={cn("w-3 h-3 rounded-full", currentStep === 'etymology' ? 'bg-primary' : 'bg-muted')} />
+          </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Chakma Script *</Label>
-                  <Input
-                    value={chakmaInput}
-                    onChange={(e) => setChakmaInput(e.target.value)}
-                    placeholder="Enter Chakma script"
-                    className="font-chakma text-xl h-12"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label>Romanized Form *</Label>
-                  <Input
-                    value={romanizedInput}
-                    onChange={(e) => setRomanizedInput(e.target.value)}
-                    placeholder="Enter romanized pronunciation"
-                    className="h-12"
-                    required
-                  />
-                </div>
-              </div>
-
-              <Button
-                onClick={handleChakmaSubmit}
-                disabled={!chakmaInput || !romanizedInput || isGeneratingEtymology}
-                className="w-full"
-              >
-                {isGeneratingEtymology ? (
-                  <>
-                    <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
-                    Generating Etymology...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Generate Etymology Options
-                  </>
-                )}
-              </Button>
-            </div>
-          </Card>
-
-          {/* Etymology Selection Form */}
-          {showEtymologyForm && (
+          {/* Step 1: Basic Information */}
+          {currentStep === 'basic' && (
             <Card className="p-6">
               <div className="space-y-4">
-                <h4 className="font-medium">Select or Edit Etymology</h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Step 1: Basic Translation for "{selectedEnglishWord}"</h4>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedEnglishWord(null)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Chakma Script *</Label>
+                    <Input
+                      value={chakmaInput}
+                      onChange={(e) => setChakmaInput(e.target.value)}
+                      placeholder="Enter Chakma script"
+                      className="font-chakma text-xl h-12"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label>Romanized Pronunciation *</Label>
+                    <Input
+                      value={romanizedInput}
+                      onChange={(e) => setRomanizedInput(e.target.value)}
+                      placeholder="e.g., chakma, ado, por"
+                      className="h-12"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleBasicSubmit}
+                  disabled={!chakmaInput || !romanizedInput}
+                  className="w-full"
+                >
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                  Next: Add Details
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {/* Step 2: Advanced Details */}
+          {currentStep === 'advanced' && (
+            <Card className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Step 2: Additional Details</h4>
+                  <Button variant="ghost" size="sm" onClick={() => setCurrentStep('basic')}>
+                    <ArrowRight className="h-4 w-4 rotate-180" />
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label>Audio Pronunciation URL</Label>
+                    <Input
+                      value={audioUrl}
+                      onChange={(e) => setAudioUrl(e.target.value)}
+                      placeholder="https://example.com/audio.mp3 (optional)"
+                      className="h-12"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Example Sentence *</Label>
+                    <Textarea
+                      value={exampleSentence}
+                      onChange={(e) => setExampleSentence(e.target.value)}
+                      placeholder={`Example: ${chakmaInput} 𑄟𑄮𑄨 𑄞𑄣𑄧 - ${selectedEnglishWord} is my friend`}
+                      className="h-20"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Synonyms (comma separated)</Label>
+                      <Input
+                        value={synonyms}
+                        onChange={(e) => setSynonyms(e.target.value)}
+                        placeholder="𑄟𑄚𑄪𑄌𑄢, person, individual"
+                        className="h-12"
+                      />
+                    </div>
+                    <div>
+                      <Label>Antonyms (comma separated)</Label>
+                      <Input
+                        value={antonyms}
+                        onChange={(e) => setAntonyms(e.target.value)}
+                        placeholder="animal, 𑄛𑄌𑄪"
+                        className="h-12"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleAdvancedSubmit}
+                  disabled={!exampleSentence || isGeneratingEtymology}
+                  className="w-full"
+                >
+                  {isGeneratingEtymology ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                      Analyzing Etymology...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="h-4 w-4 mr-2" />
+                      Generate Smart Etymology
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {/* Step 3: Etymology Selection */}
+          {currentStep === 'etymology' && (
+            <Card className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Step 3: Smart Etymology Analysis for "{romanizedInput}"</h4>
+                  <Button variant="ghost" size="sm" onClick={() => setCurrentStep('advanced')}>
+                    <ArrowRight className="h-4 w-4 rotate-180" />
+                  </Button>
+                </div>
+
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    <Brain className="h-4 w-4 inline mr-1" />
+                    AI analyzed the phonetic patterns and linguistic features of "{romanizedInput}":
+                  </p>
+                </div>
 
                 <div className="space-y-3">
                   {generatedEtymologies.map((etymology, index) => (
-                    <div key={index} className="flex items-start space-x-3">
+                    <div key={index} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/30">
                       <input
                         type="radio"
                         id={`etymology-${index}`}
@@ -1284,7 +1465,7 @@ function AIWordGenerator({
                         }}
                         className="mt-1"
                       />
-                      <label htmlFor={`etymology-${index}`} className="text-sm cursor-pointer">
+                      <label htmlFor={`etymology-${index}`} className="text-sm cursor-pointer flex-1">
                         {etymology}
                       </label>
                     </div>
@@ -1294,7 +1475,7 @@ function AIWordGenerator({
                 <Separator />
 
                 <div>
-                  <Label>Custom Etymology (Optional)</Label>
+                  <Label>Custom Etymology (Override AI suggestions)</Label>
                   <Textarea
                     value={customEtymology}
                     onChange={(e) => {
@@ -1306,15 +1487,23 @@ function AIWordGenerator({
                   />
                 </div>
 
-                <div className="flex gap-2">
-                  <Button onClick={handleFinalSubmit} className="flex-1">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Word Entry as JSON
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowEtymologyForm(false)}>
-                    Back
-                  </Button>
+                <div className="bg-primary/10 p-4 rounded-lg">
+                  <h5 className="font-medium mb-2">Final Word Summary:</h5>
+                  <div className="text-sm space-y-1">
+                    <p><strong>Chakma:</strong> <span className="font-chakma">{chakmaInput}</span></p>
+                    <p><strong>Romanized:</strong> {romanizedInput}</p>
+                    <p><strong>English:</strong> {selectedEnglishWord}</p>
+                    <p><strong>Example:</strong> {exampleSentence}</p>
+                    {synonyms && <p><strong>Synonyms:</strong> {synonyms}</p>}
+                    {antonyms && <p><strong>Antonyms:</strong> {antonyms}</p>}
+                    {audioUrl && <p><strong>Audio:</strong> {audioUrl}</p>}
+                  </div>
                 </div>
+
+                <Button onClick={handleFinalSubmit} className="w-full h-12" size="lg">
+                  <Download className="h-5 w-5 mr-2" />
+                  Export Complete Word Entry as JSON
+                </Button>
               </div>
             </Card>
           )}
