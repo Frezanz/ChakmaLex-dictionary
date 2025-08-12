@@ -414,6 +414,15 @@ function WordDetails({
   onFavoriteToggle,
   onPlayAudio,
 }: WordDetailsProps) {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleFavoriteClick = () => {
+    setIsAnimating(true);
+    onFavoriteToggle();
+
+    // Reset animation after completion
+    setTimeout(() => setIsAnimating(false), 600);
+  };
   return (
     <Card>
       <CardHeader>
