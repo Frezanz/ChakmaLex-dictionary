@@ -156,11 +156,41 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   };
 
   const exportData = () => {
+    // Export in the existing repository format for GitHub upload
     const data = {
-      words,
-      characters,
-      exportedAt: new Date().toISOString(),
-      version: "1.0.0",
+      version: "2.0.0",
+      dictionary: {
+        words: words.map(word => ({
+          id: word.id,
+          chakma_word_script: word.chakma_word_script,
+          romanized_pronunciation: word.romanized_pronunciation,
+          english_translation: word.english_translation,
+          synonyms: word.synonyms || [],
+          antonyms: word.antonyms || [],
+          example_sentence: word.example_sentence,
+          etymology: word.etymology,
+          explanation_media: word.explanation_media,
+          audio_pronunciation_url: word.audio_pronunciation_url,
+          is_verified: word.is_verified || false,
+          created_at: word.created_at || new Date().toISOString(),
+          updated_at: word.updated_at || new Date().toISOString()
+        })),
+        total_count: words.length
+      },
+      characters: {
+        alphabet: characters.filter(c => c.character_type === 'alphabet'),
+        vowel: characters.filter(c => c.character_type === 'vowel'),
+        diacritic: characters.filter(c => c.character_type === 'diacritic'),
+        conjunct: characters.filter(c => c.character_type === 'conjunct'),
+        ordinal: characters.filter(c => c.character_type === 'ordinal'),
+        symbol: characters.filter(c => c.character_type === 'symbol'),
+        total_count: characters.length
+      },
+      metadata: {
+        exported_at: new Date().toISOString(),
+        exported_by: "ChakmaLex Developer Console",
+        format_version: "2.0.0"
+      }
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -169,7 +199,7 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "chakmalex-content.json";
+    a.download = "chakmalex-repository-data.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -273,44 +303,11 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
             <TabsContent value="words" className="flex-1 overflow-hidden">
               <WordsManagement
                 words={words}
-                editingWord={editingWord}
-                onEdit={setEditingWord}
-                onSave={async (word) => {
-                  const { apiClient } = await import("@/lib/apiClient");
-                  try {
-                    if (editingWord && word.id) {
-                      const updated = await apiClient.updateWord(word.id, word);
-                      setWords(words.map((w) => (w.id === updated.id ? updated : w)));
-                    } else {
-                      const created = await apiClient.createWord({
-                        chakma_word_script: word.chakma_word_script,
-                        romanized_pronunciation: word.romanized_pronunciation,
-                        english_translation: word.english_translation,
-                        example_sentence: word.example_sentence,
-                        etymology: word.etymology,
-                        audio_pronunciation_url: word.audio_pronunciation_url,
-                        explanation_media: word.explanation_media,
-                        synonyms: word.synonyms,
-                        antonyms: word.antonyms,
-                        is_verified: word.is_verified,
-                      });
-                      setWords([...words, created]);
-                    }
-                    setEditingWord(null);
-                  } catch (e: any) {
-                    alert(e?.message || "Failed to save word");
-                  }
-                }}
-                onDelete={async (id) => {
-                  const { apiClient } = await import("@/lib/apiClient");
-                  try {
-                    await apiClient.deleteWord(id);
-                    setWords(words.filter((w) => w.id !== id));
-                  } catch (e: any) {
-                    alert(e?.message || "Failed to delete word");
-                  }
-                }}
-                onCancel={() => setEditingWord(null)}
+                editingWord={null}
+                onEdit={() => {}}
+                onSave={() => {}}
+                onDelete={() => {}}
+                onCancel={() => {}}
               />
             </TabsContent>
 
@@ -318,27 +315,11 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
             <TabsContent value="characters" className="flex-1 overflow-hidden">
               <CharactersManagement
                 characters={characters}
-                editingCharacter={editingCharacter}
-                onEdit={setEditingCharacter}
-                onSave={(character) => {
-                  if (editingCharacter) {
-                    setCharacters(
-                      characters.map((c) =>
-                        c.id === character.id ? character : c,
-                      ),
-                    );
-                  } else {
-                    setCharacters([
-                      ...characters,
-                      { ...character, id: Date.now().toString() },
-                    ]);
-                  }
-                  setEditingCharacter(null);
-                }}
-                onDelete={(id) => {
-                  setCharacters(characters.filter((c) => c.id !== id));
-                }}
-                onCancel={() => setEditingCharacter(null)}
+                editingCharacter={null}
+                onEdit={() => {}}
+                onSave={() => {}}
+                onDelete={() => {}}
+                onCancel={() => {}}
               />
             </TabsContent>
 
@@ -360,18 +341,7 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                     setIsGeneratingAI(false);
                   }
                 }}
-                onCreateWord={(englishWord) => {
-                  setEditingWord({
-                    id: "",
-                    chakma_word_script: "",
-                    romanized_pronunciation: "",
-                    english_translation: englishWord,
-                    example_sentence: "",
-                    etymology: "",
-                    created_at: new Date().toISOString(),
-                  });
-                  setActiveTab("words");
-                }}
+                onCreateWord={() => {}}
               />
             </TabsContent>
 
