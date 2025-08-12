@@ -20,7 +20,7 @@ const jsonResponse = (data: any, ok = true, status = 200) => {
     ok,
     status,
     json: async () => data,
-    text: async () => JSON.stringify(data),
+    text: async () => data.error || JSON.stringify(data),
   } as unknown as Response;
 };
 
@@ -72,5 +72,52 @@ describe('apiClient words', () => {
     expect(body.synonyms[0].term).toBe('present');
 
     expect(result.synonyms?.[0].term).toBe('present');
+  });
+
+  it('handles duplicate word creation error', async () => {
+    const fetchSpy = vi.spyOn(global, 'fetch' as any).mockResolvedValueOnce(
+      jsonResponse({ 
+        success: false, 
+        error: 'Word with Chakma script "𑄃𑄘𑄮" already exists' 
+      }, false, 409)
+    );
+
+    await expect(apiClient.createWord({
+      chakma_word_script: '𑄃𑄘𑄮',
+      romanized_pronunciation: 'ado',
+      english_translation: 'today',
+      example_sentence: '',
+      etymology: ''
+    } as any)).rejects.toThrow('Word with Chakma script "𑄃𑄘𑄮" already exists');
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles duplicate word update error', async () => {
+    const fetchSpy = vi.spyOn(global, 'fetch' as any).mockResolvedValueOnce(
+      jsonResponse({ 
+        success: false, 
+        error: 'Word with Chakma script "𑄃𑄘𑄮" already exists' 
+      }, false, 409)
+    );
+
+    await expect(apiClient.updateWord('123', { 
+      chakma_word_script: '𑄃𑄘𑄮' 
+    })).rejects.toThrow('Word with Chakma script "𑄃𑄘𑄮" already exists');
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('deletes a word successfully', async () => {
+    const fetchSpy = vi.spyOn(global, 'fetch' as any).mockResolvedValueOnce(
+      jsonResponse({ success: true })
+    );
+
+    await apiClient.deleteWord('123');
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [url, options] = fetchSpy.mock.calls[0];
+    expect(String(url)).toContain('/api/words/123');
+    expect((options as RequestInit).method).toBe('DELETE');
   });
 });

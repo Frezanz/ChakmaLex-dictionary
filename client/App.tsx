@@ -19,6 +19,9 @@ import Settings from "./pages/Settings";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
+// Global state management
+import { WordStoreProvider } from "@/lib/wordStore";
+
 // Initialize theme on app start
 import { initializeTheme } from "@/lib/storage";
 
@@ -50,22 +53,24 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AppInitializer />
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Dictionary />} />
-              <Route path="/characters" element={<Characters />} />
-              <Route path="/quiz" element={<Quiz />} />
-              <Route path="/favorites" element={<Favorites />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/about" element={<About />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
-        </BrowserRouter>
+        <WordStoreProvider>
+          <AppInitializer />
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Dictionary />} />
+                <Route path="/characters" element={<Characters />} />
+                <Route path="/quiz" element={<Quiz />} />
+                <Route path="/favorites" element={<Favorites />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/about" element={<About />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Layout>
+          </BrowserRouter>
+        </WordStoreProvider>
       </TooltipProvider>
     </QueryClientProvider>
   </ErrorBoundary>

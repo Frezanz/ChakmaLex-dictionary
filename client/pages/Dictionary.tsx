@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 // Data and utilities
 import { Word, SearchHistoryItem } from "@shared/types";
 import { sampleSearchHistory } from "@shared/sampleData";
-import { apiClient } from "@/lib/apiClient";
+import { useWordStore } from "@/lib/wordStore";
 import {
   SearchHistoryManager,
   FavoritesManager,
@@ -35,62 +35,40 @@ import {
 
 export default function Dictionary() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [allWords, setAllWords] = useState<Word[]>([]);
   const [searchResults, setSearchResults] = useState<Word[]>([]);
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Use global word store
+  const { words: allWords, isLoading, error, searchWords } = useWordStore();
 
   // Initialize data
   useEffect(() => {
     setSearchHistory(SearchHistoryManager.get());
     setFavorites(FavoritesManager.get());
-
-    // Fetch words from API
-    (async () => {
-      try {
-        const words = await apiClient.getWords();
-        setAllWords(words);
-        setSearchResults(words.slice(0, 3));
-      } catch (error) {
-        console.error("Failed to load words:", error);
-      }
-    })();
   }, []);
+
+  // Update search results when words change
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults(allWords.slice(0, 3));
+    } else {
+      setSearchResults(searchWords(searchQuery));
+    }
+  }, [allWords, searchQuery, searchWords]);
 
   // Handle search
   const handleSearch = async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults(allWords.slice(0, 3));
-      setSelectedWord(null);
-      return;
-    }
-
-    setIsLoading(true);
+    setSearchQuery(query);
     setShowHistory(false);
-
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    const lowerQuery = query.toLowerCase();
-    const results = allWords.filter((word) =>
-      word.english_translation.toLowerCase().includes(lowerQuery) ||
-      word.chakma_word_script.includes(query) ||
-      word.romanized_pronunciation.toLowerCase().includes(lowerQuery) ||
-      (word.synonyms || []).some((syn) => syn.term.toLowerCase().includes(lowerQuery)) ||
-      (word.antonyms || []).some((ant) => ant.term.toLowerCase().includes(lowerQuery))
-    );
-    setSearchResults(results);
     setSelectedWord(null);
 
     // Add to search history
-    SearchHistoryManager.add(query, results.length);
+    SearchHistoryManager.add(query, searchResults.length);
     setSearchHistory(SearchHistoryManager.get());
-
-    setIsLoading(false);
   };
 
   // Handle word selection
@@ -134,8 +112,11 @@ export default function Dictionary() {
         {isLoading && (
           <p className="text-sm text-muted-foreground">Syncing latest data...</p>
         )}
-        {!isLoading && allWords.length === 0 && (
-          <p className="text-sm text-red-500">Failed to load latest data. Showing empty results.</p>
+        {error && (
+          <p className="text-sm text-red-500">Error: {error}</p>
+        )}
+        {!isLoading && allWords.length === 0 && !error && (
+          <p className="text-sm text-muted-foreground">No words available.</p>
         )}
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Discover the beauty of the Chakma language through our comprehensive

@@ -35,6 +35,16 @@ router.post("/words", (req: Request, res: Response) => {
   if (!payload || !payload.chakma_word_script || !payload.english_translation || !payload.romanized_pronunciation) {
     return res.status(400).json({ success: false, error: "Missing required fields" });
   }
+  
+  // Check for duplicate Chakma word
+  const existingWord = wordsStore.find(w => w.chakma_word_script === payload.chakma_word_script);
+  if (existingWord) {
+    return res.status(409).json({ 
+      success: false, 
+      error: `Word with Chakma script "${payload.chakma_word_script}" already exists` 
+    });
+  }
+  
   const now = new Date().toISOString();
   const newWord: Word = {
     id: String(Date.now()),
@@ -63,6 +73,20 @@ router.put("/words/:id", (req: Request, res: Response) => {
   }
   const existing = wordsStore[idx];
   const payload = req.body as Partial<Word>;
+  
+  // Check for duplicate Chakma word (excluding current word)
+  if (payload.chakma_word_script && payload.chakma_word_script !== existing.chakma_word_script) {
+    const duplicateWord = wordsStore.find(w => 
+      w.chakma_word_script === payload.chakma_word_script && w.id !== id
+    );
+    if (duplicateWord) {
+      return res.status(409).json({ 
+        success: false, 
+        error: `Word with Chakma script "${payload.chakma_word_script}" already exists` 
+      });
+    }
+  }
+  
   const updated: Word = {
     ...existing,
     ...payload,

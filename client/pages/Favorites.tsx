@@ -20,35 +20,34 @@ import {
 import { cn } from '@/lib/utils';
 
 import { Word } from '@shared/types';
-import { apiClient } from '@/lib/apiClient';
+import { useWordStore } from '@/lib/wordStore';
 import { FavoritesManager, AudioManager } from '@/lib/storage';
 
 export default function Favorites() {
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [favoriteWords, setFavoriteWords] = useState<Word[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredWords, setFilteredWords] = useState<Word[]>([]);
+
+  // Use global word store
+  const { words: allWords, getWordById } = useWordStore();
 
   useEffect(() => {
     const favoriteIds = FavoritesManager.get();
     setFavorites(favoriteIds);
-
-    (async () => {
-      try {
-        const all = await apiClient.getWords();
-        const words = all.filter(w => favoriteIds.includes(w.id));
-        setFavoriteWords(words);
-        setFilteredWords(words);
-      } catch (e) {
-        console.error('Failed to load favorite words', e);
-      }
-    })();
   }, []);
+
+  // Update favorite words when allWords changes
+  useEffect(() => {
+    const favoriteWords = allWords.filter(w => favorites.includes(w.id));
+    setFilteredWords(favoriteWords);
+  }, [allWords, favorites]);
 
   useEffect(() => {
     if (!searchQuery.trim()) {
+      const favoriteWords = allWords.filter(w => favorites.includes(w.id));
       setFilteredWords(favoriteWords);
     } else {
+      const favoriteWords = allWords.filter(w => favorites.includes(w.id));
       const filtered = favoriteWords.filter(word =>
         word.english_translation.toLowerCase().includes(searchQuery.toLowerCase()) ||
         word.chakma_word_script.includes(searchQuery) ||
@@ -56,7 +55,7 @@ export default function Favorites() {
       );
       setFilteredWords(filtered);
     }
-  }, [searchQuery, favoriteWords]);
+  }, [searchQuery, allWords, favorites]);
 
   const handleRemoveFavorite = (wordId: string) => {
     FavoritesManager.remove(wordId);
@@ -87,7 +86,7 @@ export default function Favorites() {
   const exportFavorites = () => {
     const data = {
       exported_at: new Date().toISOString(),
-      words: favoriteWords
+      words: filteredWords
     };
     
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -111,7 +110,7 @@ export default function Favorites() {
             Your saved words collection
           </p>
         </div>
-        {favoriteWords.length > 0 && (
+        {filteredWords.length > 0 && (
           <div className="flex gap-2">
             <Button variant="outline" onClick={exportFavorites}>
               <Download className="h-4 w-4 mr-2" />
@@ -125,7 +124,7 @@ export default function Favorites() {
         )}
       </div>
 
-      {favoriteWords.length === 0 ? (
+      {filteredWords.length === 0 ? (
         <Card className="text-center py-16">
           <CardContent>
             <HeartOff className="h-16 w-16 text-muted-foreground mx-auto mb-4" />

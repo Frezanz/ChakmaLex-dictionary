@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
-import { apiClient } from "@/lib/apiClient";
+import { useWordStore } from "@/lib/wordStore";
 
 import {
   Word,
@@ -125,23 +125,21 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [activeTab, setActiveTab] = useState("words");
 
   // Content management state
-  const [words, setWords] = useState<Word[]>(sampleWords);
   const [characters, setCharacters] = useState<Character[]>(sampleCharacters);
   const [syncStatus, setSyncStatus] = useState<"idle" | "syncing" | "success" | "error">("idle");
   const { toast } = useToast();
 
+  // Use global word store
+  const { words, addWord, updateWord, deleteWord, refreshWords } = useWordStore();
+
   useEffect(() => {
     if (!isAuthenticated) return;
     let cancelled = false;
-    const fetchData = async () => {
+    const fetchCharacters = async () => {
       try {
         setSyncStatus("syncing");
-        const [w, c] = await Promise.all([
-          apiClient.getWords(),
-          apiClient.getCharacters(),
-        ]);
+        const c = await apiClient.getCharacters();
         if (!cancelled) {
-          setWords(w);
           setCharacters(c);
           setSyncStatus("success");
         }
@@ -151,7 +149,7 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
         toast({ title: "Sync failed", description: err?.message ?? "Unable to load data", variant: "destructive" });
       }
     };
-    fetchData();
+    fetchCharacters();
     return () => { cancelled = true; };
   }, [isAuthenticated]);
 
@@ -190,7 +188,7 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
       words,
       characters,
       exportedAt: new Date().toISOString(),
-      version: "1.0.0",
+      version: "2.0.0",
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -211,14 +209,29 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = JSON.parse(e.target?.result as string);
-        if (data.words) setWords(data.words);
+        if (data.words) {
+          // Import words through the API to ensure validation and consistency
+          for (const word of data.words) {
+            try {
+              const { id, created_at, updated_at, ...rest } = word;
+              await addWord(rest);
+            } catch (err: any) {
+              if (err.message.includes('already exists')) {
+                console.warn(`Word "${word.chakma_word_script}" already exists, skipping`);
+              } else {
+                throw err;
+              }
+            }
+          }
+        }
         if (data.characters) setCharacters(data.characters);
-        alert("Data imported successfully!");
+        toast({ title: "Import successful", description: "Data imported successfully!" });
       } catch (error) {
-        alert("Import failed: Invalid file format");
+        console.error("Import failed:", error);
+        toast({ title: "Import failed", description: "Invalid file format or import error", variant: "destructive" });
       }
     };
     reader.readAsText(file);
@@ -309,13 +322,11 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                   try {
                     setSyncStatus("syncing");
                     if (editingWord && word.id) {
-                      const updated = await apiClient.updateWord(word.id, word);
-                      setWords(words.map((w) => (w.id === updated.id ? updated : w)));
+                      const updated = await updateWord(word.id, word);
                       toast({ title: "Word updated", description: `${updated.english_translation}` });
                     } else {
                       const { id, created_at, updated_at, ...rest } = word as any;
-                      const created = await apiClient.createWord(rest);
-                      setWords([created, ...words]);
+                      const created = await addWord(rest);
                       toast({ title: "Word created", description: `${created.english_translation}` });
                     }
                     setSyncStatus("success");
@@ -329,8 +340,7 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 onDelete={async (id) => {
                   try {
                     setSyncStatus("syncing");
-                    await apiClient.deleteWord(id);
-                    setWords(words.filter((w) => w.id !== id));
+                    await deleteWord(id);
                     setSyncStatus("success");
                     toast({ title: "Word deleted" });
                   } catch (err: any) {
