@@ -417,7 +417,7 @@ export const clearAllData = (): void => {
       localStorage.removeItem(key);
     });
 
-    // Reset to default theme
+    // Reset to default theme and font size
     PreferencesManager.applyTheme("light");
     PreferencesManager.applyFontSize("base");
     PreferencesManager.resetCustomColors();
