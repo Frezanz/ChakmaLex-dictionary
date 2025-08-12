@@ -334,8 +334,8 @@ function WordCard({
   return (
     <Card
       className={cn(
-        "cursor-pointer transition-all duration-200 hover:shadow-md",
-        isSelected && "ring-2 ring-primary border-primary",
+        "word-card cursor-pointer",
+        isSelected && "word-card-selected"
       )}
       onClick={onSelect}
     >
