@@ -133,8 +133,11 @@
     --ring: 25 100% 30%;
 
     --chakma-primary: 25 100% 30%;
-    --chakma-secondary: 39 84% 45%;
+    --chakma-secondary: 39 96% 45%;
     --chakma-accent: 200 50% 40%;
+    --chakma-gradient-start: 25 100% 30%;
+    --chakma-gradient-middle: 39 96% 45%;
+    --chakma-gradient-end: 200 50% 40%;
     --search-bg: 42 30% 92%;
     --audio-button: 25 100% 30%;
   }
