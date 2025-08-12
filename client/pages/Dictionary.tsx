@@ -321,6 +321,16 @@ function WordCard({
   onFavoriteToggle,
   onPlayAudio,
 }: WordCardProps) {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsAnimating(true);
+    onFavoriteToggle();
+
+    // Reset animation after completion
+    setTimeout(() => setIsAnimating(false), 600);
+  };
   return (
     <Card
       className={cn(
