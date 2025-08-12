@@ -328,8 +328,8 @@ function WordCard({
     setIsAnimating(true);
     onFavoriteToggle();
 
-    // Reset animation after completion
-    setTimeout(() => setIsAnimating(false), 600);
+    // Reset animation after completion - faster
+    setTimeout(() => setIsAnimating(false), 300);
   };
   return (
     <Card
