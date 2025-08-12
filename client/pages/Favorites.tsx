@@ -267,10 +267,15 @@ function FavoriteWordCard({ word, onRemove, onPlayAudio }: FavoriteWordCardProps
             <Button
               variant="ghost"
               size="sm"
-              onClick={onRemove}
-              className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+              onClick={handleRemoveClick}
+              className="h-8 w-8 p-0"
             >
-              <Heart className="h-4 w-4 fill-current" />
+              <Heart
+                className={cn(
+                  "h-4 w-4 heart-icon heart-favorite transition-all duration-300",
+                  isAnimating && "animate-bounce"
+                )}
+              />
             </Button>
           </div>
         </div>
