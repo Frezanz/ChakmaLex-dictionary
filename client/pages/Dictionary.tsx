@@ -45,6 +45,7 @@ export default function Dictionary() {
   const [isLoading, setIsLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [allWords, setAllWords] = useState<Word[]>(sampleWords);
 
   // Initialize data
   useEffect(() => {
@@ -53,12 +54,36 @@ export default function Dictionary() {
 
     // Show some featured words initially
     setSearchResults(sampleWords.slice(0, 3));
+
+    // Fetch live words from API
+    (async () => {
+      try {
+        const { apiClient } = await import("@/lib/apiClient");
+        const words = await apiClient.getWords();
+        setAllWords(words as any);
+        setSearchResults(words.slice(0, 3) as any);
+      } catch (e) {
+        console.warn("Falling back to sampleWords; failed to load from API", e);
+      }
+    })();
+
+    // Refresh on visibility/focus to avoid stale data
+    const onFocus = async () => {
+      try {
+        const { apiClient } = await import("@/lib/apiClient");
+        const words = await apiClient.getWords();
+        setAllWords(words as any);
+        if (!searchQuery) setSearchResults(words.slice(0, 3) as any);
+      } catch {}
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
   }, []);
 
   // Handle search
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
-      setSearchResults(sampleWords.slice(0, 3));
+      setSearchResults((allWords.length ? allWords : sampleWords).slice(0, 3));
       setSelectedWord(null);
       return;
     }
@@ -69,7 +94,8 @@ export default function Dictionary() {
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    const results = searchWords(query);
+    const dataset = allWords.length ? allWords : sampleWords;
+    const results = searchWords(query, dataset as any);
     setSearchResults(results);
     setSelectedWord(null);
 
