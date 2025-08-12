@@ -199,6 +199,9 @@
     --chakma-primary: 260 100% 50%;
     --chakma-secondary: 40 100% 50%;
     --chakma-accent: 180 100% 40%;
+    --chakma-gradient-start: 260 100% 50%;
+    --chakma-gradient-middle: 200 100% 45%;
+    --chakma-gradient-end: 180 100% 40%;
     --search-bg: 280 100% 98%;
     --audio-button: 260 100% 50%;
   }
