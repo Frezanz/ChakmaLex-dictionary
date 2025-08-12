@@ -20,7 +20,7 @@ import {
 import { cn } from '@/lib/utils';
 
 import { Word } from '@shared/types';
-import { sampleWords, findWordById } from '@shared/sampleData';
+import { apiClient } from '@/lib/apiClient';
 import { FavoritesManager, AudioManager } from '@/lib/storage';
 
 export default function Favorites() {
@@ -32,10 +32,17 @@ export default function Favorites() {
   useEffect(() => {
     const favoriteIds = FavoritesManager.get();
     setFavorites(favoriteIds);
-    
-    const words = favoriteIds.map(id => findWordById(id)).filter(Boolean) as Word[];
-    setFavoriteWords(words);
-    setFilteredWords(words);
+
+    (async () => {
+      try {
+        const all = await apiClient.getWords();
+        const words = all.filter(w => favoriteIds.includes(w.id));
+        setFavoriteWords(words);
+        setFilteredWords(words);
+      } catch (e) {
+        console.error('Failed to load favorite words', e);
+      }
+    })();
   }, []);
 
   useEffect(() => {

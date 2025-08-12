@@ -34,6 +34,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
+import { apiClient } from "@/lib/apiClient";
 
 import {
   Word,
@@ -125,6 +127,34 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   // Content management state
   const [words, setWords] = useState<Word[]>(sampleWords);
   const [characters, setCharacters] = useState<Character[]>(sampleCharacters);
+  const [syncStatus, setSyncStatus] = useState<"idle" | "syncing" | "success" | "error">("idle");
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    const fetchData = async () => {
+      try {
+        setSyncStatus("syncing");
+        const [w, c] = await Promise.all([
+          apiClient.getWords(),
+          apiClient.getCharacters(),
+        ]);
+        if (!cancelled) {
+          setWords(w);
+          setCharacters(c);
+          setSyncStatus("success");
+        }
+      } catch (err: any) {
+        console.error(err);
+        if (!cancelled) setSyncStatus("error");
+        toast({ title: "Sync failed", description: err?.message ?? "Unable to load data", variant: "destructive" });
+      }
+    };
+    fetchData();
+    return () => { cancelled = true; };
+  }, [isAuthenticated]);
+
   const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [editingCharacter, setEditingCharacter] = useState<Character | null>(
     null,
@@ -275,19 +305,39 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 words={words}
                 editingWord={editingWord}
                 onEdit={setEditingWord}
-                onSave={(word) => {
-                  if (editingWord) {
-                    setWords(words.map((w) => (w.id === word.id ? word : w)));
-                  } else {
-                    setWords([
-                      ...words,
-                      { ...word, id: Date.now().toString() },
-                    ]);
+                onSave={async (word) => {
+                  try {
+                    setSyncStatus("syncing");
+                    if (editingWord && word.id) {
+                      const updated = await apiClient.updateWord(word.id, word);
+                      setWords(words.map((w) => (w.id === updated.id ? updated : w)));
+                      toast({ title: "Word updated", description: `${updated.english_translation}` });
+                    } else {
+                      const { id, created_at, updated_at, ...rest } = word as any;
+                      const created = await apiClient.createWord(rest);
+                      setWords([created, ...words]);
+                      toast({ title: "Word created", description: `${created.english_translation}` });
+                    }
+                    setSyncStatus("success");
+                  } catch (err: any) {
+                    console.error(err);
+                    setSyncStatus("error");
+                    toast({ title: "Save failed", description: err?.message ?? "Unable to save word", variant: "destructive" });
                   }
                   setEditingWord(null);
                 }}
-                onDelete={(id) => {
-                  setWords(words.filter((w) => w.id !== id));
+                onDelete={async (id) => {
+                  try {
+                    setSyncStatus("syncing");
+                    await apiClient.deleteWord(id);
+                    setWords(words.filter((w) => w.id !== id));
+                    setSyncStatus("success");
+                    toast({ title: "Word deleted" });
+                  } catch (err: any) {
+                    console.error(err);
+                    setSyncStatus("error");
+                    toast({ title: "Delete failed", description: err?.message ?? "Unable to delete word", variant: "destructive" });
+                  }
                 }}
                 onCancel={() => setEditingWord(null)}
               />
@@ -299,23 +349,41 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 characters={characters}
                 editingCharacter={editingCharacter}
                 onEdit={setEditingCharacter}
-                onSave={(character) => {
-                  if (editingCharacter) {
-                    setCharacters(
-                      characters.map((c) =>
-                        c.id === character.id ? character : c,
-                      ),
-                    );
-                  } else {
-                    setCharacters([
-                      ...characters,
-                      { ...character, id: Date.now().toString() },
-                    ]);
+                onSave={async (character) => {
+                  try {
+                    setSyncStatus("syncing");
+                    if (editingCharacter && character.id) {
+                      const updated = await apiClient.updateCharacter(character.id, character);
+                      setCharacters(
+                        characters.map((c) => (c.id === updated.id ? updated : c)),
+                      );
+                      toast({ title: "Character updated", description: `${updated.romanized_name}` });
+                    } else {
+                      const { id, created_at, ...rest } = character as any;
+                      const created = await apiClient.createCharacter(rest);
+                      setCharacters([created, ...characters]);
+                      toast({ title: "Character created", description: `${created.romanized_name}` });
+                    }
+                    setSyncStatus("success");
+                  } catch (err: any) {
+                    console.error(err);
+                    setSyncStatus("error");
+                    toast({ title: "Save failed", description: err?.message ?? "Unable to save character", variant: "destructive" });
                   }
                   setEditingCharacter(null);
                 }}
-                onDelete={(id) => {
-                  setCharacters(characters.filter((c) => c.id !== id));
+                onDelete={async (id) => {
+                  try {
+                    setSyncStatus("syncing");
+                    await apiClient.deleteCharacter(id);
+                    setCharacters(characters.filter((c) => c.id !== id));
+                    setSyncStatus("success");
+                    toast({ title: "Character deleted" });
+                  } catch (err: any) {
+                    console.error(err);
+                    setSyncStatus("error");
+                    toast({ title: "Delete failed", description: err?.message ?? "Unable to delete character", variant: "destructive" });
+                  }
                 }}
                 onCancel={() => setEditingCharacter(null)}
               />
@@ -458,23 +526,39 @@ function WordForm({
   onSave: (word: Word) => void;
   onCancel: () => void;
 }) {
-  const [formData, setFormData] = useState(word);
+  const [formData, setFormData] = useState<Word>(word);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  const addRelatedTerm = (type: "synonyms" | "antonyms") => {
+    const list = (formData[type] ?? []).slice();
+    list.push({ term: "", language: "chakma" });
+    setFormData({ ...formData, [type]: list } as Word);
+  };
+
+  const updateRelatedTerm = (type: "synonyms" | "antonyms", index: number, field: "term" | "language", value: any) => {
+    const list = (formData[type] ?? []).slice();
+    list[index] = { ...list[index], [field]: value };
+    setFormData({ ...formData, [type]: list } as Word);
+  };
+
+  const removeRelatedTerm = (type: "synonyms" | "antonyms", index: number) => {
+    const list = (formData[type] ?? []).slice();
+    list.splice(index, 1);
+    setFormData({ ...formData, [type]: list } as Word);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let audioUrl = formData.audio_pronunciation_url;
 
-    // Handle audio upload if file is selected
     if (audioFile) {
       setIsUploading(true);
       try {
         audioUrl = await handleAudioUpload(audioFile);
       } catch (error) {
-        console.error("Audio upload failed:", error);
-        alert("Audio upload failed. Please try again.");
+        alert("Audio upload failed");
         setIsUploading(false);
         return;
       }
@@ -567,6 +651,72 @@ function WordForm({
           placeholder="Chakma people"
           required
         />
+      </div>
+
+      {/* Synonyms editor */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label>Synonyms</Label>
+          <Button type="button" variant="outline" size="sm" onClick={() => addRelatedTerm("synonyms")}>
+            <Plus className="h-4 w-4 mr-1" /> Add
+          </Button>
+        </div>
+        {(formData.synonyms ?? []).map((syn, idx) => (
+          <div key={`syn-${idx}`} className="grid grid-cols-3 gap-2">
+            <Input
+              value={syn.term}
+              onChange={(e) => updateRelatedTerm("synonyms", idx, "term", e.target.value)}
+              placeholder="Term"
+              className={syn.language === "chakma" ? "font-chakma" : undefined}
+            />
+            <select
+              className="border rounded px-2 py-2 bg-transparent"
+              value={syn.language}
+              onChange={(e) => updateRelatedTerm("synonyms", idx, "language", e.target.value)}
+            >
+              <option value="chakma">Chakma</option>
+              <option value="english">English</option>
+            </select>
+            <div className="flex items-center">
+              <Button type="button" variant="ghost" onClick={() => removeRelatedTerm("synonyms", idx)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Antonyms editor */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label>Antonyms</Label>
+          <Button type="button" variant="outline" size="sm" onClick={() => addRelatedTerm("antonyms")}>
+            <Plus className="h-4 w-4 mr-1" /> Add
+          </Button>
+        </div>
+        {(formData.antonyms ?? []).map((ant, idx) => (
+          <div key={`ant-${idx}`} className="grid grid-cols-3 gap-2">
+            <Input
+              value={ant.term}
+              onChange={(e) => updateRelatedTerm("antonyms", idx, "term", e.target.value)}
+              placeholder="Term"
+              className={ant.language === "chakma" ? "font-chakma" : undefined}
+            />
+            <select
+              className="border rounded px-2 py-2 bg-transparent"
+              value={ant.language}
+              onChange={(e) => updateRelatedTerm("antonyms", idx, "language", e.target.value)}
+            >
+              <option value="chakma">Chakma</option>
+              <option value="english">English</option>
+            </select>
+            <div className="flex items-center">
+              <Button type="button" variant="ghost" onClick={() => removeRelatedTerm("antonyms", idx)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        ))}
       </div>
 
       <div>
