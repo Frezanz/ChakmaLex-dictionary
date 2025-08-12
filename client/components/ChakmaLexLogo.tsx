@@ -23,19 +23,19 @@ export default function ChakmaLexLogo({
   const sizes = {
     sm: {
       container: 'h-8 w-8',
-      text: 'text-lg',
+      text: 'text-xs',
       titleText: 'text-sm',
       subtitleText: 'text-xs'
     },
     md: {
       container: 'h-12 w-12',
-      text: 'text-xl',
+      text: 'text-sm',
       titleText: 'text-xl',
       subtitleText: 'text-xs'
     },
     lg: {
       container: 'h-16 w-16',
-      text: 'text-3xl',
+      text: 'text-lg',
       titleText: 'text-3xl',
       subtitleText: 'text-sm'
     }
@@ -135,7 +135,7 @@ export function AnimatedChakmaLexLogo({ className }: { className?: string }) {
         
         {/* Logo center */}
         <div className="absolute inset-3 bg-gradient-to-br from-emerald-500 via-blue-600 to-purple-700 rounded-full flex items-center justify-center shadow-2xl">
-          <span className="text-xl font-bold text-white drop-shadow-lg tracking-tight">CkLex</span>
+          <span className="text-sm font-bold text-white drop-shadow-lg tracking-tight">CkLex</span>
         </div>
         
         {/* Orbiting elements */}
@@ -170,7 +170,7 @@ export function CompactLogo({ className }: { className?: string }) {
         <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent" />
         
         <div className="h-full w-full flex items-center justify-center">
-          <span className="text-sm font-bold text-white drop-shadow tracking-tight">CkLex</span>
+          <span className="text-xs font-bold text-white drop-shadow tracking-tight">CkLex</span>
         </div>
       </div>
     </div>
@@ -180,9 +180,9 @@ export function CompactLogo({ className }: { className?: string }) {
 // Special variant for dark mode
 export function DarkModeLogo({ size = 'md', className }: { size?: 'sm' | 'md' | 'lg', className?: string }) {
   const sizes = {
-    sm: { container: 'h-8 w-8', text: 'text-lg' },
-    md: { container: 'h-12 w-12', text: 'text-xl' },
-    lg: { container: 'h-16 w-16', text: 'text-3xl' }
+    sm: { container: 'h-8 w-8', text: 'text-xs' },
+    md: { container: 'h-12 w-12', text: 'text-sm' },
+    lg: { container: 'h-16 w-16', text: 'text-lg' }
   };
 
   return (
