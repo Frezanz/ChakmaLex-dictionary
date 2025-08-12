@@ -209,8 +209,8 @@ export default function Settings() {
                   )}
                 >
                   <div className="font-medium">{font.label}</div>
-                  <div className="text-xs text-muted-foreground" style={{ fontSize: font.size }}>
-                    Sample text
+                  <div className="text-xs text-muted-foreground">
+                    Preview text
                   </div>
                 </button>
               ))}
