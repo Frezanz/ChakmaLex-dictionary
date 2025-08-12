@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+import wordsRouter from "./routes/words";
+import charactersRouter from "./routes/characters";
 
 export function createServer() {
   const app = express();
@@ -18,6 +20,10 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+
+  // Dictionary & character APIs
+  app.use("/api/words", wordsRouter);
+  app.use("/api/characters", charactersRouter);
 
   return app;
 }

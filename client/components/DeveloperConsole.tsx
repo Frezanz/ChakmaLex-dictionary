@@ -42,7 +42,18 @@ import {
   CharacterFormData,
   CharacterType,
 } from "@shared/types";
-import { sampleWords, sampleCharacters } from "@shared/sampleData";
+// import of sample data removed (now fetched from API)
+import {
+  fetchWords,
+  addWord,
+  updateWord as apiUpdateWord,
+  deleteWord as apiDeleteWord,
+  fetchCharacters,
+  addCharacter,
+  updateCharacter as apiUpdateCharacter,
+  deleteCharacter as apiDeleteCharacter,
+} from "@/lib/api";
+import { parseRelatedText, stringifyRelated } from "@/lib/utils";
 import { DeveloperConsoleManager } from "@/lib/storage";
 
 interface DeveloperConsoleProps {
@@ -123,8 +134,8 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [activeTab, setActiveTab] = useState("words");
 
   // Content management state
-  const [words, setWords] = useState<Word[]>(sampleWords);
-  const [characters, setCharacters] = useState<Character[]>(sampleCharacters);
+  const [words, setWords] = useState<Word[]>([]);
+  const [characters, setCharacters] = useState<Character[]>([]);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [editingCharacter, setEditingCharacter] = useState<Character | null>(
     null,
@@ -132,6 +143,19 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [aiGeneratedWords, setAiGeneratedWords] = useState<string[]>([]);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
+
+  // Load latest data on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const [w, c] = await Promise.all([fetchWords(), fetchCharacters()]);
+        setWords(w);
+        setCharacters(c);
+      } catch (err) {
+        console.error("Failed to load data", err);
+      }
+    })();
+  }, []);
 
   const validPasswords = [
     "frezanz120913",
@@ -277,17 +301,24 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 onEdit={setEditingWord}
                 onSave={(word) => {
                   if (editingWord) {
-                    setWords(words.map((w) => (w.id === word.id ? word : w)));
+                    apiUpdateWord(word.id, word)
+                      .then((updated) => {
+                        setWords(words.map((w) => (w.id === updated.id ? updated : w)));
+                      })
+                      .catch((err) => alert(`Update failed: ${err.message}`));
                   } else {
-                    setWords([
-                      ...words,
-                      { ...word, id: Date.now().toString() },
-                    ]);
+                    addWord(word)
+                      .then((created) => {
+                        setWords([...words, created]);
+                      })
+                      .catch((err) => alert(`Create failed: ${err.message}`));
                   }
                   setEditingWord(null);
                 }}
                 onDelete={(id) => {
-                  setWords(words.filter((w) => w.id !== id));
+                  apiDeleteWord(id)
+                    .then(() => setWords(words.filter((w) => w.id !== id)))
+                    .catch((err) => alert(`Delete failed: ${err.message}`));
                 }}
                 onCancel={() => setEditingWord(null)}
               />
@@ -301,21 +332,24 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 onEdit={setEditingCharacter}
                 onSave={(character) => {
                   if (editingCharacter) {
-                    setCharacters(
-                      characters.map((c) =>
-                        c.id === character.id ? character : c,
-                      ),
-                    );
+                    apiUpdateCharacter(character.id, character)
+                      .then((updated) => {
+                        setCharacters(
+                          characters.map((c) => (c.id === updated.id ? updated : c)),
+                        );
+                      })
+                      .catch((err) => alert(`Update failed: ${err.message}`));
                   } else {
-                    setCharacters([
-                      ...characters,
-                      { ...character, id: Date.now().toString() },
-                    ]);
+                    addCharacter(character)
+                      .then((created) => setCharacters([...characters, created]))
+                      .catch((err) => alert(`Create failed: ${err.message}`));
                   }
                   setEditingCharacter(null);
                 }}
                 onDelete={(id) => {
-                  setCharacters(characters.filter((c) => c.id !== id));
+                  apiDeleteCharacter(id)
+                    .then(() => setCharacters(characters.filter((c) => c.id !== id)))
+                    .catch((err) => alert(`Delete failed: ${err.message}`));
                 }}
                 onCancel={() => setEditingCharacter(null)}
               />
@@ -459,6 +493,12 @@ function WordForm({
   onCancel: () => void;
 }) {
   const [formData, setFormData] = useState(word);
+  const [synonymsText, setSynonymsText] = useState(
+    stringifyRelated(word.synonyms) || "",
+  );
+  const [antonymsText, setAntonymsText] = useState(
+    stringifyRelated(word.antonyms) || "",
+  );
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -483,6 +523,8 @@ function WordForm({
 
     onSave({
       ...formData,
+      synonyms: parseRelatedText(synonymsText),
+      antonyms: parseRelatedText(antonymsText),
       audio_pronunciation_url: audioUrl,
       updated_at: new Date().toISOString(),
     });
@@ -646,6 +688,33 @@ function WordForm({
           </p>
         </div>
       </div>
+
+      {/* Synonyms */}
+      <div>
+        <Label>Synonyms (one per line, format term:language)</Label>
+        <Textarea
+          value={synonymsText}
+          onChange={(e) => setSynonymsText(e.target.value)}
+          placeholder={"𑄃𑄏𑄮:chakma\nnow:english"}
+        />
+        <p className="text-xs text-muted-foreground mt-1">
+          Example: <code>𑄃𑄏𑄮:chakma</code> or <code>now:english</code>
+        </p>
+      </div>
+
+      {/* Antonyms */}
+      <div>
+        <Label>Antonyms (one per line, format term:language)</Label>
+        <Textarea
+          value={antonymsText}
+          onChange={(e) => setAntonymsText(e.target.value)}
+          placeholder={"𑄇𑄣𑄌𑄢:chakma\nyesterday:english"}
+        />
+        <p className="text-xs text-muted-foreground mt-1">
+          Example: <code>𑄇𑄣𑄌𑄢:chakma</code> or <code>yesterday:english</code>
+        </p>
+      </div>
+
     </form>
   );
 }

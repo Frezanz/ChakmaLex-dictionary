@@ -24,11 +24,8 @@ import { cn } from "@/lib/utils";
 
 // Data and utilities
 import { Word, SearchHistoryItem } from "@shared/types";
-import {
-  sampleWords,
-  searchWords,
-  sampleSearchHistory,
-} from "@shared/sampleData";
+import { fetchWords } from "@/lib/api";
+// sampleSearchHistory import removed - history now handled via local manager
 import {
   SearchHistoryManager,
   FavoritesManager,
@@ -39,6 +36,7 @@ import {
 export default function Dictionary() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Word[]>([]);
+  const [allWords, setAllWords] = useState<Word[]>([]);
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -51,14 +49,22 @@ export default function Dictionary() {
     setSearchHistory(SearchHistoryManager.get());
     setFavorites(FavoritesManager.get());
 
-    // Show some featured words initially
-    setSearchResults(sampleWords.slice(0, 3));
+    // Fetch latest words from backend
+    (async () => {
+      try {
+        const words = await fetchWords();
+        setAllWords(words);
+        setSearchResults(words.slice(0, 3));
+      } catch (err) {
+        console.error("Failed to fetch words", err);
+      }
+    })();
   }, []);
 
   // Handle search
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
-      setSearchResults(sampleWords.slice(0, 3));
+      setSearchResults(allWords.slice(0, 3));
       setSelectedWord(null);
       return;
     }
@@ -66,10 +72,14 @@ export default function Dictionary() {
     setIsLoading(true);
     setShowHistory(false);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    const results = searchWords(query);
+    const lower = query.toLowerCase();
+    const results = allWords.filter((word) =>
+      word.english_translation.toLowerCase().includes(lower) ||
+      word.chakma_word_script.includes(query) ||
+      word.romanized_pronunciation.toLowerCase().includes(lower) ||
+      word.synonyms?.some((s) => s.term.toLowerCase().includes(lower)) ||
+      word.antonyms?.some((a) => a.term.toLowerCase().includes(lower)),
+    );
     setSearchResults(results);
     setSelectedWord(null);
 

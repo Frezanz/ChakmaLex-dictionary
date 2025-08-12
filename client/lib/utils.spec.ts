@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cn } from "./utils";
+import { cn, parseRelatedText, stringifyRelated } from "./utils";
 
 describe("cn function", () => {
   it("should merge classes correctly", () => {
@@ -28,5 +28,17 @@ describe("cn function", () => {
     expect(cn("base", { conditional: true, "not-included": false })).toBe(
       "base conditional",
     );
+  });
+
+  it("should parse and stringify related terms correctly", () => {
+    const text = "𑄃𑄘𑄮:chakma\nnow:english";
+    const parsed = parseRelatedText(text);
+    expect(parsed).toEqual([
+      { term: "𑄃𑄘𑄮", language: "chakma" },
+      { term: "now", language: "english" },
+    ]);
+
+    const stringified = stringifyRelated(parsed);
+    expect(stringified).toBe("𑄃𑄘𑄮:chakma\nnow:english");
   });
 });
