@@ -1,5 +1,5 @@
 /* Custom font for Chakma script - replace with actual Chakma font */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Chakma&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Chakma&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -35,12 +35,15 @@
     --ring: 142 76% 36%;
     --radius: 0.5rem;
 
-    /* ChakmaLex specific colors */
-    --chakma-primary: 142 76% 36%;
-    --chakma-secondary: 39 84% 56%;
-    --chakma-accent: 221 83% 53%;
+    /* ChakmaLex specific colors - Enhanced */
+    --chakma-primary: 160 84% 39%; /* Vibrant emerald */
+    --chakma-secondary: 39 96% 56%; /* Bright golden yellow */
+    --chakma-accent: 259 94% 51%; /* Rich purple */
+    --chakma-gradient-start: 160 84% 39%;
+    --chakma-gradient-middle: 217 91% 60%;
+    --chakma-gradient-end: 259 94% 51%;
     --search-bg: 0 0% 98%;
-    --audio-button: 142 76% 36%;
+    --audio-button: 160 84% 39%;
   }
 
   /* Dark Theme */
@@ -65,11 +68,14 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 142 76% 36%;
 
-    --chakma-primary: 142 76% 36%;
-    --chakma-secondary: 39 84% 56%;
-    --chakma-accent: 221 83% 53%;
+    --chakma-primary: 160 84% 39%; /* Vibrant emerald */
+    --chakma-secondary: 39 96% 56%; /* Bright golden yellow */
+    --chakma-accent: 259 94% 51%; /* Rich purple */
+    --chakma-gradient-start: 160 84% 39%;
+    --chakma-gradient-middle: 217 91% 60%;
+    --chakma-gradient-end: 259 94% 51%;
     --search-bg: 217.2 32.6% 17.5%;
-    --audio-button: 142 76% 36%;
+    --audio-button: 160 84% 39%;
   }
 
   /* OLED Theme - Pure blacks for OLED displays */
@@ -94,11 +100,14 @@
     --input: 0 0% 15%;
     --ring: 142 76% 36%;
 
-    --chakma-primary: 142 76% 36%;
-    --chakma-secondary: 39 84% 56%;
-    --chakma-accent: 221 83% 53%;
+    --chakma-primary: 160 84% 39%;
+    --chakma-secondary: 39 96% 56%;
+    --chakma-accent: 259 94% 51%;
+    --chakma-gradient-start: 160 84% 39%;
+    --chakma-gradient-middle: 217 91% 60%;
+    --chakma-gradient-end: 259 94% 51%;
     --search-bg: 0 0% 8%;
-    --audio-button: 142 76% 36%;
+    --audio-button: 160 84% 39%;
   }
 
   /* Sepia Theme - Easy on the eyes */
@@ -124,8 +133,11 @@
     --ring: 25 100% 30%;
 
     --chakma-primary: 25 100% 30%;
-    --chakma-secondary: 39 84% 45%;
+    --chakma-secondary: 39 96% 45%;
     --chakma-accent: 200 50% 40%;
+    --chakma-gradient-start: 25 100% 30%;
+    --chakma-gradient-middle: 39 96% 45%;
+    --chakma-gradient-end: 200 50% 40%;
     --search-bg: 42 30% 92%;
     --audio-button: 25 100% 30%;
   }
@@ -153,8 +165,11 @@
     --ring: 15 100% 45%;
 
     --chakma-primary: 15 100% 45%;
-    --chakma-secondary: 39 84% 56%;
+    --chakma-secondary: 39 96% 56%;
     --chakma-accent: 45 70% 50%;
+    --chakma-gradient-start: 15 100% 45%;
+    --chakma-gradient-middle: 39 96% 56%;
+    --chakma-gradient-end: 45 70% 50%;
     --search-bg: 30 30% 95%;
     --audio-button: 15 100% 45%;
   }
@@ -184,6 +199,9 @@
     --chakma-primary: 260 100% 50%;
     --chakma-secondary: 40 100% 50%;
     --chakma-accent: 180 100% 40%;
+    --chakma-gradient-start: 260 100% 50%;
+    --chakma-gradient-middle: 200 100% 45%;
+    --chakma-gradient-end: 180 100% 40%;
     --search-bg: 280 100% 98%;
     --audio-button: 260 100% 50%;
   }
@@ -196,12 +214,15 @@
 
   body {
     @apply bg-background text-foreground transition-colors duration-300;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
   }
 
   /* Chakma script font family */
   .chakma-text {
-    font-family: 'Noto Sans Chakma', sans-serif;
+    font-family: "Noto Sans Chakma", sans-serif;
     font-weight: 400;
   }
 
@@ -233,18 +254,37 @@
   }
 
   /* Dynamic font size classes */
-  .font-size-xs { font-size: 0.75rem; }
-  .font-size-sm { font-size: 0.875rem; }
-  .font-size-base { font-size: 1rem; }
-  .font-size-lg { font-size: 1.125rem; }
-  .font-size-xl { font-size: 1.25rem; }
-  .font-size-2xl { font-size: 1.5rem; }
-  .font-size-3xl { font-size: 1.875rem; }
+  .font-size-xs {
+    font-size: 0.75rem;
+  }
+  .font-size-sm {
+    font-size: 0.875rem;
+  }
+  .font-size-base {
+    font-size: 1rem;
+  }
+  .font-size-lg {
+    font-size: 1.125rem;
+  }
+  .font-size-xl {
+    font-size: 1.25rem;
+  }
+  .font-size-2xl {
+    font-size: 1.5rem;
+  }
+  .font-size-3xl {
+    font-size: 1.875rem;
+  }
 
   /* Audio button pulse animation */
   @keyframes audio-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
   }
 
   .audio-playing {
