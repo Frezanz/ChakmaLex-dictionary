@@ -436,9 +436,11 @@
     transform: scale(1.02);
   }
 
-  .word-card-selected .chakma-text {
-    color: hsl(var(--chakma-primary));
+  .word-card-selected .chakma-text,
+  .word-card-selected .text-chakma-primary {
+    color: hsl(var(--chakma-primary)) !important;
     text-shadow: 0 0 8px hsl(var(--chakma-primary) / 0.4);
+    filter: brightness(1.2);
   }
 
   .word-card-selected .english-translation {
