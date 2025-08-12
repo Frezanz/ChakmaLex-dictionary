@@ -1338,50 +1338,62 @@ function DataManagement({
 }: any) {
   return (
     <div className="space-y-6">
+      <div className="text-center">
+        <Database className="h-12 w-12 text-chakma-primary mx-auto mb-4" />
+        <h3 className="text-lg font-semibold mb-2">
+          Repository Data Export
+        </h3>
+        <p className="text-muted-foreground">
+          Export dictionary data in GitHub repository format for direct upload.
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <Card className="p-4 text-center">
           <FileText className="h-8 w-8 text-chakma-primary mx-auto mb-2" />
           <div className="text-2xl font-bold">{wordsCount}</div>
-          <p className="text-sm text-muted-foreground">Words</p>
+          <p className="text-sm text-muted-foreground">Dictionary Words</p>
         </Card>
         <Card className="p-4 text-center">
-          <Database className="h-8 w-8 text-chakma-secondary mx-auto mb-2" />
+          <Settings className="h-8 w-8 text-chakma-secondary mx-auto mb-2" />
           <div className="text-2xl font-bold">{charactersCount}</div>
-          <p className="text-sm text-muted-foreground">Characters</p>
+          <p className="text-sm text-muted-foreground">Chakma Characters</p>
         </Card>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="p-4">
-          <h3 className="font-medium mb-3">Export Data</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Download all content as JSON backup
-          </p>
-          <Button onClick={onExport} className="w-full">
-            <Download className="h-4 w-4 mr-2" />
-            Export Content
-          </Button>
-        </Card>
-
-        <Card className="p-4">
-          <h3 className="font-medium mb-3">Import Data</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Restore content from JSON backup
-          </p>
-          <div className="relative">
-            <input
-              type="file"
-              accept=".json"
-              onChange={onImport}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-            <Button className="w-full">
-              <Upload className="h-4 w-4 mr-2" />
-              Import Content
-            </Button>
+      <Card className="p-6">
+        <div className="space-y-4">
+          <div className="text-center">
+            <h3 className="font-medium mb-2">Export Repository Data</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Downloads a JSON file compatible with the ChakmaLex repository format.
+              This file can be directly uploaded to GitHub for data management.
+            </p>
           </div>
-        </Card>
-      </div>
+
+          <Button onClick={onExport} className="w-full h-12 text-base">
+            <Download className="h-5 w-5 mr-2" />
+            Download Repository JSON
+          </Button>
+
+          <div className="text-xs text-muted-foreground text-center space-y-1">
+            <p>• Includes all words with proper formatting</p>
+            <p>• Characters grouped by type</p>
+            <p>• Compatible with existing repository structure</p>
+            <p>• Ready for GitHub upload and version control</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-4 bg-muted/50">
+        <div className="text-center">
+          <h4 className="font-medium text-sm mb-2">Import Functionality</h4>
+          <p className="text-xs text-muted-foreground">
+            Import functionality has been disabled in this view-only version.
+            Use the exported JSON files with your repository management system.
+          </p>
+        </div>
+      </Card>
     </div>
   );
 }
