@@ -100,11 +100,14 @@
     --input: 0 0% 15%;
     --ring: 142 76% 36%;
 
-    --chakma-primary: 142 76% 36%;
-    --chakma-secondary: 39 84% 56%;
-    --chakma-accent: 221 83% 53%;
+    --chakma-primary: 160 84% 39%;
+    --chakma-secondary: 39 96% 56%;
+    --chakma-accent: 259 94% 51%;
+    --chakma-gradient-start: 160 84% 39%;
+    --chakma-gradient-middle: 217 91% 60%;
+    --chakma-gradient-end: 259 94% 51%;
     --search-bg: 0 0% 8%;
-    --audio-button: 142 76% 36%;
+    --audio-button: 160 84% 39%;
   }
 
   /* Sepia Theme - Easy on the eyes */
