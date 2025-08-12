@@ -1,7 +1,7 @@
 /**
  * Developer Console for ChakmaLex
- * Hidden content management system accessible via logo taps + password
- * Features: CRUD operations, audio upload, AI word generation, data export/import
+ * Touch-friendly content management system accessible via logo taps + password
+ * Features: CRUD operations, audio upload, AI word generation, data export/import, GitHub sync
  */
 
 import React, { useState, useEffect } from "react";
@@ -32,6 +32,9 @@ import {
   Volume2,
   Music,
   RefreshCw,
+  ChevronDown,
+  ChevronUp,
+  Image as ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +47,7 @@ import {
 } from "@shared/types";
 import { sampleWords, sampleCharacters } from "@shared/sampleData";
 import { DeveloperConsoleManager } from "@/lib/storage";
+import { APIClient, APIError } from "@/lib/api";
 
 interface DeveloperConsoleProps {
   onClose: () => void;
@@ -52,68 +56,18 @@ interface DeveloperConsoleProps {
 // Helper function to generate random English words
 const generateRandomEnglishWords = (count: number): string[] => {
   const commonWords = [
-    "happiness",
-    "mountain",
-    "river",
-    "beautiful",
-    "friendship",
-    "journey",
-    "wisdom",
-    "courage",
-    "peaceful",
-    "traditional",
-    "family",
-    "education",
-    "culture",
-    "celebration",
-    "community",
-    "nature",
-    "freedom",
-    "respect",
-    "harmony",
-    "strength",
-    "knowledge",
-    "compassion",
-    "unity",
-    "heritage",
-    "dignity",
-    "prosperity",
-    "abundance",
-    "serenity",
-    "gratitude",
-    "enlightenment",
-    "adventure",
-    "discovery",
-    "creativity",
-    "innovation",
-    "inspiration",
-    "dedication",
-    "perseverance",
-    "excellence",
-    "achievement",
-    "success",
-    "progress",
-    "development",
-    "growth",
-    "improvement",
+    "happiness", "mountain", "river", "beautiful", "friendship",
+    "journey", "wisdom", "courage", "peaceful", "traditional",
+    "family", "education", "culture", "celebration", "community",
+    "nature", "freedom", "respect", "harmony", "strength",
+    "knowledge", "compassion", "unity", "heritage", "dignity",
+    "prosperity", "abundance", "serenity", "gratitude", "enlightenment",
+    "adventure", "discovery", "creativity", "innovation", "inspiration",
+    "dedication", "perseverance", "excellence", "achievement", "success",
+    "progress", "development", "growth", "improvement",
   ];
 
   return commonWords.sort(() => 0.5 - Math.random()).slice(0, count);
-};
-
-// Helper function to handle audio file upload
-const handleAudioUpload = async (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      // In a real app, this would upload to a server/CDN
-      // For demo purposes, we'll create a blob URL
-      const audioUrl = URL.createObjectURL(file);
-      resolve(audioUrl);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 };
 
 export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
@@ -121,17 +75,19 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("words");
+  const [syncStatus, setSyncStatus] = useState<{
+    loading: boolean;
+    message: string;
+    error?: string;
+  }>({ loading: false, message: "" });
 
   // Content management state
   const [words, setWords] = useState<Word[]>(sampleWords);
   const [characters, setCharacters] = useState<Character[]>(sampleCharacters);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
-  const [editingCharacter, setEditingCharacter] = useState<Character | null>(
-    null,
-  );
+  const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
   const [aiGeneratedWords, setAiGeneratedWords] = useState<string[]>([]);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-  const [uploadingAudio, setUploadingAudio] = useState(false);
 
   const validPasswords = [
     "frezanz120913",
@@ -141,6 +97,33 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
     "ujc120913",
     "ujc04485380",
   ];
+
+  // Load data from API on component mount
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadData();
+    }
+  }, [isAuthenticated]);
+
+  const loadData = async () => {
+    try {
+      setSyncStatus({ loading: true, message: "Loading data..." });
+      const [wordsResponse, charactersResponse] = await Promise.all([
+        APIClient.getWords({ limit: 1000 }),
+        APIClient.getCharacters(),
+      ]);
+      setWords(wordsResponse.items);
+      setCharacters(charactersResponse);
+      setSyncStatus({ loading: false, message: "Data loaded successfully" });
+    } catch (error) {
+      console.error("Error loading data:", error);
+      setSyncStatus({ 
+        loading: false, 
+        message: "Failed to load data", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,23 +192,24 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
           <CardContent>
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
               <div>
-                <Label>Enter Password:</Label>
+                <Label className="text-base font-medium">Enter Password:</Label>
                 <Input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
+                  className="h-12 text-lg"
                   autoFocus
                 />
                 {error && (
                   <p className="text-destructive text-sm mt-1">{error}</p>
                 )}
               </div>
-              <div className="flex space-x-2">
-                <Button type="submit" className="flex-1">
+              <div className="flex space-x-3">
+                <Button type="submit" className="flex-1 h-12 text-base">
                   Access Console
                 </Button>
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button type="button" variant="outline" onClick={onClose} className="h-12 px-6">
                   Cancel
                 </Button>
               </div>
@@ -244,15 +228,53 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
             <CardTitle className="flex items-center gap-2">
               <Database className="h-5 w-5" />
               ChakmaLex Developer Console
-              <Badge variant="outline">v2.0</Badge>
+              <Badge variant="outline">v3.0</Badge>
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Enhanced with audio upload, full character editing, and AI word
-              generation
-            </p>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-4">
+              {syncStatus.loading && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                  {syncStatus.message}
+                </div>
+              )}
+              {syncStatus.error && (
+                <div className="flex items-center gap-2 text-sm text-destructive">
+                  <XCircle className="h-4 w-4" />
+                  {syncStatus.error}
+                </div>
+              )}
+              {!syncStatus.loading && !syncStatus.error && syncStatus.message && (
+                <div className="flex items-center gap-2 text-sm text-green-600">
+                  <CheckCircle className="h-4 w-4" />
+                  {syncStatus.message}
+                </div>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={async () => {
+                  try {
+                    setSyncStatus({ loading: true, message: "Syncing to GitHub..." });
+                    await APIClient.syncToGitHub(words, characters, 'update');
+                    setSyncStatus({ loading: false, message: "Synced to GitHub successfully" });
+                  } catch (error) {
+                    console.error("GitHub sync failed:", error);
+                    setSyncStatus({ 
+                      loading: false, 
+                      message: "GitHub sync failed", 
+                      error: error instanceof Error ? error.message : "Unknown error" 
+                    });
+                  }
+                }}
+                disabled={syncStatus.loading}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Sync to GitHub
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onClose}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardHeader>
 
@@ -275,19 +297,46 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 words={words}
                 editingWord={editingWord}
                 onEdit={setEditingWord}
-                onSave={(word) => {
-                  if (editingWord) {
-                    setWords(words.map((w) => (w.id === word.id ? word : w)));
-                  } else {
-                    setWords([
-                      ...words,
-                      { ...word, id: Date.now().toString() },
-                    ]);
+                onSave={async (word) => {
+                  try {
+                    setSyncStatus({ loading: true, message: "Saving word..." });
+                    let savedWord: Word;
+                    
+                    if (editingWord?.id) {
+                      // Update existing word
+                      savedWord = await APIClient.updateWord(editingWord.id, word);
+                      setWords(words.map((w) => (w.id === savedWord.id ? savedWord : w)));
+                    } else {
+                      // Create new word
+                      savedWord = await APIClient.createWord(word);
+                      setWords([...words, savedWord]);
+                    }
+                    
+                    setEditingWord(null);
+                    setSyncStatus({ loading: false, message: "Word saved successfully" });
+                  } catch (error) {
+                    console.error("Error saving word:", error);
+                    setSyncStatus({ 
+                      loading: false, 
+                      message: "Failed to save word", 
+                      error: error instanceof Error ? error.message : "Unknown error" 
+                    });
                   }
-                  setEditingWord(null);
                 }}
-                onDelete={(id) => {
-                  setWords(words.filter((w) => w.id !== id));
+                onDelete={async (id) => {
+                  try {
+                    setSyncStatus({ loading: true, message: "Deleting word..." });
+                    await APIClient.deleteWord(id);
+                    setWords(words.filter((w) => w.id !== id));
+                    setSyncStatus({ loading: false, message: "Word deleted successfully" });
+                  } catch (error) {
+                    console.error("Error deleting word:", error);
+                    setSyncStatus({ 
+                      loading: false, 
+                      message: "Failed to delete word", 
+                      error: error instanceof Error ? error.message : "Unknown error" 
+                    });
+                  }
                 }}
                 onCancel={() => setEditingWord(null)}
               />
@@ -299,23 +348,46 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 characters={characters}
                 editingCharacter={editingCharacter}
                 onEdit={setEditingCharacter}
-                onSave={(character) => {
-                  if (editingCharacter) {
-                    setCharacters(
-                      characters.map((c) =>
-                        c.id === character.id ? character : c,
-                      ),
-                    );
-                  } else {
-                    setCharacters([
-                      ...characters,
-                      { ...character, id: Date.now().toString() },
-                    ]);
+                onSave={async (character) => {
+                  try {
+                    setSyncStatus({ loading: true, message: "Saving character..." });
+                    let savedCharacter: Character;
+                    
+                    if (editingCharacter?.id) {
+                      // Update existing character
+                      savedCharacter = await APIClient.updateCharacter(editingCharacter.id, character);
+                      setCharacters(characters.map((c) => (c.id === savedCharacter.id ? savedCharacter : c)));
+                    } else {
+                      // Create new character
+                      savedCharacter = await APIClient.createCharacter(character);
+                      setCharacters([...characters, savedCharacter]);
+                    }
+                    
+                    setEditingCharacter(null);
+                    setSyncStatus({ loading: false, message: "Character saved successfully" });
+                  } catch (error) {
+                    console.error("Error saving character:", error);
+                    setSyncStatus({ 
+                      loading: false, 
+                      message: "Failed to save character", 
+                      error: error instanceof Error ? error.message : "Unknown error" 
+                    });
                   }
-                  setEditingCharacter(null);
                 }}
-                onDelete={(id) => {
-                  setCharacters(characters.filter((c) => c.id !== id));
+                onDelete={async (id) => {
+                  try {
+                    setSyncStatus({ loading: true, message: "Deleting character..." });
+                    await APIClient.deleteCharacter(id);
+                    setCharacters(characters.filter((c) => c.id !== id));
+                    setSyncStatus({ loading: false, message: "Character deleted successfully" });
+                  } catch (error) {
+                    console.error("Error deleting character:", error);
+                    setSyncStatus({ 
+                      loading: false, 
+                      message: "Failed to delete character", 
+                      error: error instanceof Error ? error.message : "Unknown error" 
+                    });
+                  }
                 }}
                 onCancel={() => setEditingCharacter(null)}
               />
@@ -406,36 +478,37 @@ function WordsManagement({
               created_at: new Date().toISOString(),
             })
           }
+          className="h-12 px-6 text-base"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-5 w-5 mr-2" />
           Add Word
         </Button>
       </div>
 
-      <div className="flex-1 overflow-auto space-y-2">
+      <div className="flex-1 overflow-auto space-y-3">
         {words.map((word) => (
-          <Card key={word.id} className="p-3">
+          <Card key={word.id} className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-chakma text-chakma-primary">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-xl font-chakma text-chakma-primary">
                     {word.chakma_word_script}
                   </span>
                   <span className="text-sm text-muted-foreground">
                     /{word.romanized_pronunciation}/
                   </span>
                 </div>
-                <div className="font-medium">{word.english_translation}</div>
+                <div className="font-medium text-base">{word.english_translation}</div>
               </div>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={() => onEdit(word)}>
+                <Button variant="outline" size="sm" onClick={() => onEdit(word)} className="h-10 px-4">
                   <Edit className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => onDelete(word.id)}
-                  className="text-destructive"
+                  className="text-destructive h-10 px-4"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -461,9 +534,24 @@ function WordForm({
   const [formData, setFormData] = useState(word);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [showAudioSection, setShowAudioSection] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate form data
+    const errors = APIClient.validateWord(formData);
+    if (errors.length > 0) {
+      alert(`Please fix the following errors:\n${errors.join('\n')}`);
+      return;
+    }
+
+    // Check for duplicate words
+    const isDuplicate = await APIClient.checkDuplicateWord(formData.chakma_word_script, formData.id);
+    if (isDuplicate) {
+      alert("This Chakma word already exists in the dictionary.");
+      return;
+    }
 
     let audioUrl = formData.audio_pronunciation_url;
 
@@ -471,7 +559,8 @@ function WordForm({
     if (audioFile) {
       setIsUploading(true);
       try {
-        audioUrl = await handleAudioUpload(audioFile);
+        const uploadResult = await APIClient.uploadAudio(audioFile);
+        audioUrl = uploadResult.url;
       } catch (error) {
         console.error("Audio upload failed:", error);
         alert("Audio upload failed. Please try again.");
@@ -498,21 +587,21 @@ function WordForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">
+        <h3 className="text-xl font-semibold">
           {word.id ? "Edit Word" : "Add New Word"}
         </h3>
-        <div className="flex gap-2">
-          <Button type="submit" disabled={isUploading}>
+        <div className="flex gap-3">
+          <Button type="submit" disabled={isUploading} className="h-12 px-6 text-base">
             {isUploading ? (
               <>
-                <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                <div className="animate-spin h-5 w-5 mr-2 border-2 border-current border-t-transparent rounded-full" />
                 Uploading...
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-5 w-5 mr-2" />
                 Save
               </>
             )}
@@ -522,27 +611,28 @@ function WordForm({
             variant="outline"
             onClick={onCancel}
             disabled={isUploading}
+            className="h-12 px-6 text-base"
           >
             Cancel
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <Label>Chakma Script *</Label>
+          <Label className="text-base font-medium">Chakma Script *</Label>
           <Input
             value={formData.chakma_word_script}
             onChange={(e) =>
               setFormData({ ...formData, chakma_word_script: e.target.value })
             }
             placeholder="Chakma text"
-            className="font-chakma"
+            className="font-chakma text-lg h-12"
             required
           />
         </div>
         <div>
-          <Label>Romanized Pronunciation *</Label>
+          <Label className="text-base font-medium">Romanized Pronunciation *</Label>
           <Input
             value={formData.romanized_pronunciation}
             onChange={(e) =>
@@ -552,99 +642,163 @@ function WordForm({
               })
             }
             placeholder="chakma"
+            className="text-lg h-12"
             required
           />
         </div>
       </div>
 
       <div>
-        <Label>English Translation *</Label>
+        <Label className="text-base font-medium">English Translation *</Label>
         <Input
           value={formData.english_translation}
           onChange={(e) =>
             setFormData({ ...formData, english_translation: e.target.value })
           }
           placeholder="Chakma people"
+          className="text-lg h-12"
           required
         />
       </div>
 
       <div>
-        <Label>Example Sentence *</Label>
+        <Label className="text-base font-medium">Example Sentence *</Label>
         <Textarea
           value={formData.example_sentence}
           onChange={(e) =>
             setFormData({ ...formData, example_sentence: e.target.value })
           }
           placeholder="Example usage in Chakma with English translation"
+          className="text-lg min-h-[80px]"
           required
         />
       </div>
 
       <div>
-        <Label>Etymology *</Label>
+        <Label className="text-base font-medium">Etymology *</Label>
         <Textarea
           value={formData.etymology}
           onChange={(e) =>
             setFormData({ ...formData, etymology: e.target.value })
           }
           placeholder="Origin and historical development of the word"
+          className="text-lg min-h-[80px]"
           required
         />
       </div>
 
-      <div>
-        <Label>Audio Pronunciation</Label>
-        <div className="space-y-3">
-          {formData.audio_pronunciation_url && (
-            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-              <Volume2 className="h-4 w-4 text-chakma-primary" />
-              <span className="text-sm text-muted-foreground">
-                Current audio available
-              </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  const audio = new Audio(formData.audio_pronunciation_url!);
-                  audio.play().catch(console.error);
-                }}
-              >
-                <Volume2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <input
-                type="file"
-                accept="audio/*"
-                onChange={handleAudioFileChange}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
-              <Button type="button" variant="outline" className="w-full">
-                <Music className="h-4 w-4 mr-2" />
-                {audioFile ? audioFile.name : "Upload Audio File"}
-              </Button>
-            </div>
-            {audioFile && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setAudioFile(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label className="text-base font-medium">Audio & Media</Label>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAudioSection(!showAudioSection)}
+            className="h-10 px-4"
+          >
+            {showAudioSection ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-2" />
+                Hide
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-2" />
+                Show
+              </>
             )}
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            Supported formats: MP3, WAV, OGG. Max size: 5MB
-          </p>
+          </Button>
         </div>
+        
+        {showAudioSection && (
+          <div className="space-y-4 p-4 border rounded-lg">
+            <div>
+              <Label className="text-base font-medium">Audio Pronunciation</Label>
+              <div className="space-y-3 mt-2">
+                {formData.audio_pronunciation_url && (
+                  <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
+                    <Volume2 className="h-5 w-5 text-chakma-primary" />
+                    <span className="text-sm text-muted-foreground flex-1">
+                      Current audio available
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-10 px-4"
+                      onClick={() => {
+                        const audio = new Audio(formData.audio_pronunciation_url!);
+                        audio.play().catch(console.error);
+                      }}
+                    >
+                      <Volume2 className="h-4 w-4 mr-2" />
+                      Play
+                    </Button>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-1">
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      onChange={handleAudioFileChange}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
+                    <Button type="button" variant="outline" className="w-full h-12 text-base">
+                      <Music className="h-5 w-5 mr-2" />
+                      {audioFile ? audioFile.name : "Upload Audio File"}
+                    </Button>
+                  </div>
+                  {audioFile && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-12 px-4"
+                      onClick={() => setAudioFile(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Audio URL (Alternative)</Label>
+                    <Input
+                      value={formData.audio_pronunciation_url || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, audio_pronunciation_url: e.target.value })
+                      }
+                      placeholder="https://example.com/audio.mp3"
+                      className="h-10"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Image URL</Label>
+                    <Input
+                      value={formData.explanation_media?.value || ""}
+                      onChange={(e) =>
+                        setFormData({ 
+                          ...formData, 
+                          explanation_media: { type: 'url', value: e.target.value }
+                        })
+                      }
+                      placeholder="https://example.com/image.jpg"
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+
+                <p className="text-sm text-muted-foreground">
+                  Supported audio formats: MP3, WAV, OGG. Max size: 5MB
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </form>
   );
@@ -693,22 +847,23 @@ function CharactersManagement({
               created_at: new Date().toISOString(),
             })
           }
+          className="h-12 px-6 text-base"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-5 w-5 mr-2" />
           Add Character
         </Button>
       </div>
 
-      <div className="flex-1 overflow-auto space-y-2">
+      <div className="flex-1 overflow-auto space-y-3">
         {characters.map((character) => (
-          <Card key={character.id} className="p-3">
+          <Card key={character.id} className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1 flex items-center gap-4">
-                <div className="text-3xl font-chakma text-chakma-primary">
+                <div className="text-4xl font-chakma text-chakma-primary">
                   {character.character_script}
                 </div>
                 <div className="space-y-1">
-                  <div className="font-medium">{character.romanized_name}</div>
+                  <div className="font-medium text-base">{character.romanized_name}</div>
                   <Badge variant="secondary" className="text-xs">
                     {character.character_type}
                   </Badge>
@@ -722,12 +877,11 @@ function CharactersManagement({
               <div className="flex gap-2">
                 {character.audio_pronunciation_url && (
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
+                    className="h-10 px-4"
                     onClick={() => {
-                      const audio = new Audio(
-                        character.audio_pronunciation_url!,
-                      );
+                      const audio = new Audio(character.audio_pronunciation_url!);
                       audio.play().catch(console.error);
                     }}
                   >
@@ -735,17 +889,18 @@ function CharactersManagement({
                   </Button>
                 )}
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => onEdit(character)}
+                  className="h-10 px-4"
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => onDelete(character.id)}
-                  className="text-destructive"
+                  className="text-destructive h-10 px-4"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -771,6 +926,7 @@ function CharacterForm({
   const [formData, setFormData] = useState(character);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [showAudioSection, setShowAudioSection] = useState(false);
 
   const characterTypes: CharacterType[] = [
     "alphabet",
@@ -784,12 +940,20 @@ function CharacterForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate form data
+    const errors = APIClient.validateCharacter(formData);
+    if (errors.length > 0) {
+      alert(`Please fix the following errors:\n${errors.join('\n')}`);
+      return;
+    }
+
     let audioUrl = formData.audio_pronunciation_url;
 
     if (audioFile) {
       setIsUploading(true);
       try {
-        audioUrl = await handleAudioUpload(audioFile);
+        const uploadResult = await APIClient.uploadAudio(audioFile);
+        audioUrl = uploadResult.url;
       } catch (error) {
         console.error("Audio upload failed:", error);
         alert("Audio upload failed. Please try again.");
@@ -815,21 +979,21 @@ function CharacterForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">
+        <h3 className="text-xl font-semibold">
           {character.id ? "Edit Character" : "Add New Character"}
         </h3>
-        <div className="flex gap-2">
-          <Button type="submit" disabled={isUploading}>
+        <div className="flex gap-3">
+          <Button type="submit" disabled={isUploading} className="h-12 px-6 text-base">
             {isUploading ? (
               <>
-                <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                <div className="animate-spin h-5 w-5 mr-2 border-2 border-current border-t-transparent rounded-full" />
                 Uploading...
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-5 w-5 mr-2" />
                 Save
               </>
             )}
@@ -839,40 +1003,42 @@ function CharacterForm({
             variant="outline"
             onClick={onCancel}
             disabled={isUploading}
+            className="h-12 px-6 text-base"
           >
             Cancel
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <Label>Character Script *</Label>
+          <Label className="text-base font-medium">Character Script *</Label>
           <Input
             value={formData.character_script}
             onChange={(e) =>
               setFormData({ ...formData, character_script: e.target.value })
             }
             placeholder="𑄌"
-            className="font-chakma text-2xl"
+            className="font-chakma text-2xl h-12"
             required
           />
         </div>
         <div>
-          <Label>Romanized Name *</Label>
+          <Label className="text-base font-medium">Romanized Name *</Label>
           <Input
             value={formData.romanized_name}
             onChange={(e) =>
               setFormData({ ...formData, romanized_name: e.target.value })
             }
             placeholder="cha"
+            className="text-lg h-12"
             required
           />
         </div>
       </div>
 
       <div>
-        <Label>Character Type *</Label>
+        <Label className="text-base font-medium">Character Type *</Label>
         <select
           value={formData.character_type}
           onChange={(e) =>
@@ -881,7 +1047,7 @@ function CharacterForm({
               character_type: e.target.value as CharacterType,
             })
           }
-          className="w-full px-3 py-2 border border-input rounded-lg bg-background"
+          className="w-full px-3 py-2 border border-input rounded-lg bg-background h-12 text-lg"
           required
         >
           {characterTypes.map((type) => (
@@ -893,69 +1059,114 @@ function CharacterForm({
       </div>
 
       <div>
-        <Label>Description</Label>
+        <Label className="text-base font-medium">Description</Label>
         <Textarea
           value={formData.description || ""}
           onChange={(e) =>
             setFormData({ ...formData, description: e.target.value })
           }
           placeholder="Description of the character and its usage"
+          className="text-lg min-h-[80px]"
           rows={3}
         />
       </div>
 
-      <div>
-        <Label>Audio Pronunciation</Label>
-        <div className="space-y-3">
-          {formData.audio_pronunciation_url && (
-            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-              <Volume2 className="h-4 w-4 text-chakma-primary" />
-              <span className="text-sm text-muted-foreground">
-                Current audio available
-              </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  const audio = new Audio(formData.audio_pronunciation_url!);
-                  audio.play().catch(console.error);
-                }}
-              >
-                <Volume2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <input
-                type="file"
-                accept="audio/*"
-                onChange={handleAudioFileChange}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
-              <Button type="button" variant="outline" className="w-full">
-                <Music className="h-4 w-4 mr-2" />
-                {audioFile ? audioFile.name : "Upload Audio File"}
-              </Button>
-            </div>
-            {audioFile && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setAudioFile(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label className="text-base font-medium">Audio Pronunciation</Label>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAudioSection(!showAudioSection)}
+            className="h-10 px-4"
+          >
+            {showAudioSection ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-2" />
+                Hide
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-2" />
+                Show
+              </>
             )}
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            Supported formats: MP3, WAV, OGG. Max size: 5MB
-          </p>
+          </Button>
         </div>
+        
+        {showAudioSection && (
+          <div className="space-y-4 p-4 border rounded-lg">
+            <div>
+              <Label className="text-base font-medium">Audio Pronunciation</Label>
+              <div className="space-y-3 mt-2">
+                {formData.audio_pronunciation_url && (
+                  <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
+                    <Volume2 className="h-5 w-5 text-chakma-primary" />
+                    <span className="text-sm text-muted-foreground flex-1">
+                      Current audio available
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-10 px-4"
+                      onClick={() => {
+                        const audio = new Audio(formData.audio_pronunciation_url!);
+                        audio.play().catch(console.error);
+                      }}
+                    >
+                      <Volume2 className="h-4 w-4 mr-2" />
+                      Play
+                    </Button>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-1">
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      onChange={handleAudioFileChange}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
+                    <Button type="button" variant="outline" className="w-full h-12 text-base">
+                      <Music className="h-5 w-5 mr-2" />
+                      {audioFile ? audioFile.name : "Upload Audio File"}
+                    </Button>
+                  </div>
+                  {audioFile && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-12 px-4"
+                      onClick={() => setAudioFile(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Audio URL (Alternative)</Label>
+                  <Input
+                    value={formData.audio_pronunciation_url || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, audio_pronunciation_url: e.target.value })
+                    }
+                    placeholder="https://example.com/audio.mp3"
+                    className="h-10"
+                  />
+                </div>
+
+                <p className="text-sm text-muted-foreground">
+                  Supported audio formats: MP3, WAV, OGG. Max size: 5MB
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </form>
   );
@@ -991,16 +1202,16 @@ function AIWordGenerator({
           <Button
             onClick={onGenerate}
             disabled={isGenerating}
-            className="w-full"
+            className="w-full h-12 text-base"
           >
             {isGenerating ? (
               <>
-                <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                <div className="animate-spin h-5 w-5 mr-2 border-2 border-current border-t-transparent rounded-full" />
                 Generating Words...
               </>
             ) : (
               <>
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-5 w-5 mr-2" />
                 Generate 10 English Words
               </>
             )}
@@ -1009,12 +1220,12 @@ function AIWordGenerator({
           {words.length > 0 && (
             <div className="space-y-3">
               <h4 className="font-medium">Generated Words:</h4>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {words.map((word, index) => (
                   <Button
                     key={index}
                     variant="outline"
-                    className="justify-start h-auto p-3"
+                    className="justify-start h-16 p-4 text-base"
                     onClick={() => onCreateWord(word)}
                   >
                     <div className="text-left">
@@ -1062,14 +1273,14 @@ function DataManagement({
         </Card>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="p-4">
           <h3 className="font-medium mb-3">Export Data</h3>
           <p className="text-sm text-muted-foreground mb-4">
             Download all content as JSON backup
           </p>
-          <Button onClick={onExport} className="w-full">
-            <Download className="h-4 w-4 mr-2" />
+          <Button onClick={onExport} className="w-full h-12 text-base">
+            <Download className="h-5 w-5 mr-2" />
             Export Content
           </Button>
         </Card>
@@ -1086,8 +1297,8 @@ function DataManagement({
               onChange={onImport}
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
-            <Button className="w-full">
-              <Upload className="h-4 w-4 mr-2" />
+            <Button className="w-full h-12 text-base">
+              <Upload className="h-5 w-5 mr-2" />
               Import Content
             </Button>
           </div>
