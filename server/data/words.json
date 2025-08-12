@@ -1,0 +1,228 @@
+[
+  {
+    "id": "1",
+    "chakma_word_script": "𑄃𑄘𑄮",
+    "romanized_pronunciation": "ado",
+    "english_translation": "today",
+    "synonyms": [
+      {
+        "term": "𑄃𑄏𑄮",
+        "language": "chakma"
+      },
+      {
+        "term": "now",
+        "language": "english"
+      }
+    ],
+    "antonyms": [
+      {
+        "term": "𑄇𑄣𑄌𑄢",
+        "language": "chakma"
+      },
+      {
+        "term": "yesterday",
+        "language": "english"
+      }
+    ],
+    "example_sentence": "𑄃𑄘𑄮 𑄟𑄮𑄨 𑄇𑄧𑄌 𑄅𑄋𑄬 - Today I am going home",
+    "etymology": "Derived from Sanskrit \"adya\" meaning today",
+    "explanation_media": {
+      "type": "url",
+      "value": "https://example.com/calendar-today.jpg"
+    },
+    "is_verified": true,
+    "created_at": "2024-01-01T00:00:00.000Z",
+    "updated_at": "2024-01-15T00:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "chakma_word_script": "𑄛𑄧𑄢",
+    "romanized_pronunciation": "por",
+    "english_translation": "house",
+    "synonyms": [
+      {
+        "term": "𑄊𑄧𑄢",
+        "language": "chakma"
+      },
+      {
+        "term": "home",
+        "language": "english"
+      },
+      {
+        "term": "dwelling",
+        "language": "english"
+      }
+    ],
+    "antonyms": [
+      {
+        "term": "homeless",
+        "language": "english"
+      }
+    ],
+    "example_sentence": "𑄟𑄮𑄨 𑄛𑄧𑄢𑄴 𑄝𑄧𑄛 - My house is big",
+    "etymology": "From Proto-Sino-Tibetan root meaning shelter",
+    "explanation_media": {
+      "type": "url",
+      "value": "https://example.com/traditional-house.jpg"
+    },
+    "is_verified": true,
+    "created_at": "2024-01-02T00:00:00.000Z",
+    "updated_at": "2024-01-16T00:00:00.000Z"
+  },
+  {
+    "id": "3",
+    "chakma_word_script": "𑄎𑄚𑄴",
+    "romanized_pronunciation": "jan",
+    "english_translation": "person",
+    "synonyms": [
+      {
+        "term": "𑄟𑄚𑄱𑄪",
+        "language": "chakma"
+      },
+      {
+        "term": "individual",
+        "language": "english"
+      },
+      {
+        "term": "human",
+        "language": "english"
+      }
+    ],
+    "antonyms": [
+      {
+        "term": "animal",
+        "language": "english"
+      }
+    ],
+    "example_sentence": "𑄃𑄨 𑄎𑄚𑄴 𑄟𑄮𑄨 𑄞𑄣𑄧 - This person is my friend",
+    "etymology": "Cognate with Bengali \"jon\" meaning person",
+    "is_verified": true,
+    "created_at": "2024-01-03T00:00:00.000Z",
+    "updated_at": "2024-01-17T00:00:00.000Z"
+  },
+  {
+    "id": "4",
+    "chakma_word_script": "𑄢𑄚𑄴",
+    "romanized_pronunciation": "ran",
+    "english_translation": "cook",
+    "synonyms": [
+      {
+        "term": "𑄛𑄧𑄣",
+        "language": "chakma"
+      },
+      {
+        "term": "prepare food",
+        "language": "english"
+      }
+    ],
+    "example_sentence": "𑄟𑄧 𑄞𑄛 𑄢𑄚 - Mom cooks rice",
+    "etymology": "Related to Sanskrit \"randh\" meaning to cook",
+    "is_verified": true,
+    "created_at": "2024-01-04T00:00:00.000Z",
+    "updated_at": "2024-01-18T00:00:00.000Z"
+  },
+  {
+    "id": "5",
+    "chakma_word_script": "𑄝𑄨𑄚𑄴",
+    "romanized_pronunciation": "bin",
+    "english_translation": "seed",
+    "synonyms": [
+      {
+        "term": "𑄝𑄨𑄌",
+        "language": "chakma"
+      },
+      {
+        "term": "grain",
+        "language": "english"
+      }
+    ],
+    "example_sentence": "𑄝𑄨𑄚𑄴 𑄊𑄊 𑄛𑄧𑄙 - Plant the seed in soil",
+    "etymology": "From Proto-Tibeto-Burman root for seed",
+    "is_verified": true,
+    "created_at": "2024-01-05T00:00:00.000Z",
+    "updated_at": "2024-01-19T00:00:00.000Z"
+  },
+  {
+    "id": "6",
+    "chakma_word_script": "𑄞𑄛",
+    "romanized_pronunciation": "bap",
+    "english_translation": "rice",
+    "synonyms": [
+      {
+        "term": "𑄃𑄚𑄴𑄚",
+        "language": "chakma"
+      },
+      {
+        "term": "grain",
+        "language": "english"
+      }
+    ],
+    "example_sentence": "𑄞𑄛 𑄟𑄮𑄨 𑄛𑄴𑄢𑄨𑄠 - Rice is my favorite food",
+    "etymology": "Borrowed from Bengali \"bhat\" meaning cooked rice",
+    "is_verified": true,
+    "created_at": "2024-01-06T00:00:00.000Z",
+    "updated_at": "2024-01-20T00:00:00.000Z"
+  },
+  {
+    "id": "7",
+    "chakma_word_script": "𑄃𑄉𑄨",
+    "romanized_pronunciation": "agi",
+    "english_translation": "fire",
+    "synonyms": [
+      {
+        "term": "𑄎𑄮𑄣",
+        "language": "chakma"
+      },
+      {
+        "term": "flame",
+        "language": "english"
+      }
+    ],
+    "antonyms": [
+      {
+        "term": "𑄛𑄚𑄨",
+        "language": "chakma"
+      },
+      {
+        "term": "water",
+        "language": "english"
+      }
+    ],
+    "example_sentence": "𑄃𑄉𑄨 𑄛𑄧𑄦 - The fire is hot",
+    "etymology": "From Sanskrit \"agni\" meaning fire",
+    "is_verified": true,
+    "created_at": "2024-01-07T00:00:00.000Z",
+    "updated_at": "2024-01-21T00:00:00.000Z"
+  },
+  {
+    "id": "8",
+    "chakma_word_script": "����𑄚𑄨",
+    "romanized_pronunciation": "pani",
+    "english_translation": "water",
+    "synonyms": [
+      {
+        "term": "𑄎𑄮𑄣",
+        "language": "chakma"
+      },
+      {
+        "term": "liquid",
+        "language": "english"
+      }
+    ],
+    "antonyms": [
+      {
+        "term": "𑄃𑄉𑄨",
+        "language": "chakma"
+      },
+      {
+        "term": "fire",
+        "language": "english"
+      }
+    ],
+    "example_sentence": "𑄛𑄚𑄨 𑄇𑄧𑄣 - Water is cold",
+    "etymology": "From Sanskrit \"paniya\" meaning drinkable water",
+    "is_verified": true,
+    "created_at": "2024-01-08T00:00:00.000Z",
+    "updated_at": "2024-01-22T00:00:00.000Z"
+  }
+]

@@ -24,11 +24,8 @@ import { cn } from "@/lib/utils";
 
 // Data and utilities
 import { Word, SearchHistoryItem } from "@shared/types";
-import {
-  sampleWords,
-  searchWords,
-  sampleSearchHistory,
-} from "@shared/sampleData";
+import { useQuery } from "@tanstack/react-query";
+import { fetchWords } from "@/lib/api";
 import {
   SearchHistoryManager,
   FavoritesManager,
@@ -46,19 +43,26 @@ export default function Dictionary() {
   const [showHistory, setShowHistory] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const wordsQuery = useQuery({
+    queryKey: ["words"],
+    queryFn: fetchWords,
+    staleTime: 0,
+  });
+
   // Initialize data
   useEffect(() => {
     setSearchHistory(SearchHistoryManager.get());
     setFavorites(FavoritesManager.get());
 
-    // Show some featured words initially
-    setSearchResults(sampleWords.slice(0, 3));
-  }, []);
+    if (wordsQuery.data && wordsQuery.data.length > 0) {
+      setSearchResults(wordsQuery.data.slice(0, 3));
+    }
+  }, [wordsQuery.data]);
 
   // Handle search
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
-      setSearchResults(sampleWords.slice(0, 3));
+      setSearchResults((wordsQuery.data || []).slice(0, 3));
       setSelectedWord(null);
       return;
     }
@@ -66,10 +70,16 @@ export default function Dictionary() {
     setIsLoading(true);
     setShowHistory(false);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 150));
 
-    const results = searchWords(query);
+    const lowerQuery = query.toLowerCase();
+    const results = (wordsQuery.data || []).filter((word) =>
+      word.english_translation.toLowerCase().includes(lowerQuery) ||
+      word.chakma_word_script.includes(query) ||
+      word.romanized_pronunciation.toLowerCase().includes(lowerQuery) ||
+      word.synonyms?.some((syn) => syn.term.toLowerCase().includes(lowerQuery)) ||
+      word.antonyms?.some((ant) => ant.term.toLowerCase().includes(lowerQuery))
+    );
     setSearchResults(results);
     setSelectedWord(null);
 
@@ -128,23 +138,28 @@ export default function Dictionary() {
       {/* Search Section */}
       <Card>
         <CardContent className="pt-6">
-          <div className="relative">
-            <div className="flex space-x-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  ref={searchInputRef}
-                  placeholder="Search in English, Chakma script, or romanized text..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleSearch(searchQuery);
-                    }
-                  }}
-                  onFocus={() => setShowHistory(true)}
-                  className="pl-10 pr-12 h-12 text-lg"
-                />
+                     <div className="relative">
+             <div className="flex space-x-2">
+               <div className="relative flex-1">
+                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                 <Input
+                   ref={searchInputRef}
+                   placeholder="Search in English, Chakma script, or romanized text..."
+                   value={searchQuery}
+                   onChange={(e) => setSearchQuery(e.target.value)}
+                   onKeyDown={(e) => {
+                     if (e.key === "Enter") {
+                       handleSearch(searchQuery);
+                     }
+                   }}
+                   onFocus={() => setShowHistory(true)}
+                   className="pl-10 pr-12 h-12 text-lg"
+                 />
+                 {wordsQuery.isFetching && (
+                   <div className="absolute right-10 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                     Syncing...
+                   </div>
+                 )}
                 {searchQuery && (
                   <Button
                     variant="ghost"
@@ -159,11 +174,11 @@ export default function Dictionary() {
                   </Button>
                 )}
               </div>
-              <Button
-                onClick={() => handleSearch(searchQuery)}
-                disabled={isLoading}
-                className="h-12 px-6"
-              >
+                             <Button
+                 onClick={() => handleSearch(searchQuery)}
+                 disabled={isLoading || wordsQuery.isLoading}
+                 className="h-12 px-6"
+               >
                 {isLoading ? (
                   <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
                 ) : (
@@ -219,18 +234,18 @@ export default function Dictionary() {
             )}
           </div>
 
-          {searchResults.length === 0 ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No words found</h3>
-                <p className="text-muted-foreground">
-                  Try searching with different terms or check your spelling.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
+                     {searchResults.length === 0 ? (
+             <Card className="text-center py-12">
+               <CardContent>
+                 <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                 <h3 className="text-lg font-medium mb-2">No words found</h3>
+                 <p className="text-muted-foreground">
+                   {wordsQuery.isLoading ? "Loading dictionary..." : "Try searching with different terms or check your spelling."}
+                 </p>
+               </CardContent>
+             </Card>
+           ) : (
+             <div className="space-y-3">
               {searchResults.map((word) => (
                 <WordCard
                   key={word.id}
