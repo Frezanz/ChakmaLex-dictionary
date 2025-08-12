@@ -1,5 +1,5 @@
 // ChakmaLex Service Worker
-const CACHE_NAME = 'chakmalex-v1.0.0';
+const CACHE_NAME = 'chakmalex-v1.0.1';
 const STATIC_CACHE_URLS = [
   '/',
   '/index.html',

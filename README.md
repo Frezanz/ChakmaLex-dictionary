@@ -237,3 +237,16 @@ Special thanks to:
 
 **ChakmaLex v1.0** - Preserving language, empowering learners
 Built with ❤️ for the Chakma community | Powered by **Fxanx**
+
+## Backend environment
+
+Set the following environment variables for GitHub sync and uploads (Netlify or local `.env`):
+
+- `GITHUB_TOKEN`: Personal Access Token with repo scope
+- `GITHUB_OWNER`: GitHub username or org
+- `GITHUB_REPO`: Repository name
+- `GITHUB_BRANCH`: Optional, defaults to `main`
+- `WORDS_JSON_PATH`: Path to words JSON in repo, e.g. `data/words.json`
+- `AUDIO_FOLDER_PATH`: Path to store audio files in repo, e.g. `assets/audio`
+- `IMAGE_FOLDER_PATH`: Path to store images in repo, e.g. `assets/images`
+- `NETLIFY_BUILD_HOOK_URL`: Optional build hook to trigger redeploy after writes

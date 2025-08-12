@@ -275,19 +275,40 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
                 words={words}
                 editingWord={editingWord}
                 onEdit={setEditingWord}
-                onSave={(word) => {
-                  if (editingWord) {
-                    setWords(words.map((w) => (w.id === word.id ? word : w)));
-                  } else {
-                    setWords([
-                      ...words,
-                      { ...word, id: Date.now().toString() },
-                    ]);
+                onSave={async (word) => {
+                  const { apiClient } = await import("@/lib/apiClient");
+                  try {
+                    if (editingWord && word.id) {
+                      const updated = await apiClient.updateWord(word.id, word);
+                      setWords(words.map((w) => (w.id === updated.id ? updated : w)));
+                    } else {
+                      const created = await apiClient.createWord({
+                        chakma_word_script: word.chakma_word_script,
+                        romanized_pronunciation: word.romanized_pronunciation,
+                        english_translation: word.english_translation,
+                        example_sentence: word.example_sentence,
+                        etymology: word.etymology,
+                        audio_pronunciation_url: word.audio_pronunciation_url,
+                        explanation_media: word.explanation_media,
+                        synonyms: word.synonyms,
+                        antonyms: word.antonyms,
+                        is_verified: word.is_verified,
+                      });
+                      setWords([...words, created]);
+                    }
+                    setEditingWord(null);
+                  } catch (e: any) {
+                    alert(e?.message || "Failed to save word");
                   }
-                  setEditingWord(null);
                 }}
-                onDelete={(id) => {
-                  setWords(words.filter((w) => w.id !== id));
+                onDelete={async (id) => {
+                  const { apiClient } = await import("@/lib/apiClient");
+                  try {
+                    await apiClient.deleteWord(id);
+                    setWords(words.filter((w) => w.id !== id));
+                  } catch (e: any) {
+                    alert(e?.message || "Failed to delete word");
+                  }
                 }}
                 onCancel={() => setEditingWord(null)}
               />
@@ -461,29 +482,51 @@ function WordForm({
   const [formData, setFormData] = useState(word);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let audioUrl = formData.audio_pronunciation_url;
+    let imageUrl = formData.explanation_media?.type === 'image' ? formData.explanation_media.value : undefined;
 
     // Handle audio upload if file is selected
     if (audioFile) {
       setIsUploading(true);
       try {
-        audioUrl = await handleAudioUpload(audioFile);
+        // Prefer backend upload to persist across reloads
+        const { apiClient } = await import("@/lib/apiClient");
+        audioUrl = await apiClient.uploadAudio(audioFile);
       } catch (error) {
         console.error("Audio upload failed:", error);
         alert("Audio upload failed. Please try again.");
         setIsUploading(false);
         return;
       }
-      setIsUploading(false);
     }
+
+    if (imageFile) {
+      setIsUploading(true);
+      try {
+        const { apiClient } = await import("@/lib/apiClient");
+        imageUrl = await apiClient.uploadImage(imageFile);
+      } catch (error) {
+        console.error("Image upload failed:", error);
+        alert("Image upload failed. Please try again.");
+        setIsUploading(false);
+        return;
+      }
+    }
+
+    setIsUploading(false);
 
     onSave({
       ...formData,
       audio_pronunciation_url: audioUrl,
+      explanation_media: imageUrl
+        ? { type: 'image', value: imageUrl }
+        : formData.explanation_media,
       updated_at: new Date().toISOString(),
     });
   };
@@ -494,6 +537,15 @@ function WordForm({
       setAudioFile(file);
     } else {
       alert("Please select a valid audio file (MP3, WAV, OGG)");
+    }
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setImageFile(file);
+    } else {
+      alert("Please select a valid image file (PNG, JPG, WEBP)");
     }
   };
 
@@ -528,7 +580,7 @@ function WordForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label>Chakma Script *</Label>
           <Input
@@ -537,7 +589,7 @@ function WordForm({
               setFormData({ ...formData, chakma_word_script: e.target.value })
             }
             placeholder="Chakma text"
-            className="font-chakma"
+            className="font-chakma h-14 text-xl"
             required
           />
         </div>
@@ -552,6 +604,7 @@ function WordForm({
               })
             }
             placeholder="chakma"
+            className="h-14 text-lg"
             required
           />
         </div>
@@ -565,6 +618,7 @@ function WordForm({
             setFormData({ ...formData, english_translation: e.target.value })
           }
           placeholder="Chakma people"
+          className="h-14 text-lg"
           required
         />
       </div>
@@ -577,6 +631,7 @@ function WordForm({
             setFormData({ ...formData, example_sentence: e.target.value })
           }
           placeholder="Example usage in Chakma with English translation"
+          className="text-lg"
           required
         />
       </div>
@@ -589,6 +644,7 @@ function WordForm({
             setFormData({ ...formData, etymology: e.target.value })
           }
           placeholder="Origin and historical development of the word"
+          className="text-lg"
           required
         />
       </div>
@@ -624,7 +680,7 @@ function WordForm({
                 onChange={handleAudioFileChange}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
-              <Button type="button" variant="outline" className="w-full">
+              <Button type="button" variant="outline" className="w-full h-12 text-base">
                 <Music className="h-4 w-4 mr-2" />
                 {audioFile ? audioFile.name : "Upload Audio File"}
               </Button>
@@ -644,6 +700,91 @@ function WordForm({
           <p className="text-xs text-muted-foreground">
             Supported formats: MP3, WAV, OGG. Max size: 5MB
           </p>
+        </div>
+      </div>
+
+      <div>
+        <Label>Explanation Image</Label>
+        <div className="space-y-3">
+          {formData.explanation_media?.type === 'image' && (
+            <div className="text-sm text-muted-foreground break-all">
+              Current: {formData.explanation_media.value}
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageFileChange}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+              <Button type="button" variant="outline" className="w-full h-12 text-base">
+                <Upload className="h-4 w-4 mr-2" />
+                {imageFile ? imageFile.name : "Upload Image"}
+              </Button>
+            </div>
+            {imageFile && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setImageFile(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          <Input
+            placeholder="Or paste image URL"
+            className="h-12 text-base"
+            value={formData.explanation_media?.type === 'image' ? (formData.explanation_media?.value || '') : ''}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                explanation_media: e.target.value
+                  ? { type: 'image', value: e.target.value }
+                  : undefined,
+              })
+            }
+          />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <Label>Advanced Details</Label>
+        <div className="rounded-lg border p-3 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label>Synonyms (comma separated)</Label>
+              <Input
+                className="h-12"
+                value={(formData.synonyms || []).map((s) => s.term).join(', ')}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    synonyms: e.target.value
+                      .split(',')
+                      .map((x) => x.trim())
+                      .filter(Boolean)
+                      .map((term) => ({ term, language: 'chakma' as const })),
+                  })
+                }
+              />
+            </div>
+            <div>
+              <Label>Antonyms (comma separated)</Label>
+              <Input
+                className="h-12"
+                value={(formData.antonyms || []).map((a) => a.term).join(', ')}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    antonyms: e.target.value
+                      .split(',')
+                      .map((x) => x.trim())
+                      .filter(Boolean)
+                      .map((term) => ({ term, language: 'chakma' as const })),
+                  })
+                }
+              />
+            </div>
+          </div>
         </div>
       </div>
     </form>

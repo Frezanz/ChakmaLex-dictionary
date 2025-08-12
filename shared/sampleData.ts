@@ -357,9 +357,9 @@ export const findCharacterById = (id: string): Character | undefined => {
   return sampleCharacters.find(char => char.id === id);
 };
 
-export const searchWords = (query: string): Word[] => {
+export const searchWords = (query: string, dataset: Word[] = sampleWords): Word[] => {
   const lowerQuery = query.toLowerCase();
-  return sampleWords.filter(word => 
+  return dataset.filter(word => 
     word.english_translation.toLowerCase().includes(lowerQuery) ||
     word.chakma_word_script.includes(query) ||
     word.romanized_pronunciation.toLowerCase().includes(lowerQuery) ||
