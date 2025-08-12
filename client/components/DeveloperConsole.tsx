@@ -32,6 +32,8 @@ import {
   Volume2,
   Music,
   RefreshCw,
+  Image,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +46,7 @@ import {
 } from "@shared/types";
 import { sampleWords, sampleCharacters } from "@shared/sampleData";
 import { DeveloperConsoleManager } from "@/lib/storage";
+import { apiClient, apiUtils } from "@/lib/api";
 
 interface DeveloperConsoleProps {
   onClose: () => void;
@@ -123,8 +126,8 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [activeTab, setActiveTab] = useState("words");
 
   // Content management state
-  const [words, setWords] = useState<Word[]>(sampleWords);
-  const [characters, setCharacters] = useState<Character[]>(sampleCharacters);
+  const [words, setWords] = useState<Word[]>([]);
+  const [characters, setCharacters] = useState<Character[]>([]);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [editingCharacter, setEditingCharacter] = useState<Character | null>(
     null,
@@ -132,6 +135,41 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [aiGeneratedWords, setAiGeneratedWords] = useState<string[]>([]);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+
+  // Load data from API on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const [wordsResponse, charactersResponse] = await Promise.all([
+          apiClient.getWords(),
+          apiClient.getCharacters(),
+        ]);
+
+        if (wordsResponse.success && wordsResponse.data) {
+          setWords(wordsResponse.data.items || []);
+        }
+
+        if (charactersResponse.success && charactersResponse.data) {
+          setCharacters(charactersResponse.data);
+        }
+      } catch (error) {
+        console.error("Error loading data:", error);
+        setError("Failed to load data from server");
+        // Fallback to sample data
+        setWords(sampleWords);
+        setCharacters(sampleCharacters);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (isAuthenticated) {
+      loadData();
+    }
+  }, [isAuthenticated]);
 
   const validPasswords = [
     "frezanz120913",
@@ -238,7 +276,7 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-6xl h-[90vh] flex flex-col">
+      <Card className="w-full max-w-6xl h-[90vh] flex flex-col max-h-[95vh] overflow-hidden">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
@@ -262,35 +300,50 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
             onValueChange={setActiveTab}
             className="h-full flex flex-col"
           >
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="words">Words Management</TabsTrigger>
-              <TabsTrigger value="characters">Characters</TabsTrigger>
-              <TabsTrigger value="ai">AI Word Generator</TabsTrigger>
-              <TabsTrigger value="data">Data Export/Import</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 gap-2 p-1">
+              <TabsTrigger value="words" className="text-sm py-3 px-4">Words</TabsTrigger>
+              <TabsTrigger value="characters" className="text-sm py-3 px-4">Characters</TabsTrigger>
+              <TabsTrigger value="ai" className="text-sm py-3 px-4">AI Generator</TabsTrigger>
+              <TabsTrigger value="data" className="text-sm py-3 px-4">Data</TabsTrigger>
             </TabsList>
 
             {/* Words Management */}
             <TabsContent value="words" className="flex-1 overflow-hidden">
-              <WordsManagement
-                words={words}
-                editingWord={editingWord}
-                onEdit={setEditingWord}
-                onSave={(word) => {
-                  if (editingWord) {
-                    setWords(words.map((w) => (w.id === word.id ? word : w)));
-                  } else {
-                    setWords([
-                      ...words,
-                      { ...word, id: Date.now().toString() },
-                    ]);
-                  }
-                  setEditingWord(null);
-                }}
-                onDelete={(id) => {
-                  setWords(words.filter((w) => w.id !== id));
-                }}
-                onCancel={() => setEditingWord(null)}
-              />
+              {isLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="animate-spin h-8 w-8 border-4 border-chakma-primary border-t-transparent rounded-full" />
+                  <span className="ml-3 text-lg">Loading words...</span>
+                </div>
+              ) : error ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <XCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+                    <p className="text-lg text-destructive mb-2">Error loading data</p>
+                    <p className="text-muted-foreground">{error}</p>
+                  </div>
+                </div>
+              ) : (
+                <WordsManagement
+                  words={words}
+                  editingWord={editingWord}
+                  onEdit={setEditingWord}
+                  onSave={(word) => {
+                    if (editingWord) {
+                      setWords(words.map((w) => (w.id === word.id ? word : w)));
+                    } else {
+                      setWords([
+                        ...words,
+                        { ...word, id: Date.now().toString() },
+                      ]);
+                    }
+                    setEditingWord(null);
+                  }}
+                  onDelete={(id) => {
+                    setWords(words.filter((w) => w.id !== id));
+                  }}
+                  onCancel={() => setEditingWord(null)}
+                />
+              )}
             </TabsContent>
 
             {/* Characters Management */}
@@ -386,14 +439,88 @@ function WordsManagement({
   onDelete: (id: string) => void;
   onCancel: () => void;
 }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<string>("");
+
   if (editingWord) {
     return <WordForm word={editingWord} onSave={onSave} onCancel={onCancel} />;
   }
 
+  const handleSave = async (word: Word) => {
+    setIsLoading(true);
+    setSyncStatus("Saving...");
+    
+    try {
+      let response;
+      if (word.id) {
+        response = await apiClient.updateWord(word.id, word);
+      } else {
+        response = await apiClient.createWord(word);
+      }
+
+      if (response.success) {
+        onSave(word);
+        setSyncStatus("Saved successfully!");
+        
+        // Sync to GitHub
+        const githubResponse = await apiClient.syncToGitHub(
+          word.id ? 'update' : 'create',
+          response.data || word
+        );
+        
+        if (githubResponse.success) {
+          setSyncStatus("Synced to GitHub!");
+        } else {
+          setSyncStatus("Saved locally, GitHub sync failed");
+        }
+      } else {
+        setSyncStatus(`Error: ${response.error}`);
+      }
+    } catch (error) {
+      setSyncStatus(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => setSyncStatus(""), 3000);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setIsLoading(true);
+    setSyncStatus("Deleting...");
+    
+    try {
+      const response = await apiClient.deleteWord(id);
+      if (response.success) {
+        onDelete(id);
+        setSyncStatus("Deleted successfully!");
+        
+        // Sync to GitHub
+        const githubResponse = await apiClient.syncToGitHub('delete', { id });
+        if (githubResponse.success) {
+          setSyncStatus("Synced to GitHub!");
+        } else {
+          setSyncStatus("Deleted locally, GitHub sync failed");
+        }
+      } else {
+        setSyncStatus(`Error: ${response.error}`);
+      }
+    } catch (error) {
+      setSyncStatus(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => setSyncStatus(""), 3000);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Words ({words.length})</h3>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h3 className="text-lg font-semibold">Words ({words.length})</h3>
+          {syncStatus && (
+            <p className="text-sm text-muted-foreground">{syncStatus}</p>
+          )}
+        </div>
         <Button
           onClick={() =>
             onEdit({
@@ -406,38 +533,54 @@ function WordsManagement({
               created_at: new Date().toISOString(),
             })
           }
+          className="w-full sm:w-auto py-3 px-6 text-base"
+          disabled={isLoading}
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-5 w-5 mr-2" />
           Add Word
         </Button>
       </div>
 
-      <div className="flex-1 overflow-auto space-y-2">
+      <div className="flex-1 overflow-auto space-y-3">
         {words.map((word) => (
-          <Card key={word.id} className="p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-chakma text-chakma-primary">
+          <Card key={word.id} className="p-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mb-2">
+                  <span className="text-xl font-chakma text-chakma-primary">
                     {word.chakma_word_script}
                   </span>
                   <span className="text-sm text-muted-foreground">
                     /{word.romanized_pronunciation}/
                   </span>
                 </div>
-                <div className="font-medium">{word.english_translation}</div>
+                <div className="font-medium text-base">{word.english_translation}</div>
+                {word.example_sentence && (
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                    {word.example_sentence}
+                  </p>
+                )}
               </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={() => onEdit(word)}>
-                  <Edit className="h-4 w-4" />
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => onEdit(word)}
+                  className="flex-1 sm:flex-none py-2 px-4 text-base"
+                  disabled={isLoading}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  onClick={() => onDelete(word.id)}
-                  className="text-destructive"
+                  onClick={() => handleDelete(word.id)}
+                  className="flex-1 sm:flex-none py-2 px-4 text-base text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  disabled={isLoading}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
                 </Button>
               </div>
             </div>
@@ -460,32 +603,57 @@ function WordForm({
 }) {
   const [formData, setFormData] = useState(word);
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    let audioUrl = formData.audio_pronunciation_url;
+    setIsUploading(true);
+    setUploadProgress("Processing...");
 
-    // Handle audio upload if file is selected
-    if (audioFile) {
-      setIsUploading(true);
-      try {
-        audioUrl = await handleAudioUpload(audioFile);
-      } catch (error) {
-        console.error("Audio upload failed:", error);
-        alert("Audio upload failed. Please try again.");
-        setIsUploading(false);
-        return;
+    try {
+      let audioUrl = formData.audio_pronunciation_url;
+      let imageUrl = formData.explanation_media?.value;
+
+      // Handle audio upload if file is selected
+      if (audioFile) {
+        setUploadProgress("Uploading audio...");
+        const audioResponse = await apiClient.uploadAudio(audioFile);
+        if (audioResponse.success && audioResponse.data) {
+          audioUrl = audioResponse.data.url;
+        } else {
+          throw new Error(audioResponse.error || "Audio upload failed");
+        }
       }
-      setIsUploading(false);
-    }
 
-    onSave({
-      ...formData,
-      audio_pronunciation_url: audioUrl,
-      updated_at: new Date().toISOString(),
-    });
+      // Handle image upload if file is selected
+      if (imageFile) {
+        setUploadProgress("Uploading image...");
+        const imageResponse = await apiClient.uploadImage(imageFile);
+        if (imageResponse.success && imageResponse.data) {
+          imageUrl = imageResponse.data.url;
+        } else {
+          throw new Error(imageResponse.error || "Image upload failed");
+        }
+      }
+
+      const updatedWord = {
+        ...formData,
+        audio_pronunciation_url: audioUrl,
+        explanation_media: imageUrl ? { type: 'image' as const, value: imageUrl } : undefined,
+        updated_at: new Date().toISOString(),
+      };
+
+      onSave(updatedWord);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsUploading(false);
+      setUploadProgress("");
+    }
   };
 
   const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -497,22 +665,35 @@ function WordForm({
     }
   };
 
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setImageFile(file);
+    } else {
+      alert("Please select a valid image file (JPG, PNG, GIF)");
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h3 className="text-xl font-semibold">
           {word.id ? "Edit Word" : "Add New Word"}
         </h3>
-        <div className="flex gap-2">
-          <Button type="submit" disabled={isUploading}>
+        <div className="flex gap-3 w-full sm:w-auto">
+          <Button 
+            type="submit" 
+            disabled={isUploading}
+            className="flex-1 sm:flex-none py-3 px-6 text-base"
+          >
             {isUploading ? (
               <>
-                <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
-                Uploading...
+                <div className="animate-spin h-5 w-5 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                {uploadProgress}
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-5 w-5 mr-2" />
                 Save
               </>
             )}
@@ -522,27 +703,28 @@ function WordForm({
             variant="outline"
             onClick={onCancel}
             disabled={isUploading}
+            className="flex-1 sm:flex-none py-3 px-6 text-base"
           >
             Cancel
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Chakma Script *</Label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label className="text-base">Chakma Script *</Label>
           <Input
             value={formData.chakma_word_script}
             onChange={(e) =>
               setFormData({ ...formData, chakma_word_script: e.target.value })
             }
             placeholder="Chakma text"
-            className="font-chakma"
+            className="font-chakma text-lg py-3"
             required
           />
         </div>
-        <div>
-          <Label>Romanized Pronunciation *</Label>
+        <div className="space-y-2">
+          <Label className="text-base">Romanized Pronunciation *</Label>
           <Input
             value={formData.romanized_pronunciation}
             onChange={(e) =>
@@ -552,99 +734,176 @@ function WordForm({
               })
             }
             placeholder="chakma"
+            className="text-lg py-3"
             required
           />
         </div>
       </div>
 
-      <div>
-        <Label>English Translation *</Label>
+      <div className="space-y-2">
+        <Label className="text-base">English Translation *</Label>
         <Input
           value={formData.english_translation}
           onChange={(e) =>
             setFormData({ ...formData, english_translation: e.target.value })
           }
           placeholder="Chakma people"
+          className="text-lg py-3"
           required
         />
       </div>
 
-      <div>
-        <Label>Example Sentence *</Label>
+      <div className="space-y-2">
+        <Label className="text-base">Example Sentence *</Label>
         <Textarea
           value={formData.example_sentence}
           onChange={(e) =>
             setFormData({ ...formData, example_sentence: e.target.value })
           }
           placeholder="Example usage in Chakma with English translation"
+          className="text-base py-3 min-h-[100px]"
           required
         />
       </div>
 
-      <div>
-        <Label>Etymology *</Label>
+      <div className="space-y-2">
+        <Label className="text-base">Etymology *</Label>
         <Textarea
           value={formData.etymology}
           onChange={(e) =>
             setFormData({ ...formData, etymology: e.target.value })
           }
           placeholder="Origin and historical development of the word"
+          className="text-base py-3 min-h-[100px]"
           required
         />
       </div>
 
-      <div>
-        <Label>Audio Pronunciation</Label>
-        <div className="space-y-3">
-          {formData.audio_pronunciation_url && (
-            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-              <Volume2 className="h-4 w-4 text-chakma-primary" />
-              <span className="text-sm text-muted-foreground">
-                Current audio available
-              </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  const audio = new Audio(formData.audio_pronunciation_url!);
-                  audio.play().catch(console.error);
-                }}
-              >
-                <Volume2 className="h-4 w-4" />
-              </Button>
+      {/* Collapsible Audio Section */}
+      <div className="space-y-4">
+        <details className="group">
+          <summary className="flex items-center justify-between cursor-pointer list-none p-4 bg-muted rounded-lg">
+            <div className="flex items-center gap-2">
+              <Volume2 className="h-5 w-5 text-chakma-primary" />
+              <Label className="text-base font-medium">Audio Pronunciation</Label>
             </div>
-          )}
-
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <input
-                type="file"
-                accept="audio/*"
-                onChange={handleAudioFileChange}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
-              <Button type="button" variant="outline" className="w-full">
-                <Music className="h-4 w-4 mr-2" />
-                {audioFile ? audioFile.name : "Upload Audio File"}
-              </Button>
+            <div className="group-open:rotate-180 transition-transform">
+              <ChevronDown className="h-4 w-4" />
             </div>
-            {audioFile && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setAudioFile(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+          </summary>
+          <div className="p-4 space-y-4">
+            {formData.audio_pronunciation_url && (
+              <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+                <Volume2 className="h-5 w-5 text-chakma-primary" />
+                <span className="text-sm text-muted-foreground flex-1">
+                  Current audio available
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const audio = new Audio(formData.audio_pronunciation_url!);
+                    audio.play().catch(console.error);
+                  }}
+                  className="py-2 px-4"
+                >
+                  <Volume2 className="h-4 w-4 mr-2" />
+                  Play
+                </Button>
+              </div>
             )}
-          </div>
 
-          <p className="text-xs text-muted-foreground">
-            Supported formats: MP3, WAV, OGG. Max size: 5MB
-          </p>
-        </div>
+            <div className="space-y-3">
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="audio/*"
+                  onChange={handleAudioFileChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+                <Button type="button" variant="outline" className="w-full py-3 text-base">
+                  <Music className="h-5 w-5 mr-2" />
+                  {audioFile ? audioFile.name : "Upload Audio File"}
+                </Button>
+              </div>
+              {audioFile && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setAudioFile(null)}
+                  className="w-full py-2"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Remove Audio File
+                </Button>
+              )}
+              <p className="text-sm text-muted-foreground">
+                Supported formats: MP3, WAV, OGG. Max size: 5MB
+              </p>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      {/* Collapsible Image Section */}
+      <div className="space-y-4">
+        <details className="group">
+          <summary className="flex items-center justify-between cursor-pointer list-none p-4 bg-muted rounded-lg">
+            <div className="flex items-center gap-2">
+              <Image className="h-5 w-5 text-chakma-secondary" />
+              <Label className="text-base font-medium">Explanation Image</Label>
+            </div>
+            <div className="group-open:rotate-180 transition-transform">
+              <ChevronDown className="h-4 w-4" />
+            </div>
+          </summary>
+          <div className="p-4 space-y-4">
+            {formData.explanation_media?.value && (
+              <div className="space-y-3">
+                <img 
+                  src={formData.explanation_media.value} 
+                  alt="Explanation" 
+                  className="max-w-full h-auto rounded-lg border"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Current image available
+                </p>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageFileChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+                <Button type="button" variant="outline" className="w-full py-3 text-base">
+                  <Image className="h-5 w-5 mr-2" />
+                  {imageFile ? imageFile.name : "Upload Image File"}
+                </Button>
+              </div>
+              {imageFile && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setImageFile(null)}
+                  className="w-full py-2"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Remove Image File
+                </Button>
+              )}
+              <p className="text-sm text-muted-foreground">
+                Supported formats: JPG, PNG, GIF. Max size: 5MB
+              </p>
+            </div>
+          </div>
+        </details>
       </div>
     </form>
   );
