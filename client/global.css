@@ -165,8 +165,11 @@
     --ring: 15 100% 45%;
 
     --chakma-primary: 15 100% 45%;
-    --chakma-secondary: 39 84% 56%;
+    --chakma-secondary: 39 96% 56%;
     --chakma-accent: 45 70% 50%;
+    --chakma-gradient-start: 15 100% 45%;
+    --chakma-gradient-middle: 39 96% 56%;
+    --chakma-gradient-end: 45 70% 50%;
     --search-bg: 30 30% 95%;
     --audio-button: 15 100% 45%;
   }
