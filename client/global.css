@@ -220,52 +220,6 @@
       sans-serif;
   }
 
-  /* Apply font size to all elements when body has font-size class */
-  body[class*="font-size-"] * {
-    font-size: inherit !important;
-  }
-
-  /* Specific overrides for elements that should maintain relative sizes */
-  body[class*="font-size-"] h1 {
-    font-size: 2.25em !important;
-  }
-  body[class*="font-size-"] h2 {
-    font-size: 1.875em !important;
-  }
-  body[class*="font-size-"] h3 {
-    font-size: 1.5em !important;
-  }
-  body[class*="font-size-"] h4 {
-    font-size: 1.25em !important;
-  }
-  body[class*="font-size-"] h5 {
-    font-size: 1.125em !important;
-  }
-  body[class*="font-size-"] h6 {
-    font-size: 1em !important;
-  }
-  body[class*="font-size-"] .text-xs {
-    font-size: 0.75em !important;
-  }
-  body[class*="font-size-"] .text-sm {
-    font-size: 0.875em !important;
-  }
-  body[class*="font-size-"] .text-lg {
-    font-size: 1.125em !important;
-  }
-  body[class*="font-size-"] .text-xl {
-    font-size: 1.25em !important;
-  }
-  body[class*="font-size-"] .text-2xl {
-    font-size: 1.5em !important;
-  }
-  body[class*="font-size-"] .text-3xl {
-    font-size: 1.875em !important;
-  }
-  body[class*="font-size-"] .text-4xl {
-    font-size: 2.25em !important;
-  }
-
   /* Chakma script font family */
   .chakma-text {
     font-family: "Noto Sans Chakma", sans-serif;
