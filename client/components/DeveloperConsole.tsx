@@ -41,9 +41,12 @@ import {
   WordFormData,
   CharacterFormData,
   CharacterType,
+  RelatedTerm,
 } from "@shared/types";
 import { sampleWords, sampleCharacters } from "@shared/sampleData";
 import { DeveloperConsoleManager } from "@/lib/storage";
+import { apiClient, subscribeSyncStatus, getCurrentSyncStatus, refreshAllData } from "@/lib/api";
+import { SyncStatus } from "@shared/api";
 
 interface DeveloperConsoleProps {
   onClose: () => void;
@@ -132,6 +135,8 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
   const [aiGeneratedWords, setAiGeneratedWords] = useState<string[]>([]);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(getCurrentSyncStatus());
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const validPasswords = [
     "frezanz120913",
@@ -141,6 +146,34 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
     "ujc120913",
     "ujc04485380",
   ];
+
+  // Subscribe to sync status updates
+  useEffect(() => {
+    const unsubscribe = subscribeSyncStatus(setSyncStatus);
+    return unsubscribe;
+  }, []);
+
+  // Load data from API when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadAllData();
+    }
+  }, [isAuthenticated]);
+
+  const loadAllData = async () => {
+    try {
+      setApiError(null);
+      const { words: apiWords, characters: apiCharacters } = await refreshAllData();
+      setWords(apiWords);
+      setCharacters(apiCharacters);
+    } catch (error) {
+      console.error('Failed to load data from API:', error);
+      setApiError(error instanceof Error ? error.message : 'Failed to load data');
+      // Fall back to sample data if API fails
+      setWords(sampleWords);
+      setCharacters(sampleCharacters);
+    }
+  };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -274,22 +307,39 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
               <WordsManagement
                 words={words}
                 editingWord={editingWord}
+                syncStatus={syncStatus}
+                apiError={apiError}
                 onEdit={setEditingWord}
-                onSave={(word) => {
-                  if (editingWord) {
-                    setWords(words.map((w) => (w.id === word.id ? word : w)));
-                  } else {
-                    setWords([
-                      ...words,
-                      { ...word, id: Date.now().toString() },
-                    ]);
+                onSave={async (word) => {
+                  try {
+                    setApiError(null);
+                    if (editingWord && editingWord.id) {
+                      // Update existing word
+                      const response = await apiClient.updateWord(editingWord.id, word);
+                      setWords(words.map((w) => (w.id === response.word.id ? response.word : w)));
+                    } else {
+                      // Create new word
+                      const response = await apiClient.createWord(word);
+                      setWords([...words, response.word]);
+                    }
+                    setEditingWord(null);
+                  } catch (error) {
+                    console.error('Failed to save word:', error);
+                    setApiError(error instanceof Error ? error.message : 'Failed to save word');
                   }
-                  setEditingWord(null);
                 }}
-                onDelete={(id) => {
-                  setWords(words.filter((w) => w.id !== id));
+                onDelete={async (id) => {
+                  try {
+                    setApiError(null);
+                    await apiClient.deleteWord(id);
+                    setWords(words.filter((w) => w.id !== id));
+                  } catch (error) {
+                    console.error('Failed to delete word:', error);
+                    setApiError(error instanceof Error ? error.message : 'Failed to delete word');
+                  }
                 }}
                 onCancel={() => setEditingWord(null)}
+                onRefresh={loadAllData}
               />
             </TabsContent>
 
@@ -298,26 +348,39 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
               <CharactersManagement
                 characters={characters}
                 editingCharacter={editingCharacter}
+                syncStatus={syncStatus}
+                apiError={apiError}
                 onEdit={setEditingCharacter}
-                onSave={(character) => {
-                  if (editingCharacter) {
-                    setCharacters(
-                      characters.map((c) =>
-                        c.id === character.id ? character : c,
-                      ),
-                    );
-                  } else {
-                    setCharacters([
-                      ...characters,
-                      { ...character, id: Date.now().toString() },
-                    ]);
+                onSave={async (character) => {
+                  try {
+                    setApiError(null);
+                    if (editingCharacter && editingCharacter.id) {
+                      // Update existing character
+                      const response = await apiClient.updateCharacter(editingCharacter.id, character);
+                      setCharacters(characters.map((c) => (c.id === response.character.id ? response.character : c)));
+                    } else {
+                      // Create new character
+                      const response = await apiClient.createCharacter(character);
+                      setCharacters([...characters, response.character]);
+                    }
+                    setEditingCharacter(null);
+                  } catch (error) {
+                    console.error('Failed to save character:', error);
+                    setApiError(error instanceof Error ? error.message : 'Failed to save character');
                   }
-                  setEditingCharacter(null);
                 }}
-                onDelete={(id) => {
-                  setCharacters(characters.filter((c) => c.id !== id));
+                onDelete={async (id) => {
+                  try {
+                    setApiError(null);
+                    await apiClient.deleteCharacter(id);
+                    setCharacters(characters.filter((c) => c.id !== id));
+                  } catch (error) {
+                    console.error('Failed to delete character:', error);
+                    setApiError(error instanceof Error ? error.message : 'Failed to delete character');
+                  }
                 }}
                 onCancel={() => setEditingCharacter(null)}
+                onRefresh={loadAllData}
               />
             </TabsContent>
 
@@ -374,17 +437,23 @@ export default function DeveloperConsole({ onClose }: DeveloperConsoleProps) {
 function WordsManagement({
   words,
   editingWord,
+  syncStatus,
+  apiError,
   onEdit,
   onSave,
   onDelete,
   onCancel,
+  onRefresh,
 }: {
   words: Word[];
   editingWord: Word | null;
+  syncStatus: SyncStatus;
+  apiError: string | null;
   onEdit: (word: Word | null) => void;
-  onSave: (word: Word) => void;
-  onDelete: (id: string) => void;
+  onSave: (word: any) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
   onCancel: () => void;
+  onRefresh: () => Promise<void>;
 }) {
   if (editingWord) {
     return <WordForm word={editingWord} onSave={onSave} onCancel={onCancel} />;
@@ -393,30 +462,71 @@ function WordsManagement({
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Words ({words.length})</h3>
-        <Button
-          onClick={() =>
-            onEdit({
-              id: "",
-              chakma_word_script: "",
-              romanized_pronunciation: "",
-              english_translation: "",
-              example_sentence: "",
-              etymology: "",
-              created_at: new Date().toISOString(),
-            })
-          }
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Word
-        </Button>
+        <div className="flex items-center gap-4">
+          <h3 className="text-lg font-semibold">Words ({words.length})</h3>
+          {/* Sync Status Indicator */}
+          <div className="flex items-center gap-2">
+            {syncStatus.isLoading && (
+              <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+            )}
+            {syncStatus.pendingChanges > 0 && (
+              <Badge variant="outline" className="text-xs">
+                {syncStatus.pendingChanges} pending
+              </Badge>
+            )}
+            {syncStatus.lastSync && (
+              <span className="text-xs text-muted-foreground">
+                Last sync: {new Date(syncStatus.lastSync).toLocaleTimeString()}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefresh}
+            disabled={syncStatus.isLoading}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          <Button
+            onClick={() =>
+              onEdit({
+                id: "",
+                chakma_word_script: "",
+                romanized_pronunciation: "",
+                english_translation: "",
+                synonyms: [],
+                antonyms: [],
+                example_sentence: "",
+                etymology: "",
+                created_at: new Date().toISOString(),
+              })
+            }
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Word
+          </Button>
+        </div>
       </div>
+      
+      {/* Error Display */}
+      {apiError && (
+        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+          <div className="flex items-center gap-2">
+            <XCircle className="h-4 w-4 text-destructive" />
+            <span className="text-sm text-destructive">{apiError}</span>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 overflow-auto space-y-2">
         {words.map((word) => (
           <Card key={word.id} className="p-3">
             <div className="flex items-center justify-between">
-              <div className="flex-1">
+              <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-3">
                   <span className="text-lg font-chakma text-chakma-primary">
                     {word.chakma_word_script}
@@ -426,6 +536,37 @@ function WordsManagement({
                   </span>
                 </div>
                 <div className="font-medium">{word.english_translation}</div>
+                {/* Synonyms and Antonyms Preview */}
+                {(word.synonyms && word.synonyms.length > 0) || (word.antonyms && word.antonyms.length > 0) ? (
+                  <div className="flex flex-wrap gap-1 text-xs">
+                    {word.synonyms && word.synonyms.length > 0 && (
+                      <>
+                        <span className="text-muted-foreground">Synonyms:</span>
+                        {word.synonyms.slice(0, 2).map((syn, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {syn.term}
+                          </Badge>
+                        ))}
+                        {word.synonyms.length > 2 && (
+                          <span className="text-muted-foreground">+{word.synonyms.length - 2}</span>
+                        )}
+                      </>
+                    )}
+                    {word.antonyms && word.antonyms.length > 0 && (
+                      <>
+                        <span className="text-muted-foreground ml-2">Antonyms:</span>
+                        {word.antonyms.slice(0, 2).map((ant, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {ant.term}
+                          </Badge>
+                        ))}
+                        {word.antonyms.length > 2 && (
+                          <span className="text-muted-foreground">+{word.antonyms.length - 2}</span>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ) : null}
               </div>
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" onClick={() => onEdit(word)}>
@@ -436,6 +577,7 @@ function WordsManagement({
                   size="sm"
                   onClick={() => onDelete(word.id)}
                   className="text-destructive"
+                  disabled={syncStatus.isLoading}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -455,37 +597,51 @@ function WordForm({
   onCancel,
 }: {
   word: Word;
-  onSave: (word: Word) => void;
+  onSave: (word: any) => Promise<void>;
   onCancel: () => void;
 }) {
   const [formData, setFormData] = useState(word);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Separate state for synonyms and antonyms input
+  const [newSynonym, setNewSynonym] = useState({ term: '', language: 'english' as 'chakma' | 'english' });
+  const [newAntonym, setNewAntonym] = useState({ term: '', language: 'english' as 'chakma' | 'english' });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
 
-    let audioUrl = formData.audio_pronunciation_url;
+    try {
+      let audioUrl = formData.audio_pronunciation_url;
 
-    // Handle audio upload if file is selected
-    if (audioFile) {
-      setIsUploading(true);
-      try {
-        audioUrl = await handleAudioUpload(audioFile);
-      } catch (error) {
-        console.error("Audio upload failed:", error);
-        alert("Audio upload failed. Please try again.");
+      // Handle audio upload if file is selected
+      if (audioFile) {
+        setIsUploading(true);
+        try {
+          audioUrl = await handleAudioUpload(audioFile);
+        } catch (error) {
+          console.error("Audio upload failed:", error);
+          alert("Audio upload failed. Please try again.");
+          setIsUploading(false);
+          setIsSaving(false);
+          return;
+        }
         setIsUploading(false);
-        return;
       }
-      setIsUploading(false);
-    }
 
-    onSave({
-      ...formData,
-      audio_pronunciation_url: audioUrl,
-      updated_at: new Date().toISOString(),
-    });
+      await onSave({
+        ...formData,
+        audio_pronunciation_url: audioUrl,
+        updated_at: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Failed to save word:", error);
+      alert(error instanceof Error ? error.message : "Failed to save word. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -497,6 +653,46 @@ function WordForm({
     }
   };
 
+  // Handle synonyms
+  const addSynonym = () => {
+    if (newSynonym.term.trim()) {
+      const synonyms = formData.synonyms || [];
+      setFormData({
+        ...formData,
+        synonyms: [...synonyms, newSynonym]
+      });
+      setNewSynonym({ term: '', language: 'english' });
+    }
+  };
+
+  const removeSynonym = (index: number) => {
+    const synonyms = formData.synonyms || [];
+    setFormData({
+      ...formData,
+      synonyms: synonyms.filter((_, i) => i !== index)
+    });
+  };
+
+  // Handle antonyms
+  const addAntonym = () => {
+    if (newAntonym.term.trim()) {
+      const antonyms = formData.antonyms || [];
+      setFormData({
+        ...formData,
+        antonyms: [...antonyms, newAntonym]
+      });
+      setNewAntonym({ term: '', language: 'english' });
+    }
+  };
+
+  const removeAntonym = (index: number) => {
+    const antonyms = formData.antonyms || [];
+    setFormData({
+      ...formData,
+      antonyms: antonyms.filter((_, i) => i !== index)
+    });
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex justify-between items-center">
@@ -504,11 +700,16 @@ function WordForm({
           {word.id ? "Edit Word" : "Add New Word"}
         </h3>
         <div className="flex gap-2">
-          <Button type="submit" disabled={isUploading}>
+          <Button type="submit" disabled={isUploading || isSaving}>
             {isUploading ? (
               <>
                 <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
                 Uploading...
+              </>
+            ) : isSaving ? (
+              <>
+                <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                Saving...
               </>
             ) : (
               <>
@@ -521,7 +722,7 @@ function WordForm({
             type="button"
             variant="outline"
             onClick={onCancel}
-            disabled={isUploading}
+            disabled={isUploading || isSaving}
           >
             Cancel
           </Button>
@@ -593,6 +794,136 @@ function WordForm({
         />
       </div>
 
+      {/* Synonyms Section */}
+      <div>
+        <Label>Synonyms</Label>
+        <div className="space-y-3">
+          {/* Existing Synonyms */}
+          {formData.synonyms && formData.synonyms.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {formData.synonyms.map((synonym, index) => (
+                <div key={index} className="flex items-center gap-1 bg-secondary rounded-md px-2 py-1">
+                  <Badge variant="secondary" className={cn(
+                    "text-xs",
+                    synonym.language === "chakma" && "font-chakma"
+                  )}>
+                    {synonym.term}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">({synonym.language})</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeSynonym(index)}
+                    className="h-4 w-4 p-0 ml-1"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Add New Synonym */}
+          <div className="flex gap-2">
+            <Input
+              value={newSynonym.term}
+              onChange={(e) => setNewSynonym({ ...newSynonym, term: e.target.value })}
+              placeholder="Enter synonym..."
+              className={cn(newSynonym.language === "chakma" && "font-chakma")}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addSynonym();
+                }
+              }}
+            />
+            <select
+              value={newSynonym.language}
+              onChange={(e) => setNewSynonym({ ...newSynonym, language: e.target.value as 'chakma' | 'english' })}
+              className="px-3 py-2 border border-input rounded-lg bg-background"
+            >
+              <option value="english">English</option>
+              <option value="chakma">Chakma</option>
+            </select>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addSynonym}
+              disabled={!newSynonym.term.trim()}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Antonyms Section */}
+      <div>
+        <Label>Antonyms</Label>
+        <div className="space-y-3">
+          {/* Existing Antonyms */}
+          {formData.antonyms && formData.antonyms.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {formData.antonyms.map((antonym, index) => (
+                <div key={index} className="flex items-center gap-1 bg-secondary rounded-md px-2 py-1">
+                  <Badge variant="outline" className={cn(
+                    "text-xs",
+                    antonym.language === "chakma" && "font-chakma"
+                  )}>
+                    {antonym.term}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">({antonym.language})</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeAntonym(index)}
+                    className="h-4 w-4 p-0 ml-1"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Add New Antonym */}
+          <div className="flex gap-2">
+            <Input
+              value={newAntonym.term}
+              onChange={(e) => setNewAntonym({ ...newAntonym, term: e.target.value })}
+              placeholder="Enter antonym..."
+              className={cn(newAntonym.language === "chakma" && "font-chakma")}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addAntonym();
+                }
+              }}
+            />
+            <select
+              value={newAntonym.language}
+              onChange={(e) => setNewAntonym({ ...newAntonym, language: e.target.value as 'chakma' | 'english' })}
+              className="px-3 py-2 border border-input rounded-lg bg-background"
+            >
+              <option value="english">English</option>
+              <option value="chakma">Chakma</option>
+            </select>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addAntonym}
+              disabled={!newAntonym.term.trim()}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <div>
         <Label>Audio Pronunciation</Label>
         <div className="space-y-3">
@@ -654,17 +985,23 @@ function WordForm({
 function CharactersManagement({
   characters,
   editingCharacter,
+  syncStatus,
+  apiError,
   onEdit,
   onSave,
   onDelete,
   onCancel,
+  onRefresh,
 }: {
   characters: Character[];
   editingCharacter: Character | null;
+  syncStatus: SyncStatus;
+  apiError: string | null;
   onEdit: (character: Character | null) => void;
-  onSave: (character: Character) => void;
-  onDelete: (id: string) => void;
+  onSave: (character: any) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
   onCancel: () => void;
+  onRefresh: () => Promise<void>;
 }) {
   if (editingCharacter) {
     return (
@@ -679,25 +1016,64 @@ function CharactersManagement({
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">
-          Characters ({characters.length})
-        </h3>
-        <Button
-          onClick={() =>
-            onEdit({
-              id: "",
-              character_script: "",
-              character_type: "alphabet" as CharacterType,
-              romanized_name: "",
-              description: "",
-              created_at: new Date().toISOString(),
-            })
-          }
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Character
-        </Button>
+        <div className="flex items-center gap-4">
+          <h3 className="text-lg font-semibold">
+            Characters ({characters.length})
+          </h3>
+          {/* Sync Status Indicator */}
+          <div className="flex items-center gap-2">
+            {syncStatus.isLoading && (
+              <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+            )}
+            {syncStatus.pendingChanges > 0 && (
+              <Badge variant="outline" className="text-xs">
+                {syncStatus.pendingChanges} pending
+              </Badge>
+            )}
+            {syncStatus.lastSync && (
+              <span className="text-xs text-muted-foreground">
+                Last sync: {new Date(syncStatus.lastSync).toLocaleTimeString()}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefresh}
+            disabled={syncStatus.isLoading}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          <Button
+            onClick={() =>
+              onEdit({
+                id: "",
+                character_script: "",
+                character_type: "alphabet" as CharacterType,
+                romanized_name: "",
+                description: "",
+                created_at: new Date().toISOString(),
+              })
+            }
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Character
+          </Button>
+        </div>
       </div>
+      
+      {/* Error Display */}
+      {apiError && (
+        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+          <div className="flex items-center gap-2">
+            <XCircle className="h-4 w-4 text-destructive" />
+            <span className="text-sm text-destructive">{apiError}</span>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 overflow-auto space-y-2">
         {characters.map((character) => (
@@ -765,12 +1141,13 @@ function CharacterForm({
   onCancel,
 }: {
   character: Character;
-  onSave: (character: Character) => void;
+  onSave: (character: any) => Promise<void>;
   onCancel: () => void;
 }) {
   const [formData, setFormData] = useState(character);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const characterTypes: CharacterType[] = [
     "alphabet",
@@ -783,26 +1160,35 @@ function CharacterForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
 
-    let audioUrl = formData.audio_pronunciation_url;
+    try {
+      let audioUrl = formData.audio_pronunciation_url;
 
-    if (audioFile) {
-      setIsUploading(true);
-      try {
-        audioUrl = await handleAudioUpload(audioFile);
-      } catch (error) {
-        console.error("Audio upload failed:", error);
-        alert("Audio upload failed. Please try again.");
+      if (audioFile) {
+        setIsUploading(true);
+        try {
+          audioUrl = await handleAudioUpload(audioFile);
+        } catch (error) {
+          console.error("Audio upload failed:", error);
+          alert("Audio upload failed. Please try again.");
+          setIsUploading(false);
+          setIsSaving(false);
+          return;
+        }
         setIsUploading(false);
-        return;
       }
-      setIsUploading(false);
-    }
 
-    onSave({
-      ...formData,
-      audio_pronunciation_url: audioUrl,
-    });
+      await onSave({
+        ...formData,
+        audio_pronunciation_url: audioUrl,
+      });
+    } catch (error) {
+      console.error("Failed to save character:", error);
+      alert(error instanceof Error ? error.message : "Failed to save character. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -821,11 +1207,16 @@ function CharacterForm({
           {character.id ? "Edit Character" : "Add New Character"}
         </h3>
         <div className="flex gap-2">
-          <Button type="submit" disabled={isUploading}>
+          <Button type="submit" disabled={isUploading || isSaving}>
             {isUploading ? (
               <>
                 <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
                 Uploading...
+              </>
+            ) : isSaving ? (
+              <>
+                <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                Saving...
               </>
             ) : (
               <>
@@ -838,7 +1229,7 @@ function CharacterForm({
             type="button"
             variant="outline"
             onClick={onCancel}
-            disabled={isUploading}
+            disabled={isUploading || isSaving}
           >
             Cancel
           </Button>

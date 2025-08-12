@@ -35,6 +35,8 @@ import {
   AudioManager,
   PreferencesManager,
 } from "@/lib/storage";
+import { apiClient, subscribeSyncStatus, refreshAllData } from "@/lib/api";
+import { SyncStatus } from "@shared/api";
 
 export default function Dictionary() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -45,20 +47,41 @@ export default function Dictionary() {
   const [isLoading, setIsLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>({ isLoading: false, pendingChanges: 0 });
+  const [allWords, setAllWords] = useState<Word[]>(sampleWords);
 
   // Initialize data
   useEffect(() => {
     setSearchHistory(SearchHistoryManager.get());
     setFavorites(FavoritesManager.get());
 
-    // Show some featured words initially
-    setSearchResults(sampleWords.slice(0, 3));
+    // Subscribe to sync status updates
+    const unsubscribe = subscribeSyncStatus(setSyncStatus);
+
+    // Load words from API
+    loadWords();
+
+    return unsubscribe;
   }, []);
+
+  const loadWords = async () => {
+    try {
+      const { words } = await refreshAllData();
+      setAllWords(words);
+      // Show some featured words initially
+      setSearchResults(words.slice(0, 3));
+    } catch (error) {
+      console.error('Failed to load words from API:', error);
+      // Fall back to sample data
+      setAllWords(sampleWords);
+      setSearchResults(sampleWords.slice(0, 3));
+    }
+  };
 
   // Handle search
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
-      setSearchResults(sampleWords.slice(0, 3));
+      setSearchResults(allWords.slice(0, 3));
       setSelectedWord(null);
       return;
     }
@@ -66,15 +89,27 @@ export default function Dictionary() {
     setIsLoading(true);
     setShowHistory(false);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    try {
+      // Use API search if available, fallback to local search
+      const response = await apiClient.searchWords({ query });
+      setSearchResults(response.words);
+    } catch (error) {
+      console.error('API search failed, using local search:', error);
+      // Fallback to local search using current data
+      const results = allWords.filter(word => 
+        word.english_translation.toLowerCase().includes(query.toLowerCase()) ||
+        word.chakma_word_script.includes(query) ||
+        word.romanized_pronunciation.toLowerCase().includes(query.toLowerCase()) ||
+        word.synonyms?.some(syn => syn.term.toLowerCase().includes(query.toLowerCase())) ||
+        word.antonyms?.some(ant => ant.term.toLowerCase().includes(query.toLowerCase()))
+      );
+      setSearchResults(results);
+    }
 
-    const results = searchWords(query);
-    setSearchResults(results);
     setSelectedWord(null);
 
     // Add to search history
-    SearchHistoryManager.add(query, results.length);
+    SearchHistoryManager.add(query, searchResults.length);
     setSearchHistory(SearchHistoryManager.get());
 
     setIsLoading(false);
@@ -115,14 +150,25 @@ export default function Dictionary() {
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Hero Section */}
       <div className="text-center space-y-4 py-8">
-        <h1 className="text-4xl font-bold text-foreground">
-          Welcome to ChakmaLex
-        </h1>
+        <div className="flex items-center justify-center gap-4">
+          <h1 className="text-4xl font-bold text-foreground">
+            Welcome to ChakmaLex
+          </h1>
+          {/* Sync Status Indicator */}
+          {syncStatus.isLoading && (
+            <div className="animate-spin h-6 w-6 border-2 border-current border-t-transparent rounded-full" />
+          )}
+        </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Discover the beauty of the Chakma language through our comprehensive
           digital dictionary. Search, learn, and explore words with
           pronunciation, etymology, and cultural context.
         </p>
+        {syncStatus.lastSync && (
+          <p className="text-sm text-muted-foreground">
+            Last updated: {new Date(syncStatus.lastSync).toLocaleString()}
+          </p>
+        )}
       </div>
 
       {/* Search Section */}
