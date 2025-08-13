@@ -187,7 +187,7 @@ export default function Dictionary() {
 
       {/* Search Section */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-3 md:pt-6 px-3 md:px-6">
           <div className="relative">
             <div className="flex space-x-2">
               <div className="relative flex-1">
