@@ -168,7 +168,7 @@ export default function Dictionary() {
 
         {/* Content */}
         <div className="relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 bg-gradient-to-r from-chakma-primary to-chakma-accent bg-clip-text text-transparent animate-fade-in">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground mb-2 md:mb-4 bg-gradient-to-r from-chakma-primary to-chakma-accent bg-clip-text text-transparent animate-fade-in">
             Welcome to ChakmaLex
           </h1>
           <p
