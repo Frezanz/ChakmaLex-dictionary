@@ -55,15 +55,22 @@ export default function Dictionary() {
     // Show some featured words initially
     setSearchResults(sampleWords.slice(0, 3));
 
-    // Fetch live words from API
+    // Fetch live words from API with fallback
     (async () => {
       try {
         const { apiClient } = await import("@/lib/apiClient");
         const words = await apiClient.getWords();
         setAllWords(words as any);
         setSearchResults(words.slice(0, 3) as any);
+        console.log("Successfully loaded words from API");
       } catch (e) {
-        console.warn("Falling back to sampleWords; failed to load from API", e);
+        console.warn(
+          "API unavailable, using sample data. This is normal in development without GitHub integration:",
+          e,
+        );
+        // Keep using sampleWords as fallback
+        setAllWords(sampleWords);
+        setSearchResults(sampleWords.slice(0, 3));
       }
     })();
 
@@ -74,7 +81,10 @@ export default function Dictionary() {
         const words = await apiClient.getWords();
         setAllWords(words as any);
         if (!searchQuery) setSearchResults(words.slice(0, 3) as any);
-      } catch {}
+      } catch (e) {
+        console.warn("Failed to refresh words from API:", e);
+        // Keep existing data, don't update
+      }
     };
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
@@ -140,15 +150,39 @@ export default function Dictionary() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Hero Section */}
-      <div className="text-center space-y-4 py-8">
-        <h1 className="text-4xl font-bold text-foreground">
-          Welcome to ChakmaLex
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Discover the beauty of the Chakma language through our comprehensive
-          digital dictionary. Search, learn, and explore words with
-          pronunciation, etymology, and cultural context.
-        </p>
+      <div className="relative text-center space-y-4 py-12 px-8 rounded-2xl overflow-hidden">
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0 bg-gradient-to-br from-chakma-primary/30 via-chakma-secondary/20 to-chakma-accent/30 animate-pulse"></div>
+          <div className="absolute inset-0 bg-gradient-to-tl from-primary/10 via-transparent to-secondary/10"></div>
+          <div className="absolute top-0 left-1/4 w-32 h-32 bg-chakma-primary/10 rounded-full blur-2xl animate-bounce"></div>
+          <div
+            className="absolute bottom-0 right-1/4 w-40 h-40 bg-chakma-secondary/10 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "1s" }}
+          ></div>
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-chakma-accent/10 rounded-full blur-xl animate-ping"
+            style={{ animationDelay: "2s" }}
+          ></div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 bg-gradient-to-r from-chakma-primary to-chakma-accent bg-clip-text text-transparent animate-fade-in">
+            Welcome to ChakmaLex
+          </h1>
+          <p
+            className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in"
+            style={{ animationDelay: "0.3s" }}
+          >
+            Discover the beauty of the Chakma language through our comprehensive
+            digital dictionary. Search, learn, and explore words with
+            pronunciation, etymology, and cultural context.
+          </p>
+        </div>
+
+        {/* Subtle border glow */}
+        <div className="absolute inset-0 rounded-2xl border border-chakma-primary/20 shadow-lg shadow-chakma-primary/5"></div>
       </div>
 
       {/* Search Section */}
