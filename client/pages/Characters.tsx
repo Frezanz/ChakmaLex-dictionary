@@ -71,7 +71,7 @@ export default function Characters() {
                   <TabsTrigger
                     key={type.id}
                     value={type.id}
-                    className="text-xs"
+                    className="text-xs flex flex-col gap-1 p-2 md:p-3"
                   >
                     <Icon className="h-4 w-4 mr-1" />
                     {type.label}
