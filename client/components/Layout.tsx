@@ -200,8 +200,8 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-background transition-colors duration-300">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
+        <div className="container mx-auto px-2 md:px-4">
+          <div className="flex h-12 md:h-16 items-center justify-between">
             {/* Back Button and Logo */}
             <div className="flex justify-start flex-row overflow-auto items-center space-x-2">
               {/* Back Button */}
