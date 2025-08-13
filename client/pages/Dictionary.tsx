@@ -62,9 +62,12 @@ export default function Dictionary() {
         const words = await apiClient.getWords();
         setAllWords(words as any);
         setSearchResults(words.slice(0, 3) as any);
-        console.log('Successfully loaded words from API');
+        console.log("Successfully loaded words from API");
       } catch (e) {
-        console.warn("API unavailable, using sample data. This is normal in development without GitHub integration:", e);
+        console.warn(
+          "API unavailable, using sample data. This is normal in development without GitHub integration:",
+          e,
+        );
         // Keep using sampleWords as fallback
         setAllWords(sampleWords);
         setSearchResults(sampleWords.slice(0, 3));
@@ -153,8 +156,14 @@ export default function Dictionary() {
           <div className="absolute inset-0 bg-gradient-to-br from-chakma-primary/30 via-chakma-secondary/20 to-chakma-accent/30 animate-pulse"></div>
           <div className="absolute inset-0 bg-gradient-to-tl from-primary/10 via-transparent to-secondary/10"></div>
           <div className="absolute top-0 left-1/4 w-32 h-32 bg-chakma-primary/10 rounded-full blur-2xl animate-bounce"></div>
-          <div className="absolute bottom-0 right-1/4 w-40 h-40 bg-chakma-secondary/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-chakma-accent/10 rounded-full blur-xl animate-ping" style={{animationDelay: '2s'}}></div>
+          <div
+            className="absolute bottom-0 right-1/4 w-40 h-40 bg-chakma-secondary/10 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "1s" }}
+          ></div>
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-chakma-accent/10 rounded-full blur-xl animate-ping"
+            style={{ animationDelay: "2s" }}
+          ></div>
         </div>
 
         {/* Content */}
@@ -162,7 +171,10 @@ export default function Dictionary() {
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 bg-gradient-to-r from-chakma-primary to-chakma-accent bg-clip-text text-transparent animate-fade-in">
             Welcome to ChakmaLex
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{animationDelay: '0.3s'}}>
+          <p
+            className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in"
+            style={{ animationDelay: "0.3s" }}
+          >
             Discover the beauty of the Chakma language through our comprehensive
             digital dictionary. Search, learn, and explore words with
             pronunciation, etymology, and cultural context.
