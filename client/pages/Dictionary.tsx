@@ -465,13 +465,13 @@ function WordDetails({
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-2">
-            <CardTitle className="text-3xl font-chakma text-chakma-primary">
+            <CardTitle className="text-2xl md:text-3xl font-chakma text-chakma-primary">
               {word.chakma_word_script}
             </CardTitle>
-            <div className="text-muted-foreground">
+            <div className="text-sm md:text-base text-muted-foreground">
               /{word.romanized_pronunciation}/
             </div>
-            <h2 className="text-2xl font-semibold">
+            <h2 className="text-xl md:text-2xl font-semibold">
               {word.english_translation}
             </h2>
           </div>
