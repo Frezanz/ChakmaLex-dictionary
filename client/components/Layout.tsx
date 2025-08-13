@@ -314,11 +314,11 @@ export default function Layout({ children }: LayoutProps) {
               </nav>
 
               {/* Mobile Audio Toggle */}
-              <div className="border-t border-border pt-4">
+              <div className="border-t border-border pt-2">
                 <Button
                   variant="ghost"
                   onClick={toggleAudio}
-                  className="w-full justify-start px-3 py-3 h-auto"
+                  className="w-full justify-start px-2 py-2 h-auto text-sm"
                 >
                   {audioEnabled ? (
                     <Volume2 className="h-5 w-5 mr-3" />
