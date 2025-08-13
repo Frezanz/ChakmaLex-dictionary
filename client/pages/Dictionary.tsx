@@ -203,7 +203,7 @@ export default function Dictionary() {
                     }
                   }}
                   onFocus={() => setShowHistory(true)}
-                  className="pl-10 pr-12 h-12 text-lg"
+                  className="pl-10 pr-12 h-10 md:h-12 text-base md:text-lg"
                 />
                 {searchQuery && (
                   <Button
