@@ -44,13 +44,13 @@ export default function Characters() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-3 md:space-y-6">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold text-foreground">
+      <div className="text-center space-y-2 md:space-y-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">
           Learn Chakma Script
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto">
           Master the Chakma writing system by learning individual characters,
           their sounds, and usage. Click on any character to hear its
           pronunciation.
