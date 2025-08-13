@@ -222,7 +222,7 @@ export default function Dictionary() {
               <Button
                 onClick={() => handleSearch(searchQuery)}
                 disabled={isLoading}
-                className="h-12 px-6"
+                className="h-10 md:h-12 px-4 md:px-6"
               >
                 {isLoading ? (
                   <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
