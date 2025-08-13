@@ -45,12 +45,26 @@
     --search-bg: 0 0% 98%;
     --audio-button: 160 84% 39%;
 
-    /* Base font size - Mobile first */
-    --base-font-size: 0.8rem;
+    /* Base font size - Mobile first - Smaller for better mobile experience */
+    --base-font-size: 0.7rem;
+  }
+
+  /* Tablet font size */
+  @media (min-width: 640px) {
+    :root {
+      --base-font-size: 0.8rem;
+    }
   }
 
   /* Desktop font size */
   @media (min-width: 768px) {
+    :root {
+      --base-font-size: 0.9rem;
+    }
+  }
+
+  /* Large desktop font size */
+  @media (min-width: 1024px) {
     :root {
       --base-font-size: 1rem;
     }
@@ -229,7 +243,14 @@
       -apple-system,
       sans-serif;
     font-size: var(--base-font-size);
-    line-height: 1.5;
+    line-height: 1.4;
+  }
+
+  /* Better mobile line heights */
+  @media (min-width: 768px) {
+    body {
+      line-height: 1.5;
+    }
   }
 
   /* Chakma script font family */
@@ -265,27 +286,52 @@
     @apply outline-none ring-2 ring-ring ring-offset-2;
   }
 
-  /* Dynamic font size classes using CSS custom properties */
+  /* Dynamic font size classes using CSS custom properties - Mobile optimized */
   :root.font-size-xs {
-    --base-font-size: 0.6rem;
+    --base-font-size: 0.5rem;
   }
   :root.font-size-sm {
-    --base-font-size: 0.7rem;
+    --base-font-size: 0.6rem;
   }
   :root.font-size-base {
-    --base-font-size: 0.8rem;
+    --base-font-size: 0.7rem;
   }
   :root.font-size-lg {
-    --base-font-size: 0.9rem;
+    --base-font-size: 0.8rem;
   }
   :root.font-size-xl {
-    --base-font-size: 1rem;
+    --base-font-size: 0.9rem;
   }
   :root.font-size-2xl {
-    --base-font-size: 1.1rem;
+    --base-font-size: 1rem;
   }
   :root.font-size-3xl {
-    --base-font-size: 1.2rem;
+    --base-font-size: 1.1rem;
+  }
+
+  /* Tablet font size overrides */
+  @media (min-width: 640px) {
+    :root.font-size-xs {
+      --base-font-size: 0.6rem;
+    }
+    :root.font-size-sm {
+      --base-font-size: 0.7rem;
+    }
+    :root.font-size-base {
+      --base-font-size: 0.8rem;
+    }
+    :root.font-size-lg {
+      --base-font-size: 0.9rem;
+    }
+    :root.font-size-xl {
+      --base-font-size: 1rem;
+    }
+    :root.font-size-2xl {
+      --base-font-size: 1.1rem;
+    }
+    :root.font-size-3xl {
+      --base-font-size: 1.2rem;
+    }
   }
 
   /* Desktop font size overrides */
@@ -491,6 +537,27 @@
     user-select: none;
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Mobile spacing utilities */
+  .mobile-compact {
+    @apply space-y-2 md:space-y-4;
+  }
+
+  .mobile-tight {
+    @apply space-y-1 md:space-y-2;
+  }
+
+  .mobile-padding {
+    @apply p-2 md:p-4;
+  }
+
+  .mobile-padding-x {
+    @apply px-2 md:px-4;
+  }
+
+  .mobile-padding-y {
+    @apply py-2 md:py-4;
   }
 
   /* Developer console access area */

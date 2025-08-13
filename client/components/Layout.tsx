@@ -200,8 +200,8 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-background transition-colors duration-300">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
+        <div className="container mx-auto px-2 md:px-4">
+          <div className="flex h-12 md:h-16 items-center justify-between">
             {/* Back Button and Logo */}
             <div className="flex justify-start flex-row overflow-auto items-center space-x-2">
               {/* Back Button */}
@@ -283,8 +283,8 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Mobile Navigation */}
           {isMobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-border">
-              <nav className="grid grid-cols-2 gap-2 mb-4">
+            <div className="md:hidden py-2 border-t border-border">
+              <nav className="grid grid-cols-2 gap-1 mb-2">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.to;
@@ -294,14 +294,14 @@ export default function Layout({ children }: LayoutProps) {
                       key={item.to}
                       to={item.to}
                       className={cn(
-                        "flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors",
+                        "flex items-center space-x-2 px-2 py-2 rounded-lg transition-colors text-sm",
                         isActive
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:text-foreground hover:bg-muted",
                       )}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-4 w-4" />
                       <div>
                         <div className="font-medium text-sm">{item.label}</div>
                         <div className="text-xs opacity-75">
@@ -314,16 +314,16 @@ export default function Layout({ children }: LayoutProps) {
               </nav>
 
               {/* Mobile Audio Toggle */}
-              <div className="border-t border-border pt-4">
+              <div className="border-t border-border pt-2">
                 <Button
                   variant="ghost"
                   onClick={toggleAudio}
-                  className="w-full justify-start px-3 py-3 h-auto"
+                  className="w-full justify-start px-2 py-2 h-auto text-sm"
                 >
                   {audioEnabled ? (
-                    <Volume2 className="h-5 w-5 mr-3" />
+                    <Volume2 className="h-4 w-4 mr-2" />
                   ) : (
-                    <VolumeX className="h-5 w-5 mr-3" />
+                    <VolumeX className="h-4 w-4 mr-2" />
                   )}
                   <div className="text-left">
                     <div className="font-medium text-sm">
@@ -343,7 +343,9 @@ export default function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">{children}</main>
+      <main className="container mx-auto px-2 py-3 md:px-4 md:py-6">
+        {children}
+      </main>
 
       {/* Developer Console Modal */}
       {showDevConsole && (

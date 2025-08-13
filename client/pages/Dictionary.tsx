@@ -148,9 +148,9 @@ export default function Dictionary() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-3 md:space-y-6">
       {/* Hero Section */}
-      <div className="relative text-center space-y-4 py-12 px-8 rounded-2xl overflow-hidden">
+      <div className="relative text-center space-y-3 md:space-y-4 py-6 px-4 md:py-12 md:px-8 rounded-2xl overflow-hidden">
         {/* Animated gradient background */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute inset-0 bg-gradient-to-br from-chakma-primary/30 via-chakma-secondary/20 to-chakma-accent/30 animate-pulse"></div>
@@ -168,11 +168,11 @@ export default function Dictionary() {
 
         {/* Content */}
         <div className="relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 bg-gradient-to-r from-chakma-primary to-chakma-accent bg-clip-text text-transparent animate-fade-in">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground mb-2 md:mb-4 bg-gradient-to-r from-chakma-primary to-chakma-accent bg-clip-text text-transparent animate-fade-in">
             Welcome to ChakmaLex
           </h1>
           <p
-            className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in"
+            className="text-sm md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in"
             style={{ animationDelay: "0.3s" }}
           >
             Discover the beauty of the Chakma language through our comprehensive
@@ -187,7 +187,7 @@ export default function Dictionary() {
 
       {/* Search Section */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-3 md:pt-6 px-3 md:px-6">
           <div className="relative">
             <div className="flex space-x-2">
               <div className="relative flex-1">
@@ -203,7 +203,7 @@ export default function Dictionary() {
                     }
                   }}
                   onFocus={() => setShowHistory(true)}
-                  className="pl-10 pr-12 h-12 text-lg"
+                  className="pl-10 pr-12 h-10 md:h-12 text-base md:text-lg"
                 />
                 {searchQuery && (
                   <Button
@@ -222,7 +222,7 @@ export default function Dictionary() {
               <Button
                 onClick={() => handleSearch(searchQuery)}
                 disabled={isLoading}
-                className="h-12 px-6"
+                className="h-10 md:h-12 px-4 md:px-6"
               >
                 {isLoading ? (
                   <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
@@ -235,7 +235,7 @@ export default function Dictionary() {
             {/* Search History Dropdown */}
             {showHistory && searchHistory.length > 0 && (
               <Card className="absolute top-full left-0 right-0 mt-2 z-50 border shadow-lg">
-                <CardContent className="p-4">
+                <CardContent className="p-2 md:p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <History className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium text-muted-foreground">
@@ -373,18 +373,18 @@ function WordCard({
       )}
       onClick={onSelect}
     >
-      <CardContent className="p-4">
+      <CardContent className="p-3 md:p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1 space-y-2">
-            <div className="flex items-center gap-3">
-              <h3 className="text-2xl font-chakma chakma-text">
+            <div className="flex items-center gap-2 md:gap-3">
+              <h3 className="text-xl md:text-2xl font-chakma chakma-text">
                 {word.chakma_word_script}
               </h3>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs md:text-sm text-muted-foreground">
                 /{word.romanized_pronunciation}/
               </div>
             </div>
-            <p className="text-lg font-medium english-translation">
+            <p className="text-base md:text-lg font-medium english-translation">
               {word.english_translation}
             </p>
             {word.synonyms && word.synonyms.length > 0 && (
@@ -465,13 +465,13 @@ function WordDetails({
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-2">
-            <CardTitle className="text-3xl font-chakma text-chakma-primary">
+            <CardTitle className="text-2xl md:text-3xl font-chakma text-chakma-primary">
               {word.chakma_word_script}
             </CardTitle>
-            <div className="text-muted-foreground">
+            <div className="text-sm md:text-base text-muted-foreground">
               /{word.romanized_pronunciation}/
             </div>
-            <h2 className="text-2xl font-semibold">
+            <h2 className="text-xl md:text-2xl font-semibold">
               {word.english_translation}
             </h2>
           </div>

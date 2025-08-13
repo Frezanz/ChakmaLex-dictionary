@@ -44,20 +44,20 @@ export default function Characters() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-3 md:space-y-6">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold text-foreground">
+      <div className="text-center space-y-2 md:space-y-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">
           Learn Chakma Script
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-sm md:text-lg text-muted-foreground max-w-2xl mx-auto">
           Master the Chakma writing system by learning individual characters,
           their sounds, and usage. Click on any character to hear its
           pronunciation.
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-3 md:gap-6">
         {/* Character Categories */}
         <div className="lg:col-span-2">
           <Tabs
@@ -71,9 +71,9 @@ export default function Characters() {
                   <TabsTrigger
                     key={type.id}
                     value={type.id}
-                    className="text-xs"
+                    className="text-xs flex flex-col gap-1 p-2 md:p-3"
                   >
-                    <Icon className="h-4 w-4 mr-1" />
+                    <Icon className="h-3 w-3 md:h-4 md:w-4" />
                     {type.label}
                   </TabsTrigger>
                 );
