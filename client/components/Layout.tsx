@@ -343,7 +343,7 @@ export default function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">{children}</main>
+      <main className="container mx-auto px-2 py-3 md:px-4 md:py-6">{children}</main>
 
       {/* Developer Console Modal */}
       {showDevConsole && (
