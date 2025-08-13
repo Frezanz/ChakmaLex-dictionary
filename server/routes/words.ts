@@ -23,16 +23,23 @@ const WORDS_PATH = process.env.WORDS_JSON_PATH || 'data/words.json';
 export const wordsRouter = Router();
 
 async function loadWords(): Promise<{ words: Word[]; sha: string | null }> {
-  const { content, sha } = await getRepoFile(WORDS_PATH);
-  if (!content) return { words: [], sha: null };
   try {
-    const data = JSON.parse(content);
-    if (Array.isArray(data)) return { words: data as Word[], sha };
-    if (Array.isArray((data as any).words)) return { words: (data as any).words as Word[], sha };
-    return { words: [], sha };
+    const { content, sha } = await getRepoFile(WORDS_PATH);
+    if (!content) return { words: [], sha: null };
+    try {
+      const data = JSON.parse(content);
+      if (Array.isArray(data)) return { words: data as Word[], sha };
+      if (Array.isArray((data as any).words)) return { words: (data as any).words as Word[], sha };
+      return { words: [], sha };
+    } catch (e) {
+      console.error('Failed parsing words.json from repo', e);
+      return { words: [], sha };
+    }
   } catch (e) {
-    console.error('Failed parsing words.json from repo', e);
-    return { words: [], sha };
+    // Fallback to sample data when GitHub integration is not available
+    console.warn('GitHub integration not configured, using sample data:', e);
+    const { sampleWords } = await import('../../shared/sampleData');
+    return { words: sampleWords as any, sha: null };
   }
 }
 
