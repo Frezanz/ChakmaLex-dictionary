@@ -197,7 +197,7 @@ export default function Settings() {
                     key={theme.id}
                     onClick={() => handleThemeChange(theme.id)}
                     className={cn(
-                      "p-4 rounded-lg border-2 transition-all duration-200 text-left",
+                      "p-3 md:p-4 rounded-lg border-2 transition-all duration-200 text-left",
                       preferences.theme === theme.id
                         ? "border-primary bg-primary/10"
                         : "border-border hover:border-primary/50",
