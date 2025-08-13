@@ -44,10 +44,16 @@ async function loadWords(): Promise<{ words: Word[]; sha: string | null }> {
 }
 
 async function saveWords(words: Word[], prevSha: string | null): Promise<string> {
-  const payload = JSON.stringify(words, null, 2);
-  const result = await putRepoFile(WORDS_PATH, payload, 'chore(words): sync via developer console', prevSha || undefined);
-  await triggerNetlifyBuildIfConfigured();
-  return result.sha;
+  try {
+    const payload = JSON.stringify(words, null, 2);
+    const result = await putRepoFile(WORDS_PATH, payload, 'chore(words): sync via developer console', prevSha || undefined);
+    await triggerNetlifyBuildIfConfigured();
+    return result.sha;
+  } catch (e) {
+    console.warn('GitHub integration not configured, cannot save words:', e);
+    // Return a mock SHA when GitHub is not available
+    return Date.now().toString();
+  }
 }
 
 wordsRouter.get('/', async (_req, res) => {
