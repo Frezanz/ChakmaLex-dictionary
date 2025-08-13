@@ -321,9 +321,9 @@ export default function Layout({ children }: LayoutProps) {
                   className="w-full justify-start px-2 py-2 h-auto text-sm"
                 >
                   {audioEnabled ? (
-                    <Volume2 className="h-5 w-5 mr-3" />
+                    <Volume2 className="h-4 w-4 mr-2" />
                   ) : (
-                    <VolumeX className="h-5 w-5 mr-3" />
+                    <VolumeX className="h-4 w-4 mr-2" />
                   )}
                   <div className="text-left">
                     <div className="font-medium text-sm">
