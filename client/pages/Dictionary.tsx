@@ -235,7 +235,7 @@ export default function Dictionary() {
             {/* Search History Dropdown */}
             {showHistory && searchHistory.length > 0 && (
               <Card className="absolute top-full left-0 right-0 mt-2 z-50 border shadow-lg">
-                <CardContent className="p-4">
+                <CardContent className="p-2 md:p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <History className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium text-muted-foreground">
