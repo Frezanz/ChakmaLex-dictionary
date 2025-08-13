@@ -45,12 +45,26 @@
     --search-bg: 0 0% 98%;
     --audio-button: 160 84% 39%;
 
-    /* Base font size - Mobile first */
-    --base-font-size: 0.8rem;
+    /* Base font size - Mobile first - Smaller for better mobile experience */
+    --base-font-size: 0.7rem;
+  }
+
+  /* Tablet font size */
+  @media (min-width: 640px) {
+    :root {
+      --base-font-size: 0.8rem;
+    }
   }
 
   /* Desktop font size */
   @media (min-width: 768px) {
+    :root {
+      --base-font-size: 0.9rem;
+    }
+  }
+
+  /* Large desktop font size */
+  @media (min-width: 1024px) {
     :root {
       --base-font-size: 1rem;
     }
