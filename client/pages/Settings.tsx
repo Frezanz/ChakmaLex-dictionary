@@ -183,7 +183,7 @@ export default function Settings() {
             Appearance
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-3 md:space-y-6 p-3 md:p-6">
           <div>
             <Label className="text-base font-medium">Theme</Label>
             <p className="text-sm text-muted-foreground mb-4">
@@ -226,7 +226,7 @@ export default function Settings() {
             Typography
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-3 md:space-y-6 p-3 md:p-6">
           <div>
             <Label className="text-base font-medium">Font Size</Label>
             <p className="text-sm text-muted-foreground mb-4">
@@ -263,9 +263,9 @@ export default function Settings() {
             Audio
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-3 md:space-y-6 p-3 md:p-6">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
               <div>
                 <Label className="text-base font-medium">Volume</Label>
                 <p className="text-sm text-muted-foreground">
@@ -295,8 +295,8 @@ export default function Settings() {
             Data Management
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-4">
+        <CardContent className="space-y-3 md:space-y-6 p-3 md:p-6">
+          <div className="grid md:grid-cols-2 gap-2 md:gap-4">
             <div>
               <h3 className="font-medium mb-2">Export Data</h3>
               <p className="text-sm text-muted-foreground mb-3">
