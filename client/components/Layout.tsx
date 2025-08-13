@@ -283,8 +283,8 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Mobile Navigation */}
           {isMobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-border">
-              <nav className="grid grid-cols-2 gap-2 mb-4">
+            <div className="md:hidden py-2 border-t border-border">
+              <nav className="grid grid-cols-2 gap-1 mb-2">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.to;
