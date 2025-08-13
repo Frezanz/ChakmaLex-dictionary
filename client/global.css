@@ -243,7 +243,14 @@
       -apple-system,
       sans-serif;
     font-size: var(--base-font-size);
-    line-height: 1.5;
+    line-height: 1.4;
+  }
+
+  /* Better mobile line heights */
+  @media (min-width: 768px) {
+    body {
+      line-height: 1.5;
+    }
   }
 
   /* Chakma script font family */
