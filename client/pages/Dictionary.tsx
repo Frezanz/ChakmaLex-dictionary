@@ -55,15 +55,19 @@ export default function Dictionary() {
     // Show some featured words initially
     setSearchResults(sampleWords.slice(0, 3));
 
-    // Fetch live words from API
+    // Fetch live words from API with fallback
     (async () => {
       try {
         const { apiClient } = await import("@/lib/apiClient");
         const words = await apiClient.getWords();
         setAllWords(words as any);
         setSearchResults(words.slice(0, 3) as any);
+        console.log('Successfully loaded words from API');
       } catch (e) {
-        console.warn("Falling back to sampleWords; failed to load from API", e);
+        console.warn("API unavailable, using sample data. This is normal in development without GitHub integration:", e);
+        // Keep using sampleWords as fallback
+        setAllWords(sampleWords);
+        setSearchResults(sampleWords.slice(0, 3));
       }
     })();
 
