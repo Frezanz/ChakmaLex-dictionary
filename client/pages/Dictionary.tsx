@@ -148,9 +148,9 @@ export default function Dictionary() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-3 md:space-y-6">
       {/* Hero Section */}
-      <div className="relative text-center space-y-4 py-12 px-8 rounded-2xl overflow-hidden">
+      <div className="relative text-center space-y-3 md:space-y-4 py-6 px-4 md:py-12 md:px-8 rounded-2xl overflow-hidden">
         {/* Animated gradient background */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute inset-0 bg-gradient-to-br from-chakma-primary/30 via-chakma-secondary/20 to-chakma-accent/30 animate-pulse"></div>
