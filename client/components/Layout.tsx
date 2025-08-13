@@ -301,7 +301,7 @@ export default function Layout({ children }: LayoutProps) {
                       )}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-4 w-4" />
                       <div>
                         <div className="font-medium text-sm">{item.label}</div>
                         <div className="text-xs opacity-75">
