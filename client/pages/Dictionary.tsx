@@ -78,7 +78,10 @@ export default function Dictionary() {
         const words = await apiClient.getWords();
         setAllWords(words as any);
         if (!searchQuery) setSearchResults(words.slice(0, 3) as any);
-      } catch {}
+      } catch (e) {
+        console.warn("Failed to refresh words from API:", e);
+        // Keep existing data, don't update
+      }
     };
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
