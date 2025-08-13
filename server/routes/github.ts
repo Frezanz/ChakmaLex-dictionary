@@ -13,7 +13,7 @@ interface GitHubFileResponse {
 
 function getEnv(name: string, fallback?: string): string {
   const value = process.env[name] || fallback;
-  if (!value) throw new Error(`Missing required env var ${name}`);
+  if (!value) throw new Error(`Missing required env var ${name}. Configure GitHub integration by setting ${name} environment variable.`);
   return value;
 }
 
