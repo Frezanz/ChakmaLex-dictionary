@@ -57,7 +57,7 @@ export default function Characters() {
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-3 md:gap-6">
         {/* Character Categories */}
         <div className="lg:col-span-2">
           <Tabs
