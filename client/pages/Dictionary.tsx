@@ -172,7 +172,7 @@ export default function Dictionary() {
             Welcome to ChakmaLex
           </h1>
           <p
-            className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in"
+            className="text-sm md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in"
             style={{ animationDelay: "0.3s" }}
           >
             Discover the beauty of the Chakma language through our comprehensive
