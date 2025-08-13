@@ -373,7 +373,7 @@ function WordCard({
       )}
       onClick={onSelect}
     >
-      <CardContent className="p-4">
+      <CardContent className="p-3 md:p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-3">
