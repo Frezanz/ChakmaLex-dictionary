@@ -539,6 +539,27 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Mobile spacing utilities */
+  .mobile-compact {
+    @apply space-y-2 md:space-y-4;
+  }
+
+  .mobile-tight {
+    @apply space-y-1 md:space-y-2;
+  }
+
+  .mobile-padding {
+    @apply p-2 md:p-4;
+  }
+
+  .mobile-padding-x {
+    @apply px-2 md:px-4;
+  }
+
+  .mobile-padding-y {
+    @apply py-2 md:py-4;
+  }
+
   /* Developer console access area */
   .dev-console-trigger {
     -webkit-user-select: none;
